@@ -58,8 +58,6 @@ def draw_couloir(win, h, w, pair_pave, pair_index, impair_pave, impair_index):
             win.addstr(y_end_couloir + y_axis, start_pos + nb_pixels_espacement + j, dark_spots)
           elif (start_pos + nb_pixels_espacement + j < w - decalage):
             win.addstr(y_end_couloir + y_axis, start_pos + nb_pixels_espacement + j, medium_spots)
-          else :
-            win.addstr(y_end_couloir + y_axis, start_pos + nb_pixels_espacement + j, dark_spots)
       else :
         win.addstr(y_end_couloir + y_axis, x_axis, "@", curses.color_pair(1))
         win.addstr(y_end_couloir + y_axis, w - x_axis - 1, "@", curses.color_pair(1))
