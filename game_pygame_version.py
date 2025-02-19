@@ -1,9 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import pygame
+import pygame.locals 
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
+# Définition des couleurs
+NOIR = (0, 0, 0)
+BLANC = (255, 255, 255)
+
+# Initialisation de pygame
+pygame.init()
+window_width, window_height = 1920, 1080
+display = pygame.display.set_mode((window_width, window_height))
+pygame.display.set_caption("Raycasting Test")
+display.fill(NOIR)
 
 # Exemple de carte (map)
 map = np.array([
@@ -101,7 +113,7 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
             distance = tmaxY
             tmaxY += tDeltaY
         
-        if 0 <= x_cellule <= map.shape[0] and 0 <= y_cellule <= map.shape[1] :
+        if 0 <= x_cellule <= map.shape[1] and 0 <= y_cellule <= map.shape[0] :
             if map[y_cellule][x_cellule] == 1:
 
                 # On calcule les coordonnées exactes du point d'impact en fonction du déplacement du rayon :
@@ -112,8 +124,25 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
 
     return None
 
+def draw3DWall(ray_distance, player_angle, ray_angle, x_start, increment_width) :
+    # Empêcher l'effet "fish-eye" :
+    angle_fix = player_angle - ray_angle
+    if angle_fix < 0 :
+        angle_fix += 2*PI
+    elif angle_fix > 2*PI :
+        angle_fix -= 2*PI
+    ray_distance = ray_distance * math.cos(angle_fix)
 
-def get_rays(angle_init, pos_x, pos_y, fov = 60) :
+    lineHeight = window_height / ray_distance
+    if lineHeight > window_height :
+        lineHeight = window_height
+
+    center_h = window_height // 2 
+    y_start = center_h - (lineHeight //2)
+
+    pygame.draw.line(display, BLANC, (x_start, y_start), (x_start, y_start + lineHeight), increment_width)
+
+def get_rays(angle_init, pos_x, pos_y, fov = 80) :
     """
     Procédure qui génére des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
@@ -121,14 +150,51 @@ def get_rays(angle_init, pos_x, pos_y, fov = 60) :
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
     """
 
-    angle_acc = angle_init + (fov//2) * INCREMENT_RAD
+    display.fill(NOIR)
 
-    for i in range(0,fov) :
+    angle_acc = angle_init + (fov//2) * INCREMENT_RAD
+    increment_width = window_width // fov
+    counter_x = 0 
+
+    for i in range(0,fov+1) :
         res = digitalDifferentialAnalyzer(angle_acc, pos_x, pos_y)
         if res != None :
+            draw3DWall(res[2], angle_init, angle_acc, counter_x, increment_width)
             plt.plot([pos_x, res[0]], [pos_y, res[1]], "lime")
 
         angle_acc -= INCREMENT_RAD
+        counter_x += increment_width
+
+def run_display(angle_init, pos_x, pos_y, fov = 60) :
+
+    pl_position_x = pos_x
+    pl_position_y = pos_y
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            elif event.type == pygame.KEYDOWN :
+                if event.key == pygame.K_z :
+                    pl_position_x += 0.1 * math.cos(angle_init)
+                    pl_position_y += 0.1 * math.sin(angle_init)
+                elif event.key == pygame.K_s :
+                    pl_position_x -= 0.1 * math.cos(angle_init)
+                    pl_position_y -= 0.1 * math.sin(angle_init)
+                elif event.key == pygame.K_d:
+                    angle_init -= 0.1
+                elif event.key == pygame.K_q:
+                    angle_init += 0.1
+
+        get_rays(angle_init, pl_position_x, pl_position_y)
+
+        # Mise à jour de l'affichage
+        pygame.display.flip()
+
+    # Quitter pygame
+    pygame.quit()
 
 # Affichage avec une colormap 'gray'
 plt.imshow(map, cmap='gray_r', interpolation='nearest', origin='lower', extent=[0, map.shape[1], 0, map.shape[0]])
@@ -146,10 +212,10 @@ pos = (3.1, 9.25)
 # On fixe l'angle de perception :
 angle_percep = PI/6
 
-get_rays(angle_percep, pos[0], pos[1])
+run_display(angle_percep, pos[0], pos[1])
 
 # Ajout du point rouge représentant le joueur :
 plt.plot(pos[0], pos[1], 'ro')
 
 # Affichage du graphique
-plt.show()
+# plt.show()
