@@ -6,6 +6,8 @@ import time
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
 
+GREEN_MATRIX = (0, 233, 2)
+
 # Exemple de carte (map)
 map = np.array([
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],    # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -22,7 +24,6 @@ map = np.array([
     [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1],    # [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]     # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ])
-
 
 def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
     """
@@ -132,11 +133,22 @@ def draw3DWall(window, ray_distance, player_angle, ray_angle, x_start, increment
   center_h = window_height // 2 
   y_start = center_h - (lineHeight //2)
 
+  end_range = round(x_start + increment_width) +1
+
   for y_axis in range(round(y_start), round(y_start + lineHeight)) :
-    if 0 <= y_axis < window_height:
-      for i in range(round(x_start), round(x_start  + increment_width)) :
-        if 0 <= i < window_width -1:
-          window.addstr(y_axis, i, "#")
+    if 0 <= y_axis < window_height-1:
+      for i in range(round(x_start), end_range) :
+        if 0 <= i < window_width:
+          if i == end_range-1 :
+            window.addstr(y_axis, i, " ")
+          else :
+            window.addstr(y_axis, i, "#", curses.color_pair(1))
+
+def drawFloor(window, window_height, window_width) :
+  for y_axis in range(window_height//2, window_height) :
+    if 0 <= y_axis < window_height -1 :
+      for x_axis in range(0, window_width) :
+        window.addstr(y_axis, x_axis, "-")
 
 def get_rays(window, angle_init, pos_x, pos_y, window_height, window_width, fov = 80) :
     """
@@ -162,6 +174,13 @@ def main(stdscr):
   curses.curs_set(0) #Masquer le curseur
   stdscr.nodelay(0) #Bloquer/Débloquer l'entrée utilisateur
   stdscr.timeout(100) #Faire varier le rafraichissement du terminal en ms 
+
+  # Démarrage du gestionnaire de couleurs :
+  curses.start_color()
+
+  curses.start_color()
+  curses.init_color(1, int(GREEN_MATRIX[0] * 1000 / 255), int(GREEN_MATRIX[1] * 1000 / 255), int(GREEN_MATRIX[2] * 1000 / 255))
+  curses.init_pair(1, 1, curses.COLOR_BLACK)
 
   # On fixe la position du joueur :
   pl_position_x = 3.1
@@ -195,6 +214,7 @@ def main(stdscr):
       angle_percep -= 0.1
       stdscr.clear()
 
+    drawFloor(stdscr, window_height, window_width)
     get_rays(stdscr, angle_percep, pl_position_x, pl_position_y, window_height, window_width)
 
     time.sleep(0.1) # Faire varier le rafraichissment des animations
