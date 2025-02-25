@@ -144,7 +144,7 @@ def draw3DWall(ray_distance, player_angle, ray_angle, x_start, increment_width) 
 
 def get_rays(angle_init, pos_x, pos_y, fov = 80) :
     """
-    Procédure qui génére des rayons à partir de la position du joueur (pos_x, pos_y).
+    Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
     - fov : champ de vision en degrés. p
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
@@ -165,6 +165,9 @@ def get_rays(angle_init, pos_x, pos_y, fov = 80) :
         angle_acc -= INCREMENT_RAD
         counter_x += increment_width
 
+def check_collision(pos_x,pos_y) :
+    return map[int(pos_y)][int(pos_x)]
+
 def run_display(angle_init, pos_x, pos_y, fov = 60) :
 
     pl_position_x = pos_x
@@ -172,6 +175,9 @@ def run_display(angle_init, pos_x, pos_y, fov = 60) :
 
     running = True
     while running:
+        if check_collision(pl_position_x,pl_position_y) :
+            running = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False

@@ -152,7 +152,7 @@ def drawFloor(window, window_height, window_width) :
 
 def get_rays(window, angle_init, pos_x, pos_y, window_height, window_width, fov = 80) :
     """
-    Procédure qui génére des rayons à partir de la position du joueur (pos_x, pos_y).
+    Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
     - fov : champ de vision en degrés. p
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
@@ -169,6 +169,40 @@ def get_rays(window, angle_init, pos_x, pos_y, window_height, window_width, fov 
 
         angle_acc -= INCREMENT_RAD
         counter_x = round(i * increment_width)
+
+def check_collision(pos_x,pos_y) :
+  return map[int(pos_y)][int(pos_x)]
+
+
+def endGame(win, hauteur, largeur, death):
+
+  x_start = largeur // 16
+  y_start = hauteur // 12
+
+  try :
+    with open('design/skull.txt', 'r', encoding='utf-8') as file_txt:
+      skull = file_txt.readlines()
+      skull = [line.rstrip('\n') for line in skull]
+  except FileNotFoundError :
+     return
+  
+  for i in range(len(skull)) :
+    if 0 <= i < hauteur - 1 :
+      win.addstr(i+y_start, x_start, skull[i], curses.color_pair(1))
+
+  if death == 0:
+    try :
+      with open('text/walls.txt', 'r', encoding='utf-8') as file_txt:
+        wall_colli = file_txt.readlines()
+        wall_colli = [line.rstrip('\n') for line in wall_colli]
+    except FileNotFoundError :
+      return
+
+    for i in range(len(wall_colli)) :
+      if 0 <= i < hauteur - 1 :
+        win.addstr(i+int(hauteur*0.24), int(largeur*0.48), wall_colli[i], curses.color_pair(1))
+  win.refresh()
+  time.sleep(10)
 
 def main(stdscr):
   curses.curs_set(0) #Masquer le curseur
@@ -194,6 +228,12 @@ def main(stdscr):
     window_height, window_width = stdscr.getmaxyx()
 
     key = stdscr.getch() 
+
+    if check_collision(pl_position_x,pl_position_y) :
+      stdscr.clear()
+      stdscr.refresh()
+      endGame(stdscr,window_height, window_width, 0)
+      break
     
     if key == 27:  # Quitter avec 'échap'
       break
