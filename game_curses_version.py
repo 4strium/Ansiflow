@@ -2,6 +2,10 @@ import numpy as np
 import math
 import curses
 import time
+import type.game.Player_Window as P_win
+import type.game.Wall as Wall
+import type.game.Game as Game
+import type.game.Player as Player
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -11,7 +15,7 @@ GREEN_MATRIX = (0, 233, 2)
 # Exemple de carte (map)
 map = np.array([
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],    # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],    # [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1]
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],    # [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1]
     [1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1],    # [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1]
     [1,0,0,0,0,0,0,0,1,0,1,1,1,1,0,0,1],    # [1,0,1,0,0,0,1,1,1,1,1,1,1,1,0,1,1]
     [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1],    # [1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1]
@@ -21,7 +25,7 @@ map = np.array([
     [1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1],    # [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1]
     [1,0,1,0,0,0,1,1,1,1,1,1,1,1,0,1,1],    # [1,0,0,0,0,0,0,0,1,0,1,1,1,1,0,0,1]
     [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],    # [1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1]
-    [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1],    # [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
+    [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1],    # [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]     # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ])
 
@@ -114,7 +118,7 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
 
     return None
 
-def draw3DWall(window, ray_distance, player_angle, ray_angle, x_start, increment_width, window_height, window_width) :
+def draw3DWall(window, ray_distance, player_angle, ray_angle, wall_design) :
   # Correction de l'effet "fish-eye" :
   angle_fix = player_angle - ray_angle
   if angle_fix < 0 :
@@ -126,58 +130,53 @@ def draw3DWall(window, ray_distance, player_angle, ray_angle, x_start, increment
   if ray_distance < 0.1 :
     ray_distance = 0.1
 
-  lineHeight = window_height / ray_distance
-  if lineHeight > window_height :
-    lineHeight = window_height
+  lineHeight = P_win.get_height(window) / ray_distance
+  if lineHeight > P_win.get_height(window) :
+    lineHeight = P_win.get_height(window)
 
-  center_h = window_height // 2 
+  center_h = P_win.get_height(window) // 2 
   y_start = center_h - (lineHeight //2)
 
-  end_range = round(x_start + increment_width) +1
-
   for y_axis in range(round(y_start), round(y_start + lineHeight)) :
-    if 0 <= y_axis < window_height-1:
-      for i in range(round(x_start), end_range) :
-        if 0 <= i < window_width:
-          if i == end_range-1 :
-            window.addstr(y_axis, i, " ")
+    if 0 <= y_axis < P_win.get_height(window)-1:
+      for i in range(round(Wall.get_start_ind(wall_design)), Wall.get_end_ind(wall_design)) :
+        if 0 <= i < P_win.get_width(window):
+          if i == Wall.get_end_ind(wall_design)-1 :
+            P_win.get_stdscr(window).addstr(y_axis, i, " ")
           else :
-            window.addstr(y_axis, i, "#", curses.color_pair(1))
+            P_win.get_stdscr(window).addstr(y_axis, i, Wall.get_texture(wall_design), curses.color_pair(1))
 
-def drawFloor(window, window_height, window_width) :
-  for y_axis in range(window_height//2, window_height) :
-    if 0 <= y_axis < window_height -1 :
-      for x_axis in range(0, window_width) :
-        window.addstr(y_axis, x_axis, "-")
+def drawFloor(window) :
+  for y_axis in range(P_win.get_height(window)//2, P_win.get_height(window)) :
+    if 0 <= y_axis < P_win.get_height(window) -1 :
+      for x_axis in range(0, P_win.get_width(window)) :
+        P_win.get_stdscr(window).addstr(y_axis, x_axis, "-")
 
-def get_rays(window, angle_init, pos_x, pos_y, window_height, window_width, fov = 80) :
+def get_rays(window, player) :
     """
     Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
-    - fov : champ de vision en degrés. p
+    - fov : champ de vision en degrés.
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
     """
 
-    angle_acc = angle_init + (fov//2) * INCREMENT_RAD
-    increment_width = window_width / fov
+    angle_acc = Player.get_angle(player) + (Player.get_fov(player)//2) * INCREMENT_RAD
+    increment_width = P_win.get_width(window) / Player.get_fov(player)
     counter_x = 0 
 
-    for i in range(0,fov+1) :
-        res = digitalDifferentialAnalyzer(angle_acc, pos_x, pos_y)
+    for i in range(0,Player.get_fov(player)+1) :
+        res = digitalDifferentialAnalyzer(angle_acc, Player.get_position(player)[0], Player.get_position(player)[1])
         if res != None :
-            draw3DWall(window, res[2], angle_init, angle_acc, counter_x, increment_width, window_height, window_width)
+          wall_design = Wall.create("#",counter_x, increment_width)
+          draw3DWall(window, res[2], Player.get_angle(player), angle_acc, wall_design)
 
         angle_acc -= INCREMENT_RAD
         counter_x = round(i * increment_width)
 
-def check_collision(pos_x,pos_y) :
-  return map[int(pos_y)][int(pos_x)]
+def endGame(window, death):
 
-
-def endGame(win, hauteur, largeur, death):
-
-  x_start = largeur // 16
-  y_start = hauteur // 12
+  x_start = P_win.get_width(window) // 16
+  y_start = P_win.get_height(window) // 12
 
   try :
     with open('design/skull.txt', 'r', encoding='utf-8') as file_txt:
@@ -187,8 +186,8 @@ def endGame(win, hauteur, largeur, death):
      return
   
   for i in range(len(skull)) :
-    if 0 <= i < hauteur - 1 :
-      win.addstr(i+y_start, x_start, skull[i], curses.color_pair(1))
+    if 0 <= i < P_win.get_height(window) - 1 :
+      P_win.get_stdscr(window).addstr(i+y_start, x_start, skull[i], curses.color_pair(1))
 
   if death == 0:
     try :
@@ -199,65 +198,41 @@ def endGame(win, hauteur, largeur, death):
       return
 
     for i in range(len(wall_colli)) :
-      if 0 <= i < hauteur - 1 :
-        win.addstr(i+int(hauteur*0.24), int(largeur*0.48), wall_colli[i], curses.color_pair(1))
-  win.refresh()
+      if 0 <= i < P_win.get_height(window) - 1 :
+        P_win.get_stdscr(window).addstr(i+int(P_win.get_height(window)*0.24), int(P_win.get_width(window)*0.48), wall_colli[i], curses.color_pair(1))
+  P_win.get_stdscr(window).refresh()
   time.sleep(10)
 
-def main(stdscr):
+def run(stdscr):
   curses.curs_set(0) #Masquer le curseur
-  stdscr.nodelay(0) #Bloquer/Débloquer l'entrée utilisateur
-  stdscr.timeout(100) #Faire varier le rafraichissement du terminal en ms 
+
+  window = P_win.create(stdscr)
+  P_win.get_stdscr(window).nodelay(0) #Bloquer/Débloquer l'entrée utilisateur
+  P_win.get_stdscr(window).timeout(100) #Faire varier le rafraichissement du terminal en ms 
 
   # Démarrage du gestionnaire de couleurs :
-  curses.start_color()
-
   curses.start_color()
   curses.init_color(1, int(GREEN_MATRIX[0] * 1000 / 255), int(GREEN_MATRIX[1] * 1000 / 255), int(GREEN_MATRIX[2] * 1000 / 255))
   curses.init_pair(1, 1, curses.COLOR_BLACK)
 
-  # On fixe la position du joueur :
-  pl_position_x = 3.1
-  pl_position_y = 9.25
-
-  # On fixe l'angle de perception :
-  angle_percep = PI/6
+  game_run = Game.create(0.01,map)
+  player_run = Player.create([3.1, 9.25], 80)
 
   while True :
 
-    window_height, window_width = stdscr.getmaxyx()
+    P_win.refresh_size(window)
 
-    key = stdscr.getch() 
-
-    if check_collision(pl_position_x,pl_position_y) :
-      stdscr.clear()
-      stdscr.refresh()
-      endGame(stdscr,window_height, window_width, 0)
+    if map[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
+      P_win.get_stdscr(window).clear()
+      P_win.get_stdscr(window).refresh()
+      endGame(window, 0)
       break
+
+    Player.move(player_run,Game.get_diff_time(game_run),window)
+    drawFloor(window)
+    get_rays(window, player_run)
+
+    Game.running_time(game_run)
+    time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
     
-    if key == 27:  # Quitter avec 'échap'
-      break
-    elif key == ord('z'):
-      # Simuler l'avancement du personnage :
-      pl_position_x += 0.1 * math.cos(angle_percep)
-      pl_position_y += 0.1 * math.sin(angle_percep)
-      stdscr.clear()
-    elif key == ord('s'):
-      # Simuler le reculement du personnage par rapport au sol :
-      pl_position_x -= 0.1 * math.cos(angle_percep)
-      pl_position_y -= 0.1 * math.sin(angle_percep) 
-      stdscr.clear()  
-    elif key == ord('q'):
-      angle_percep += 0.1
-      stdscr.clear()
-    elif key == ord('d'):
-      angle_percep -= 0.1
-      stdscr.clear()
-
-    drawFloor(stdscr, window_height, window_width)
-    get_rays(stdscr, angle_percep, pl_position_x, pl_position_y, window_height, window_width)
-
-    time.sleep(0.1) # Faire varier le rafraichissment des animations
-
-        
-curses.wrapper(main)
+curses.wrapper(run)
