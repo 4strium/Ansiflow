@@ -6,6 +6,8 @@ import type.game.Player_Window as P_win
 import type.game.Wall as Wall
 import type.game.Game as Game
 import type.game.Player as Player
+import type.game.Image as Image
+import engine.Color as Color
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -144,7 +146,7 @@ def draw3DWall(window, ray_distance, player_angle, ray_angle, wall_design) :
           if i == Wall.get_end_ind(wall_design)-1 :
             P_win.get_stdscr(window).addstr(y_axis, i, " ")
           else :
-            P_win.get_stdscr(window).addstr(y_axis, i, Wall.get_texture(wall_design), curses.color_pair(1))
+            P_win.get_stdscr(window).addstr(y_axis, i, Wall.get_texture(wall_design), Wall.get_color(wall_design))
 
 def drawFloor(window) :
   for y_axis in range(P_win.get_height(window)//2, P_win.get_height(window)) :
@@ -152,7 +154,7 @@ def drawFloor(window) :
       for x_axis in range(0, P_win.get_width(window)) :
         P_win.get_stdscr(window).addstr(y_axis, x_axis, "-")
 
-def get_rays(window, player) :
+def get_rays(window, player, wall_color) :
     """
     Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
@@ -167,39 +169,25 @@ def get_rays(window, player) :
     for i in range(0,Player.get_fov(player)+1) :
         res = digitalDifferentialAnalyzer(angle_acc, Player.get_position(player)[0], Player.get_position(player)[1])
         if res != None :
-          wall_design = Wall.create("#",counter_x, increment_width)
+          wall_design = Wall.create(wall_color,"#",counter_x, increment_width)
           draw3DWall(window, res[2], Player.get_angle(player), angle_acc, wall_design)
 
         angle_acc -= INCREMENT_RAD
         counter_x = round(i * increment_width)
 
-def endGame(window, death):
+def endGame(window, death, color):
 
   x_start = P_win.get_width(window) // 16
   y_start = P_win.get_height(window) // 12
 
-  try :
-    with open('design/skull.txt', 'r', encoding='utf-8') as file_txt:
-      skull = file_txt.readlines()
-      skull = [line.rstrip('\n') for line in skull]
-  except FileNotFoundError :
-     return
-  
-  for i in range(len(skull)) :
-    if 0 <= i < P_win.get_height(window) - 1 :
-      P_win.get_stdscr(window).addstr(i+y_start, x_start, skull[i], curses.color_pair(1))
+  skull = Image.create('images/skull.txt', x_start, y_start, color)
+  Image.set_color(skull,Color.create_color(255,0,255))
+  Image.draw(window, skull)
 
   if death == 0:
-    try :
-      with open('text/walls.txt', 'r', encoding='utf-8') as file_txt:
-        wall_colli = file_txt.readlines()
-        wall_colli = [line.rstrip('\n') for line in wall_colli]
-    except FileNotFoundError :
-      return
+    text_walls = Image.create('text/walls.txt', int(P_win.get_width(window)*0.48), int(P_win.get_height(window)*0.24), color)
+    Image.draw(window, text_walls)
 
-    for i in range(len(wall_colli)) :
-      if 0 <= i < P_win.get_height(window) - 1 :
-        P_win.get_stdscr(window).addstr(i+int(P_win.get_height(window)*0.24), int(P_win.get_width(window)*0.48), wall_colli[i], curses.color_pair(1))
   P_win.get_stdscr(window).refresh()
   time.sleep(10)
 
@@ -212,8 +200,7 @@ def run(stdscr):
 
   # Démarrage du gestionnaire de couleurs :
   curses.start_color()
-  curses.init_color(1, int(GREEN_MATRIX[0] * 1000 / 255), int(GREEN_MATRIX[1] * 1000 / 255), int(GREEN_MATRIX[2] * 1000 / 255))
-  curses.init_pair(1, 1, curses.COLOR_BLACK)
+  green_matrix = Color.create_color(0, 233, 2)
 
   game_run = Game.create(0.01,map)
   player_run = Player.create([3.1, 9.25], 80)
@@ -225,12 +212,12 @@ def run(stdscr):
     if map[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
       P_win.get_stdscr(window).clear()
       P_win.get_stdscr(window).refresh()
-      endGame(window, 0)
+      endGame(window, 0, green_matrix)
       break
 
     Player.move(player_run,Game.get_diff_time(game_run),window)
     drawFloor(window)
-    get_rays(window, player_run)
+    get_rays(window, player_run, green_matrix)
 
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
