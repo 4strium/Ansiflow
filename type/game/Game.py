@@ -1,3 +1,9 @@
+import curses
+import math
+import type.game.Player as Player
+import type.game.NPC as NPC
+
+
 class Game : pass
 
 def create(differential_time, map, npc_list=[]):
@@ -26,3 +32,8 @@ def set_npcs(game_inp,n_npcs):
 
 def running_time(game_inp):
   game_inp.time += get_diff_time(game_inp)
+
+def draw_NPC(game_inp, player_inp):
+  for npc_g in game_inp.npc_list :
+    if 0.01 < math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2) < 10 :
+      pass
