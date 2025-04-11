@@ -7,6 +7,7 @@ import type.game.Wall as Wall
 import type.game.Game as Game
 import type.game.Player as Player
 import type.game.Image as Image
+import type.game.NPC as NPC
 import engine.Color as Color
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
@@ -162,7 +163,7 @@ def get_rays(window, player, wall_color) :
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
     """
 
-    angle_acc = Player.get_angle(player) + (Player.get_fov(player)//2) * INCREMENT_RAD
+    angle_acc = Player.get_left_angle(player)
     increment_width = P_win.get_width(window) / Player.get_fov(player)
     counter_x = 0 
 
@@ -178,14 +179,14 @@ def get_rays(window, player, wall_color) :
 def endGame(window, death, color):
 
   x_start = P_win.get_width(window) // 16
-  y_start = P_win.get_height(window) // 12
+  y_start = P_win.get_height(window) // 30
 
-  skull = Image.create('images/skull.txt', x_start, y_start, color)
+  skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, color)
   Image.set_color(skull,Color.create_color(255,0,255))
   Image.draw(window, skull)
 
   if death == 0:
-    text_walls = Image.create('text/walls.txt', int(P_win.get_width(window)*0.48), int(P_win.get_height(window)*0.24), color)
+    text_walls = Image.upload_classic_image('text/walls.txt', int(P_win.get_width(window)*0.48), int(P_win.get_height(window)*0.24), color)
     Image.draw(window, text_walls)
 
   P_win.get_stdscr(window).refresh()
@@ -205,6 +206,8 @@ def run(stdscr):
   game_run = Game.create(0.01,map)
   player_run = Player.create([3.1, 9.25], 80)
 
+  NPC.upload_NPC_to_game(game_run, "images/NPCS/chuck.txt")
+
   while True :
 
     P_win.refresh_size(window)
@@ -218,6 +221,7 @@ def run(stdscr):
     Player.move(player_run,Game.get_diff_time(game_run),window)
     drawFloor(window)
     get_rays(window, player_run, green_matrix)
+    Game.draw_NPC(window,game_run,player_run)
 
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
