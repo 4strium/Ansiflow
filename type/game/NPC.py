@@ -52,17 +52,21 @@ def upload_NPC_to_game( game_inp, path):
       posy = float(content[line].split("__POSITIONY__")[1].strip())
     elif "__VISUAL" in content[line]:
       nb_colors = int(content[line+1].split("__NBCOLORS__")[1].strip())
-      red = int(content[line+2].split("__COLORR__")[1].strip())
-      green = int(content[line+3].split("__COLORG__")[1].strip())
-      blue = int(content[line+4].split("__COLORB__")[1].strip())
-      line = line + 5
+      line += 2
+      colors = []
       for i in range(nb_colors) :
+        red = int(content[line].split("__COLORR__")[1].strip())
+        green = int(content[line+1].split("__COLORG__")[1].strip())
+        blue = int(content[line+2].split("__COLORB__")[1].strip())
+        line += 3
+
         tmp_visual = []
         while "__ENDVISUAL__" not in content[line] :
           tmp_visual.append(content[line])
           line += 1
         line += 1
-        visuals.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
+        colors.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
+      visuals.append(colors)
     
   npc = create(posx,posy,name,visuals)
   game_inp.npc_list.append(npc)

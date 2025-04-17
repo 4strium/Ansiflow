@@ -49,9 +49,9 @@ def draw_NPC(window_inp, game_inp, player_inp):
       if distance > 1.65 :
         dist_version = 0
       elif distance > 0.825 :
-        dist_version = 1
+        dist_version = 0 # Same dist_version because i'm tired to make other ASCII version
       else :
-        dist_version = 2
+        dist_version = 0
       vector_origin = (math.cos(Player.get_angle(player_inp)),math.sin(Player.get_angle(player_inp)))
       vector_NPC = (NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0], NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])
       angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
@@ -60,6 +60,7 @@ def draw_NPC(window_inp, game_inp, player_inp):
       x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * P_win.get_width(window_inp))
 
       if -fov_limits <= angle_player_npc <= fov_limits :
-        Image.set_pos(npc_g.visuals[dist_version],[x_fix,(P_win.get_height(window_inp) // 5)*2])
-        Image.draw(window_inp, NPC.get_visuals(npc_g)[dist_version])
+        for i in range(len(NPC.get_visuals(npc_g)[dist_version])):
+          Image.set_pos(npc_g.visuals[dist_version][i],[x_fix,(P_win.get_height(window_inp) // 4)])
+          Image.draw(window_inp, NPC.get_visuals(npc_g)[dist_version][i])
       P_win.get_stdscr(window_inp).addstr(2, P_win.get_width(window_inp) // 2, str(angle_player_npc), 1)

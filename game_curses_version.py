@@ -204,7 +204,7 @@ def run(stdscr):
   green_matrix = Color.create_color(0, 233, 2)
 
   game_run = Game.create(0.01,map)
-  player_run = Player.create([3.1, 9.25], 80)
+  player_run = Player.create([14.5, 9.25], 80)
 
   NPC.upload_NPC_to_game(game_run, "images/NPCS/chuck.txt")
 
