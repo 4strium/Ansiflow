@@ -9,28 +9,61 @@ import type.game.Player as Player
 import type.game.Image as Image
 import type.game.NPC as NPC
 import engine.Color as Color
+import engine.Button as Button
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
 
 GREEN_MATRIX = (0, 233, 2)
 
+wall_pink = 0
+blue_cyber = 0
+
 # Exemple de carte (map)
-map = np.array([
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],    # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],    # [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1]
-    [1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1],    # [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1]
-    [1,0,0,0,0,0,0,0,1,0,1,1,1,1,0,0,1],    # [1,0,1,0,0,0,1,1,1,1,1,1,1,1,0,1,1]
-    [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1],    # [1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1]
-    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],    # [1,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1]
-    [1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1],    # [1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1]
-    [1,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1],    # [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-    [1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1],    # [1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1]
-    [1,0,1,0,0,0,1,1,1,1,1,1,1,1,0,1,1],    # [1,0,0,0,0,0,0,0,1,0,1,1,1,1,0,0,1]
-    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],    # [1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1]
-    [1,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,1],    # [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]     # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-])
+map = np.array(
+  [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], #37
+    [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1], #36
+    [1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1], #35
+    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1], #34
+    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,0,1], #33
+    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1], #32
+    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1], #31
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,1,0,1], #30
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,0,0,0,0,0,0,1], #29
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,1,1,1,0,0,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1], #28
+    [1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1], #27
+    [1,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1], #26
+    [1,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,0,0,1,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], #25
+    [1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,1,1,1,1,0,1,1,1,0,1], #24
+    [1,0,1,1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,0,1,1,0,1], #23
+    [1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,1,1,0,1], #22
+    [1,0,1,1,0,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,0,0,0,1], #21
+    [1,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,1,1], #20
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,1,1,0,0,0,1], #19
+    [1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,0,1,1,1,0,1], #18
+    [1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,0,1,1,1,0,1], #17
+    [1,0,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], #16
+    [1,0,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,1,1,1,1,0,0,0,0,0,1,0,1,1,0,1,1,1,1,0,1,0,1], #15
+    [1,0,1,1,0,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1], #14
+    [1,0,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,1,0,1], #13
+    [1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1], #12
+    [1,0,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,0,0,1,0,1,0,1,0,1], #11
+    [1,0,1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1], #10
+    [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,0,1,0,1,1,0,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1], #9
+    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1], #8
+    [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,0,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,1], #7
+    [1,0,1,0,1,0,0,0,1,0,1,1,0,0,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,1], #6
+    [1,0,1,0,0,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,1,0,1,1,1], #5
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1], #4
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,1,1,1,0,1], #3 
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,1,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,1], #2
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], #1
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  #0
+  ]
+)
+
+reversed_map = np.flipud(map)
 
 def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
     """
@@ -39,6 +72,8 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
     - max-distance correspond à la distance maximale de recherhe d'obstacle, 
     si aucun obstacle n'est trouvé la fonction renvoie None
     """
+
+    global reversed_map
 
     # Le rayon émis est caractérisé par un vecteur : 
     dx = math.cos(angle) # La composante horizontale, qui correspond au cosinus de l'angle passé en paramètre
@@ -111,7 +146,7 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 10):
             tmaxY += tDeltaY
         
         if 0 <= x_cellule <= map.shape[1] and 0 <= y_cellule <= map.shape[0] :
-            if map[y_cellule][x_cellule] == 1:
+            if reversed_map[y_cellule][x_cellule] == 1:
 
                 # On calcule les coordonnées exactes du point d'impact en fonction du déplacement du rayon :
                 impact_x = x0 + distance * dx
@@ -155,7 +190,7 @@ def drawFloor(window) :
       for x_axis in range(0, P_win.get_width(window)) :
         P_win.get_stdscr(window).addstr(y_axis, x_axis, "-")
 
-def get_rays(window, player, wall_color) :
+def get_rays(window, player) :
     """
     Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
@@ -170,58 +205,150 @@ def get_rays(window, player, wall_color) :
     for i in range(0,Player.get_fov(player)+1) :
         res = digitalDifferentialAnalyzer(angle_acc, Player.get_position(player)[0], Player.get_position(player)[1])
         if res != None :
-          wall_design = Wall.create(wall_color,"#",counter_x, increment_width)
+          wall_design = Wall.create(wall_pink,"█",counter_x, increment_width)
           draw3DWall(window, res[2], Player.get_angle(player), angle_acc, wall_design)
 
         angle_acc -= INCREMENT_RAD
         counter_x = round(i * increment_width)
 
-def endGame(window, death, color):
+def endGame(window, death):
 
   x_start = P_win.get_width(window) // 16
   y_start = P_win.get_height(window) // 30
 
-  skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, color)
+  skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, wall_pink)
   Image.set_color(skull,Color.create_color(255,0,255))
   Image.draw(window, skull)
 
   if death == 0:
-    text_walls = Image.upload_classic_image('text/walls.txt', int(P_win.get_width(window)*0.48), int(P_win.get_height(window)*0.24), color)
+    text_walls = Image.upload_classic_image('text/walls.txt', int(P_win.get_width(window)*0.48), int(P_win.get_height(window)*0.24), blue_cyber)
     Image.draw(window, text_walls)
 
   P_win.get_stdscr(window).refresh()
   time.sleep(10)
 
+def open_doors(lst_blocks):
+  global reversed_map
+
+  for bloob in len(lst_blocks)-1: 
+    reversed_map[lst_blocks[bloob][1]][lst_blocks[bloob][0]]
+
+def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
+  for sentence in NPC.get_texts(npc) :
+    for i in range(len(NPC.get_visuals(npc)[sentence[0]])):
+      Image.set_pos(npc.visuals[sentence[0]][i],[P_win.get_width(window_inp) // 2,(P_win.get_height(window_inp) // 8)])
+      Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]][i])
+    P_win.get_stdscr(window_inp).refresh()
+    
+    padding = 12
+    x_index = padding
+    for letter in sentence[1] :
+      if x_index < P_win.get_width(window_inp) - padding :
+        P_win.get_stdscr(window_inp).addstr((P_win.get_height(window_inp) // 4)*3, x_index, letter, color)
+        x_index += 1
+        P_win.get_stdscr(window_inp).refresh()
+        time.sleep(Game.get_diff_time(game_inp)*8)
+    time.sleep(4)
+    P_win.get_stdscr(window_inp).clear()
+    get_rays(window_inp, player_inp)
+    Game.draw_backtalk(window_inp, color)
+  P_win.get_stdscr(window_inp).addstr((P_win.get_height(window_inp) // 4)*3, padding, NPC.get_enigma(npc)[0], color)
+  P_win.get_stdscr(window_inp).refresh()
+  time.sleep(8)
+  x_shift = 60
+  button_lst = []
+  for butt in range(3):
+    button_tmp = Button.create(NPC.get_enigma(npc)[1][butt][0], [padding+butt*x_shift,(P_win.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
+    button_lst.append(button_tmp)
+  choice = 1
+  while True :
+    key = P_win.get_stdscr(window_inp).getch()
+
+    if choice == 1 :
+      Button.draw_button(window_inp,button_lst[0],1)
+      Button.draw_button(window_inp,button_lst[1],0)
+      Button.draw_button(window_inp,button_lst[2],0)
+      if key == ord('d') :
+        choice += 1
+    elif choice == 2 :
+      Button.draw_button(window_inp,button_lst[0],0)
+      Button.draw_button(window_inp,button_lst[1],1)
+      Button.draw_button(window_inp,button_lst[2],0)
+      if key == ord('d') :
+        choice += 1
+      elif key == ord('q') :
+        choice -= 1
+    else :
+      Button.draw_button(window_inp,button_lst[0],0)
+      Button.draw_button(window_inp,button_lst[1],0)
+      Button.draw_button(window_inp,button_lst[2],1)
+      if key == ord('q') :
+        choice -= 1
+    P_win.get_stdscr(window_inp).addstr(P_win.get_height(window_inp)-5, x_shift+2, "Utilise Q et D pour changer de réponse", color)
+    P_win.get_stdscr(window_inp).addstr(P_win.get_height(window_inp)-3, x_shift, "Appuie sur ESPACE pour confirmer ta réponse", color)
+    P_win.get_stdscr(window_inp).refresh()
+    time.sleep(Game.get_diff_time(game_inp))
+
+def draw_NPC(window_inp, game_inp, player_inp, talk_color):
+  for npc_g in game_inp.npc_list :
+    distance = math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2)
+
+    if distance < 10 :
+      P_win.get_stdscr(window_inp).addstr(0, P_win.get_width(window_inp) // 2, str(round(distance,3)), 1)
+      P_win.get_stdscr(window_inp).addstr(1, P_win.get_width(window_inp) // 2, str(game_inp.npc_list[0].name), 1)
+
+    if 0.01 < distance < 2.5 :
+      if distance > 1 :
+        vector_origin = (math.cos(Player.get_angle(player_inp)),math.sin(Player.get_angle(player_inp)))
+        vector_NPC = (NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0], NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])
+        angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
+
+        fov_limits = (Player.get_fov(player_inp)//2)*INCREMENT_RAD
+        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * P_win.get_width(window_inp))
+
+        if -fov_limits <= angle_player_npc <= fov_limits :
+          for i in range(len(NPC.get_visuals(npc_g)[0])):
+            Image.set_pos(npc_g.visuals[0][i],[x_fix,(P_win.get_height(window_inp) // 4)])
+            Image.draw(window_inp, NPC.get_visuals(npc_g)[0][i])
+        P_win.get_stdscr(window_inp).addstr(2, P_win.get_width(window_inp) // 2, str(angle_player_npc), 1)
+      else :
+        Game.draw_backtalk(window_inp, talk_color)
+        talk_to_NPC(window_inp, player_inp, game_inp, npc_g, talk_color)
+
 def run(stdscr):
+  global wall_pink, blue_cyber, reversed_map
+
   curses.curs_set(0) #Masquer le curseur
 
   window = P_win.create(stdscr)
-  P_win.get_stdscr(window).nodelay(0) #Bloquer/Débloquer l'entrée utilisateur
+  P_win.get_stdscr(window).nodelay(1)
   P_win.get_stdscr(window).timeout(100) #Faire varier le rafraichissement du terminal en ms 
 
   # Démarrage du gestionnaire de couleurs :
   curses.start_color()
-  green_matrix = Color.create_color(0, 233, 2)
+  wall_pink = Color.create_color(189, 0, 255)
+  blue_cyber = Color.create_color(0,255,159)
 
-  game_run = Game.create(0.01,map)
-  player_run = Player.create([14.5, 9.25], 80)
+  
+  game_run = Game.create(0.01,reversed_map)
+  player_run = Player.create([17.5, 16.5], 80)
 
   NPC.upload_NPC_to_game(game_run, "images/NPCS/chuck.txt")
 
   while True :
-
     P_win.refresh_size(window)
 
-    if map[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
-      P_win.get_stdscr(window).clear()
+    if reversed_map[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
+      P_win.get_stdscr(window).erase()
       P_win.get_stdscr(window).refresh()
-      endGame(window, 0, green_matrix)
+      endGame(window, 0)
       break
 
     Player.move(player_run,Game.get_diff_time(game_run),window)
     drawFloor(window)
-    get_rays(window, player_run, green_matrix)
-    Game.draw_NPC(window,game_run,player_run)
+    get_rays(window, player_run)
+
+    draw_NPC(window,game_run,player_run,blue_cyber)
 
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
