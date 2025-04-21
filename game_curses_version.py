@@ -230,8 +230,8 @@ def endGame(window, death):
 def open_doors(lst_blocks):
   global reversed_map
 
-  for bloob in len(lst_blocks)-1: 
-    reversed_map[lst_blocks[bloob][1]][lst_blocks[bloob][0]]
+  for bloob in range(len(lst_blocks)-1): 
+    reversed_map[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
   for sentence in NPC.get_texts(npc) :
@@ -254,13 +254,14 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
     Game.draw_backtalk(window_inp, color)
   P_win.get_stdscr(window_inp).addstr((P_win.get_height(window_inp) // 4)*3, padding, NPC.get_enigma(npc)[0], color)
   P_win.get_stdscr(window_inp).refresh()
-  time.sleep(8)
+  time.sleep(6)
   x_shift = 60
   button_lst = []
   for butt in range(3):
     button_tmp = Button.create(NPC.get_enigma(npc)[1][butt][0], [padding+butt*x_shift,(P_win.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
     button_lst.append(button_tmp)
   choice = 1
+
   while True :
     key = P_win.get_stdscr(window_inp).getch()
 
@@ -270,6 +271,10 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
       Button.draw_button(window_inp,button_lst[2],0)
       if key == ord('d') :
         choice += 1
+      elif key == 32 :
+        open_doors(NPC.get_enigma(npc)[1][0][1])
+        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+        break       
     elif choice == 2 :
       Button.draw_button(window_inp,button_lst[0],0)
       Button.draw_button(window_inp,button_lst[1],1)
@@ -278,12 +283,20 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         choice += 1
       elif key == ord('q') :
         choice -= 1
+      elif key == 32 :
+        open_doors(NPC.get_enigma(npc)[1][1][1])
+        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+        break
     else :
       Button.draw_button(window_inp,button_lst[0],0)
       Button.draw_button(window_inp,button_lst[1],0)
       Button.draw_button(window_inp,button_lst[2],1)
       if key == ord('q') :
         choice -= 1
+      elif key == 32 :
+        open_doors(NPC.get_enigma(npc)[1][2][1])
+        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+        break
     P_win.get_stdscr(window_inp).addstr(P_win.get_height(window_inp)-5, x_shift+2, "Utilise Q et D pour changer de réponse", color)
     P_win.get_stdscr(window_inp).addstr(P_win.get_height(window_inp)-3, x_shift, "Appuie sur ESPACE pour confirmer ta réponse", color)
     P_win.get_stdscr(window_inp).refresh()
@@ -296,6 +309,8 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
     if distance < 10 :
       P_win.get_stdscr(window_inp).addstr(0, P_win.get_width(window_inp) // 2, str(round(distance,3)), 1)
       P_win.get_stdscr(window_inp).addstr(1, P_win.get_width(window_inp) // 2, str(game_inp.npc_list[0].name), 1)
+
+      print(NPC.get_enigma(npc_g))
 
     if 0.01 < distance < 2.5 :
       if distance > 1 :
