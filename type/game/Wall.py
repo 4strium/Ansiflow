@@ -4,7 +4,7 @@ def create(color, texture="#", start_ind=0, width=0):
   wall_export = Wall()
   wall_export.texture = texture
   wall_export.start_ind = start_ind
-  wall_export.end_ind = round(start_ind + width) +1
+  wall_export.end_ind = int(start_ind + width) + 1
   wall_export.color = color
   return wall_export
   

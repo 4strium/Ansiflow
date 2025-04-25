@@ -1,4 +1,5 @@
 __NAME__CHUCK
+__TYPE__1
 __POSITIONX__17.5
 __POSITIONY__18
 __NBTEXTS__7
@@ -17,6 +18,7 @@ Mais par contre si tu te trompes, tu vas devoir marcher beaucoup plus longtemps,
 __COSTUME__1
 Bon assez bavardé, je sais que ton temps est précieux, le miens aussi d'ailleurs. Voici la fameuse question :
 __QUESTION__Il me faut 1min32s pour couper une bûche en deux. Combien de temps me faut-il pour couper une bûche en 16 morceaux de même taille ?
+__NBREPONSES__3
 __REPONSE__13 minutes
 __NBBLOCKS__2
 15,19

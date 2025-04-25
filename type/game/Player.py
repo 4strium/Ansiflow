@@ -1,5 +1,6 @@
 import math
-import type.game.Player_Window as P_win
+import engine.Buffer as Buffer
+import engine.Tools as Tools
 
 INCREMENT_RAD = 0.017
 PI = 3.142
@@ -26,7 +27,7 @@ def set_angle(player_inp, n_angle) :
   player_inp.left_angle = player_inp.angle + (player_inp.fov//2) * INCREMENT_RAD
 
 def move(player, dt, window):
-  key = P_win.get_stdscr(window).getch()
+  key = Tools.get_touch()
 
   if key == 27:  # Quitter avec 'échap'
     exit()
@@ -34,15 +35,15 @@ def move(player, dt, window):
     # Simuler l'avancement du personnage :
     player.position[0] += dt * 5 * math.cos(get_angle(player))
     player.position[1] += dt * 5 * math.sin(get_angle(player))
-    P_win.get_stdscr(window).clear()
+    Buffer.clear_data(window)
   elif key == ord('s'):
     # Simuler le reculement du personnage par rapport au sol :
     player.position[0] -= dt * 5 * math.cos(get_angle(player))
     player.position[1] -= dt * 5 * math.sin(get_angle(player)) 
-    P_win.get_stdscr(window).clear()  
+    Buffer.clear_data(window) 
   elif key == ord('q'):
     set_angle(player, player.angle + dt*5)
-    P_win.get_stdscr(window).clear()
+    Buffer.clear_data(window)
   elif key == ord('d'):
     set_angle(player, player.angle - dt*5)
-    P_win.get_stdscr(window).clear()
+    Buffer.clear_data(window)

@@ -4,8 +4,8 @@ import time
 import type.game.Player as Player
 import type.game.NPC as NPC
 import type.game.Image as Image
-import type.game.Player_Window as P_win
 import engine.Color as Color
+import engine.Buffer as Buffer
 
 
 INCREMENT_RAD = 0.017
@@ -41,8 +41,8 @@ def running_time(game_inp):
   game_inp.time += get_diff_time(game_inp)
 
 def draw_backtalk(window_inp, color):
-  for i in range(P_win.get_width(window_inp)):
-    P_win.get_stdscr(window_inp).addstr((P_win.get_height(window_inp) // 3)*2, i, "─", color)
-  for j in range((P_win.get_height(window_inp) // 3)*2+1,P_win.get_height(window_inp)-1):
-    for k in range(P_win.get_width(window_inp)):
-      P_win.get_stdscr(window_inp).addstr(j, k, " ", color)
+  for i in range(Buffer.get_width(window_inp)):
+    Buffer.set_str_buffer(window_inp,"─",color,i,(Buffer.get_height(window_inp) // 3)*2)
+  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
+    for k in range(Buffer.get_width(window_inp)):
+      Buffer.set_str_buffer(window_inp," ",color,k,j)

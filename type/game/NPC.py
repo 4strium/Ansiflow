@@ -1,6 +1,5 @@
 import type.game.Image as Image
 import engine.Color as Color
-import time
 
 class NPC : pass
 
@@ -47,9 +46,12 @@ def upload_NPC_to_game(game_inp, path):
     return
 
   visuals = []
+  type_npc = -1
   for line in range(len(content)-1):
     if "__NAME__" in content[line]:
       name = content[line].split("__NAME__")[1].strip()
+    elif "__TYPE__" in content[line] :
+      type_npc = int(content[line].split("__TYPE__")[1].strip())
     elif "__POSITIONX__" in content[line]:
       posx = float(content[line].split("__POSITIONX__")[1].strip())
     elif "__POSITIONY__" in content[line]:
@@ -62,22 +64,30 @@ def upload_NPC_to_game(game_inp, path):
         costume = int(content[line].split("__COSTUME__")[1].strip())
         dialogue.append((costume,content[line+1]))
         line += 2
-    elif "__QUESTION__" in content[line]: 
+    elif "__QUESTION__" in content[line] : 
       question = content[line].split("__QUESTION__")[1].strip()
       line += 1
+
+      nb_answers = int(content[line].split("__NBREPONSES__")[1].strip())
+      line += 1
+
       answers = []
-      for ans in range(3):
+      for ans in range(nb_answers):
         ans_prop = content[line].split("__REPONSE__")[1].strip()
         line += 1
-        nb_blocks = int(content[line].split("__NBBLOCKS__")[1].strip())
-        line += 1
-        blocks = []
-        for bl in range(nb_blocks):
-          x, y = int(content[line].split(",")[0]), int(content[line].split(",")[1])
-          blocks.append([x,y])
+        if type_npc == 1 :
+          nb_blocks = int(content[line].split("__NBBLOCKS__")[1].strip())
           line += 1
-        answers.append([ans_prop, blocks])
-      enigma = [question, answers]
+          blocks = []
+          for bl in range(nb_blocks):
+            x, y = int(content[line].split(",")[0]), int(content[line].split(",")[1])
+            blocks.append([x,y])
+            line += 1
+          answers.append([ans_prop, blocks])
+          enigma = [question, answers]
+        else :
+          enigma = question
+      
     elif "__VISUAL" in content[line]:
       nb_colors = int(content[line+1].split("__NBCOLORS__")[1].strip())
       line += 2

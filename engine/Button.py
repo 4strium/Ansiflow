@@ -1,4 +1,4 @@
-import type.game.Player_Window as P_win
+import engine.Buffer as Buffer
 
 class Button : pass
 
@@ -39,18 +39,18 @@ def draw_button(window_inp, button_inp, hover):
   x_fix = get_position(button_inp)[0]
   y_fix = get_position(button_inp)[1]
   x_index = x_fix+1
-  P_win.get_stdscr(window_inp).addstr(y_fix+2, x_fix+1,get_content(button_inp), color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix, x_fix,'┌', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+1, x_fix,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+2, x_fix,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+3, x_fix,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+4, x_fix,'└', color_drawing)
+  Buffer.set_str_buffer(window_inp,get_content(button_inp), color_drawing, x_fix+1,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'┌', color_drawing, x_fix,y_fix)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+1)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+3)
+  Buffer.set_str_buffer(window_inp,'└', color_drawing, x_fix,y_fix+4)
   for i in range(space_needed):
-    P_win.get_stdscr(window_inp).addstr(y_fix, x_index,'─', color_drawing)
-    P_win.get_stdscr(window_inp).addstr(y_fix+4, x_index,'─', color_drawing)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing, x_index,y_fix)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing, x_index,y_fix+4)
     x_index += 1
-  P_win.get_stdscr(window_inp).addstr(y_fix, x_index,'┐', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+1, x_index,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+2, x_index,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+3, x_index,'│', color_drawing)
-  P_win.get_stdscr(window_inp).addstr(y_fix+4, x_index,'┘', color_drawing)
+  Buffer.set_str_buffer(window_inp,'┐', color_drawing, x_index,y_fix)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+1)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+3)
+  Buffer.set_str_buffer(window_inp,'┘', color_drawing, x_index,y_fix+4)
