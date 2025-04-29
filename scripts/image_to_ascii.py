@@ -93,4 +93,4 @@ def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", wi
             f.write("__ENDVISUAL__\n")
 
 # Appel de la fonction
-image_to_ascii_by_color("image-3.png", "sortie_ascii.txt", width=100, n_colors=16)
+image_to_ascii_by_color("image-5.png", "sortie_ascii.txt", width=80, n_colors=16)

@@ -1,14 +1,15 @@
-import type.game.Image as Image
+import json
+import engine.Image as Image
 import engine.Color as Color
 
 class NPC : pass
 
-def create(x, y, name, visuals, texts, pers_enigma):
+def create(x, y, name, type, visuals, texts, pers_enigma):
   perso = NPC()
   
-  perso.position = []
-  perso.position.append(x)
-  perso.position.append(y)
+  perso.position = [x,y]
+
+  perso.type = type
 
   perso.name = name
   perso.visuals = visuals
@@ -21,6 +22,8 @@ def get_position(perso_inp):
   return perso_inp.position
 def get_name(perso_inp):
   return perso_inp.name
+def get_type(perso_inp):
+  return perso_inp.type
 def get_visuals(perso_inp):
   return perso_inp.visuals
 def get_texts(perso_inp):
@@ -36,6 +39,8 @@ def set_visuals(perso_inp, n_visuals):
   perso_inp.visuals = n_visuals
 def set_enigma(perso_inp, n_enigma):
   perso_inp.enigma = n_enigma
+def set_type(perso_inp, n_type):
+  perso_inp.type = n_type
 
 def upload_NPC_to_game(game_inp, path):
   try :
@@ -84,10 +89,10 @@ def upload_NPC_to_game(game_inp, path):
             blocks.append([x,y])
             line += 1
           answers.append([ans_prop, blocks])
-          enigma = [question, answers]
         else :
-          enigma = question
-      
+          answers.append(ans_prop)
+      enigma = [question, answers]
+
     elif "__VISUAL" in content[line]:
       nb_colors = int(content[line+1].split("__NBCOLORS__")[1].strip())
       line += 2
@@ -106,8 +111,13 @@ def upload_NPC_to_game(game_inp, path):
         colors.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
       visuals.append(colors)
     
-  npc = create(posx,posy,name,visuals,dialogue, enigma)
+  npc = create(posx,posy,name, type_npc,visuals,dialogue, enigma)
   game_inp.npc_list.append(npc)
 
+def dispatch_NPCS(game_inp, data_path):
+  with open(data_path, 'r') as file :
+    data = json.load(file)
+  npc_elements = data['NPCS']
 
-    
+  for np in npc_elements :
+    upload_NPC_to_game(game_inp,np)

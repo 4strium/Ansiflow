@@ -1,5 +1,4 @@
 import engine.Buffer as Buffer
-import engine.Color as Color
 
 class Image : pass
 
@@ -9,9 +8,7 @@ def create(visual, x, y, color):
   img = Image()
   
   img.visual = visual
-  img.position = []
-  img.position.append(x)
-  img.position.append(y)
+  img.position = [x,y]
   img.color = color
 
   return img

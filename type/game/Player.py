@@ -1,6 +1,9 @@
 import math
+import sys
+import termios
 import engine.Buffer as Buffer
 import engine.Tools as Tools
+import type.game.Game as Game
 
 INCREMENT_RAD = 0.017
 PI = 3.142
@@ -26,10 +29,13 @@ def set_angle(player_inp, n_angle) :
   player_inp.angle = n_angle
   player_inp.left_angle = player_inp.angle + (player_inp.fov//2) * INCREMENT_RAD
 
-def move(player, dt, window):
-  key = Tools.get_touch()
+def move(game_inp,player, window):
+  dt = Game.get_diff_time(game_inp)
+  key = Tools.get_key()
 
   if key == 27:  # Quitter avec 'échap'
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
+    sys.exit()
     exit()
   elif key == ord('z'):
     # Simuler l'avancement du personnage :

@@ -1,4 +1,3 @@
-import numpy as np
 import math
 import termios
 import sys
@@ -7,7 +6,7 @@ import time
 import type.game.Wall as Wall
 import type.game.Game as Game
 import type.game.Player as Player
-import type.game.Image as Image
+import engine.Image as Image
 import type.game.NPC as NPC
 import engine.Color as Color
 import engine.Button as Button
@@ -22,61 +21,13 @@ GREEN_MATRIX = (0, 233, 2)
 wall_pink = 0
 blue_cyber = 0
 
-# Exemple de carte (map)
-map = np.array(
-  [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], #37
-    [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1], #36
-    [1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1], #35
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1], #34
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,0,1], #33
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1], #32
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1], #31
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,1,0,1], #30
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,0,0,0,0,0,0,1], #29
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,1,1,1,0,0,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1], #28
-    [1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1], #27
-    [1,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1], #26
-    [1,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,0,0,1,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], #25
-    [1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,1,1,1,1,0,1,1,1,0,1], #24
-    [1,0,1,1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,0,1,1,0,1], #23
-    [1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,1,1,0,1], #22
-    [1,0,1,1,0,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,0,0,0,1], #21
-    [1,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,1,1], #20
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,1,1,0,0,0,1], #19
-    [1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,0,1,1,1,0,1], #18
-    [1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,0,1,1,1,0,1], #17
-    [1,0,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], #16
-    [1,0,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,1,1,1,1,0,0,0,0,0,1,0,1,1,0,1,1,1,1,0,1,0,1], #15
-    [1,0,1,1,0,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1], #14
-    [1,0,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,1,0,1], #13
-    [1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1], #12
-    [1,0,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,0,0,1,0,1,0,1,0,1], #11
-    [1,0,1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1], #10
-    [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,0,1,0,1,1,0,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,0,1], #9
-    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1], #8
-    [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,0,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,1], #7
-    [1,0,1,0,1,0,0,0,1,0,1,1,0,0,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,0,0,0,0,1], #6
-    [1,0,1,0,0,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,1,0,1,1,1], #5
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,1], #4
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,1,1,1,0,1], #3 
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,1,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,1], #2
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], #1
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  #0
-  ]
-)
-
-reversed_map = np.flipud(map)
-
-def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 30):
+def digitalDifferentialAnalyzer(game_inp, angle, x0, y0, max_distance = 30):
     """
     Cette fonction permet de retourner les coordonnées du point d'impact avec un obstacle 
     d'un rayon émis depuis la position (x0,y0) d'un joueur avec un angle spécifié en radians.
     - max-distance correspond à la distance maximale de recherhe d'obstacle, 
     si aucun obstacle n'est trouvé la fonction renvoie None
     """
-
-    global reversed_map
 
     # Le rayon émis est caractérisé par un vecteur : 
     dx = math.cos(angle) # La composante horizontale, qui correspond au cosinus de l'angle passé en paramètre
@@ -148,8 +99,8 @@ def digitalDifferentialAnalyzer(angle, x0, y0, max_distance = 30):
             distance = tmaxY
             tmaxY += tDeltaY
         
-        if 0 <= x_cellule <= map.shape[1] and 0 <= y_cellule <= map.shape[0] :
-            if reversed_map[y_cellule][x_cellule] == 1:
+        if 0 <= x_cellule < len(Game.get_map(game_inp)[0]) and 0 <= y_cellule < len(Game.get_map(game_inp)) :
+            if Game.get_map(game_inp)[y_cellule][x_cellule] == 1:
 
                 # On calcule les coordonnées exactes du point d'impact en fonction du déplacement du rayon :
                 impact_x = x0 + distance * dx
@@ -194,7 +145,7 @@ def drawFloor(window) :
       for x_axis in range(0, Buffer.get_width(window)) :
         Buffer.set_str_buffer(window, "-", blue_cyber, x_axis, y_axis)
 
-def get_rays(window, player) :
+def get_rays(window, game_inp, player) :
     """
     Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
@@ -211,7 +162,7 @@ def get_rays(window, player) :
     px, py      = Player.get_position(player)
 
     for x in range(width) :
-        res = digitalDifferentialAnalyzer(angle_acc, px, py)
+        res = digitalDifferentialAnalyzer(game_inp,angle_acc, px, py)
         if res != None :
           wall_design = Wall.create(wall_pink,"█",x, 1)
           draw3DWall(window, res[2], Player.get_angle(player), angle_acc, wall_design)
@@ -234,16 +185,14 @@ def endGame(window, death):
   Buffer.show_data(window)
   time.sleep(10)
 
-def open_doors(lst_blocks):
-  global reversed_map
-
+def open_doors(game_inp, lst_blocks):
   for bloob in range(len(lst_blocks)): 
-    reversed_map[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
+    Game.get_map(game_inp)[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
   for sentence in NPC.get_texts(npc) :
     for i in range(len(NPC.get_visuals(npc)[sentence[0]])):
-      Image.set_pos(npc.visuals[sentence[0]][i],[Buffer.get_width(window_inp) // 2,(Buffer.get_height(window_inp) // 8)])
+      Image.set_pos(npc.visuals[sentence[0]][i],[Buffer.get_width(window_inp) // 2,-2])
       Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]][i])
     Buffer.show_data(window_inp)
     
@@ -257,57 +206,96 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         time.sleep(Game.get_diff_time(game_inp)*8)
     time.sleep(4)
     Buffer.clear_data(window_inp)
-    get_rays(window_inp, player_inp)
+    get_rays(window_inp, game_inp, player_inp)
     Game.draw_backtalk(window_inp, color)
   Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color,padding,(Buffer.get_height(window_inp) // 4)*3)
   Buffer.show_data(window_inp)
   time.sleep(6)
-  x_shift = 60
-  button_lst = []
-  for butt in range(3):
-    button_tmp = Button.create(NPC.get_enigma(npc)[1][butt][0], [padding+butt*x_shift,(Buffer.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
-    button_lst.append(button_tmp)
-  choice = 1
 
-  while True :
-    key = Tools.get_touch()
+  if NPC.get_type(npc) == 1 :
+    x_shift = 60
+    button_lst = []
+    for butt in range(3):
+      button_tmp = Button.create(NPC.get_enigma(npc)[1][butt][0], [padding+butt*x_shift,(Buffer.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
+      button_lst.append(button_tmp)
+    choice = 1
+    key = None
 
-    if choice == 1 :
-      Button.draw_button(window_inp,button_lst[0],1)
-      Button.draw_button(window_inp,button_lst[1],0)
-      Button.draw_button(window_inp,button_lst[2],0)
-      if key == ord('d') :
-        choice += 1
-      elif key == 32 :
-        open_doors(NPC.get_enigma(npc)[1][0][1])
-        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
-        break       
-    elif choice == 2 :
-      Button.draw_button(window_inp,button_lst[0],0)
-      Button.draw_button(window_inp,button_lst[1],1)
-      Button.draw_button(window_inp,button_lst[2],0)
-      if key == ord('d') :
-        choice += 1
-      elif key == ord('q') :
-        choice -= 1
-      elif key == 32 :
-        open_doors(NPC.get_enigma(npc)[1][1][1])
-        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
-        break
-    else :
-      Button.draw_button(window_inp,button_lst[0],0)
-      Button.draw_button(window_inp,button_lst[1],0)
-      Button.draw_button(window_inp,button_lst[2],1)
-      if key == ord('q') :
-        choice -= 1
-      elif key == 32 :
-        open_doors(NPC.get_enigma(npc)[1][2][1])
-        Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
-        break
-    Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
-    Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
-    Buffer.show_data(window_inp)
-    time.sleep(Game.get_diff_time(game_inp))
+    while True :
+
+      if choice == 1 :
+        Button.draw_button(window_inp,button_lst[0],1)
+        Button.draw_button(window_inp,button_lst[1],0)
+        Button.draw_button(window_inp,button_lst[2],0)
+        if key == ord('d') :
+          choice += 1
+        elif key == 32 :
+          open_doors(game_inp,NPC.get_enigma(npc)[1][0][1])
+          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          break       
+      elif choice == 2 :
+        Button.draw_button(window_inp,button_lst[0],0)
+        Button.draw_button(window_inp,button_lst[1],1)
+        Button.draw_button(window_inp,button_lst[2],0)
+        if key == ord('d') :
+          choice += 1
+        elif key == ord('q') :
+          choice -= 1
+        elif key == 32 :
+          open_doors(game_inp,NPC.get_enigma(npc)[1][1][1])
+          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          break
+      else :
+        Button.draw_button(window_inp,button_lst[0],0)
+        Button.draw_button(window_inp,button_lst[1],0)
+        Button.draw_button(window_inp,button_lst[2],1)
+        if key is None :
+          pass
+        elif key == ord('q') :
+          choice -= 1
+        elif key == 32 :
+          open_doors(game_inp,NPC.get_enigma(npc)[1][2][1])
+          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          break
+      Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
+      Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
+      Buffer.show_data(window_inp)
+      key = Tools.get_key()
+      time.sleep(Game.get_diff_time(game_inp))
+  elif NPC.get_type(npc) == 2 :
+    x_shift = 60
+    button_lst = []
+
+    for butt in range(2):
+      button_tmp = Button.create(NPC.get_enigma(npc)[1][butt], [padding+butt*x_shift,(Buffer.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
+      button_lst.append(button_tmp)
+    choice = 1
+    key = None
+
+    while True :
+
+      if choice == 1 :
+        Button.draw_button(window_inp,button_lst[0],1)
+        Button.draw_button(window_inp,button_lst[1],0)
+        if key == ord('d') :
+          choice += 1
+        elif key == 32 :
+
+          break       
+      else :
+        Button.draw_button(window_inp,button_lst[0],0)
+        Button.draw_button(window_inp,button_lst[1],1)
+        if key == ord('q') :
+          choice -= 1
+        elif key == 32 :
+
+          break
+      Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
+      Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
+      Buffer.show_data(window_inp)
+      key = Tools.get_key()
+      time.sleep(Game.get_diff_time(game_inp))
+     
 
 def draw_NPC(window_inp, game_inp, player_inp, talk_color):
   for npc_g in game_inp.npc_list :
@@ -315,7 +303,7 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
 
     if distance < 10 :
       Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, Buffer.get_width(window_inp) // 2, 0)
-      Buffer.set_str_buffer(window_inp, str(game_inp.npc_list[0].name), talk_color, Buffer.get_width(window_inp) // 2, 1)
+      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, Buffer.get_width(window_inp) // 2, 1)
 
     if 0.01 < distance < 2.5 :
       if distance > 1 :
@@ -328,7 +316,7 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
 
         if -fov_limits <= angle_player_npc <= fov_limits :
           for i in range(len(NPC.get_visuals(npc_g)[0])):
-            Image.set_pos(npc_g.visuals[0][i],[x_fix,(Buffer.get_height(window_inp) // 4)])
+            Image.set_pos(npc_g.visuals[0][i],[x_fix,2])
             Image.draw(window_inp, NPC.get_visuals(npc_g)[0][i])
         Buffer.set_str_buffer(window_inp, str(angle_player_npc),talk_color,Buffer.get_width(window_inp) // 2, 2)
       else :
@@ -343,7 +331,7 @@ def refresh_buffer(buffer_inp) :
   Buffer.set_width(buffer_inp, cols)
 
 def run():
-  global wall_pink, blue_cyber, reversed_map
+  global wall_pink, blue_cyber
 
   # Démarrage du gestionnaire de couleurs :
   wall_pink = Color.create_color(189, 0, 255)
@@ -352,23 +340,23 @@ def run():
   rows, cols = termios.tcgetwinsize(sys.stdout.fileno())
   buffer_window = Buffer.create(cols, rows)
 
-  game_run = Game.create(0.01,reversed_map)
-  player_run = Player.create([17.5, 16.5], 80)
+  game_run = Game.create(0.01, "data.json", termios.tcgetattr(sys.stdin))
+  tty.setcbreak(sys.stdin.fileno())
+  player_run = Player.create([27.1, 25], 80)
 
-  NPC.upload_NPC_to_game(game_run, "images/NPCS/chuck.txt")
-  NPC.upload_NPC_to_game(game_run, "images/NPCS/nix.txt")
+  NPC.dispatch_NPCS(game_run,"data.json")
 
   while True :
     refresh_buffer(buffer_window)
 
-    if reversed_map[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
+    if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
       buffer_window = refresh_buffer()
       endGame(buffer_window, 0)
       break
 
-    Player.move(player_run,Game.get_diff_time(game_run),buffer_window)
+    Player.move(game_run,player_run,buffer_window)
     drawFloor(buffer_window)
-    get_rays(buffer_window, player_run)
+    get_rays(buffer_window, game_run, player_run)
 
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
 
