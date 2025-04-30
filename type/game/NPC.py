@@ -16,6 +16,8 @@ def create(x, y, name, type, visuals, texts, pers_enigma):
   perso.texts = texts
   perso.enigma = pers_enigma
 
+  perso.special_content = []
+
   return perso
 
 def get_position(perso_inp):
@@ -30,6 +32,8 @@ def get_texts(perso_inp):
   return perso_inp.texts
 def get_enigma(perso_inp):
   return perso_inp.enigma
+def get_special_content(perso_inp):
+  return perso_inp.special_content
 
 def set_position(perso_inp,n_x,n_y):
   perso_inp.position[0], perso_inp.position[1] = n_x, n_y
@@ -41,6 +45,8 @@ def set_enigma(perso_inp, n_enigma):
   perso_inp.enigma = n_enigma
 def set_type(perso_inp, n_type):
   perso_inp.type = n_type
+def set_special_content(perso_inp, nspec_content):
+  perso_inp.special_content = nspec_content
 
 def upload_NPC_to_game(game_inp, path):
   try :
@@ -51,6 +57,7 @@ def upload_NPC_to_game(game_inp, path):
     return
 
   visuals = []
+  special_content = [[],[]]
   type_npc = -1
   for line in range(len(content)-1):
     if "__NAME__" in content[line]:
@@ -110,8 +117,38 @@ def upload_NPC_to_game(game_inp, path):
         line += 1
         colors.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
       visuals.append(colors)
-    
-  npc = create(posx,posy,name, type_npc,visuals,dialogue, enigma)
+    elif "__CHOICE" in content[line]:
+      line += 1
+      dialogue_extra = []
+      while "__ENDCHOICE__" not in content[line] :
+        costume = int(content[line].split("__COSTUME__")[1].strip())
+        dialogue_extra.append((costume,content[line+1]))
+        line += 2
+      special_content[0].append(dialogue_extra)
+    elif "__SPECIALCONTENT__" in content[line]:
+      nb_contents = int(content[line].split("__SPECIALCONTENT__")[1].strip())
+      line += 1
+      for p in range(nb_contents):
+        nb_colors = int(content[line].split("__NBCOLORS__")[1].strip())
+        line += 1
+        colors = []
+        for i in range(nb_colors) :
+          red = int(content[line].split("__COLORR__")[1].strip())
+          green = int(content[line+1].split("__COLORG__")[1].strip())
+          blue = int(content[line+2].split("__COLORB__")[1].strip())
+          line += 3
+
+          tmp_visual = []
+          while "__ENDCONTENT__" not in content[line] :
+            tmp_visual.append(content[line])
+            line += 1
+          line += 1
+          colors.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
+        special_content[1].append(colors)
+
+  npc = create(posx,posy,name,type_npc,visuals,dialogue,enigma)
+  if special_content != [] :
+    set_special_content(npc,special_content)
   game_inp.npc_list.append(npc)
 
 def dispatch_NPCS(game_inp, data_path):

@@ -90,7 +90,7 @@ def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", wi
             f.write(f"__COLORG__{g}\n")
             f.write(f"__COLORB__{b}\n")
             f.write(layer)
-            f.write("__ENDVISUAL__\n")
+            f.write("__ENDCONTENT__\n")
 
 # Appel de la fonction
-image_to_ascii_by_color("image-5.png", "sortie_ascii.txt", width=80, n_colors=16)
+image_to_ascii_by_color("roue-5.jpg", "sortie_ascii.txt", width=80, n_colors=11)

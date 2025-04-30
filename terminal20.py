@@ -189,28 +189,59 @@ def open_doors(game_inp, lst_blocks):
   for bloob in range(len(lst_blocks)): 
     Game.get_map(game_inp)[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
-def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
-  for sentence in NPC.get_texts(npc) :
-    for i in range(len(NPC.get_visuals(npc)[sentence[0]])):
-      Image.set_pos(npc.visuals[sentence[0]][i],[Buffer.get_width(window_inp) // 2,-2])
-      Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]][i])
-    Buffer.show_data(window_inp)
-    
-    padding = 12
-    x_index = padding
-    for letter in sentence[1] :
-      if x_index < Buffer.get_width(window_inp) - padding :
-        Buffer.set_str_buffer(window_inp, letter, color, x_index, (Buffer.get_height(window_inp) // 4)*3)
-        x_index += 1
+def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
+  Buffer.clear_data(window_inp)
+  for color_repartition in visuals_wheels[0]:
+    Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
+    Image.draw(window_inp, color_repartition)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color, 4, Buffer.get_height(window_inp)//2)
+  Buffer.show_data(window_inp)
+  while True :
+    if Tools.get_key() == 32 :
+      for roundx in range(100):
+        Buffer.clear_data(window_inp)
+        current_wheel = visuals_wheels[roundx % 5]
+        for color_repartition in current_wheel:
+          Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
+          Image.draw(window_inp, color_repartition)
         Buffer.show_data(window_inp)
-        time.sleep(Game.get_diff_time(game_inp)*8)
-    time.sleep(4)
-    Buffer.clear_data(window_inp)
-    get_rays(window_inp, game_inp, player_inp)
-    Game.draw_backtalk(window_inp, color)
+        coeff_time = roundx ** 1.1 # Réduction du coefficient de temps pour accélérer l'arrêt
+        if coeff_time > 60:  # Réduction de la limite pour arrêter plus tôt
+          break
+        time.sleep(Game.get_diff_time(game_inp) * coeff_time)
+      time.sleep(4)
+      break
+
+def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
+  get_rays(window_inp, game_inp, player_inp)
+  Game.draw_backtalk(window_inp, color) 
+  for i in range(len(NPC.get_visuals(npc)[sentence[0]])):
+    Image.set_pos(npc.visuals[sentence[0]][i],[Buffer.get_width(window_inp) // 2,-2])
+    Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]][i])
+  Buffer.show_data(window_inp)
+
+  padding = 12
+  x_index = padding
+  for letter in sentence[1] :
+    if x_index < Buffer.get_width(window_inp) - padding :
+      Buffer.set_str_buffer(window_inp, letter, color, x_index, (Buffer.get_height(window_inp) // 4)*3)
+      x_index += 1
+      Buffer.show_data(window_inp)
+      time.sleep(Game.get_diff_time(game_inp)*8)
+  time.sleep(4)
+  Buffer.clear_data(window_inp)
+
+def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
+
+  padding = 12
+
+  for sentence in NPC.get_texts(npc) :
+    draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
+  get_rays(window_inp, game_inp, player_inp)
+  Game.draw_backtalk(window_inp, color)
   Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color,padding,(Buffer.get_height(window_inp) // 4)*3)
   Buffer.show_data(window_inp)
-  time.sleep(6)
+  time.sleep(4)
 
   if NPC.get_type(npc) == 1 :
     x_shift = 60
@@ -280,7 +311,14 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         if key == ord('d') :
           choice += 1
         elif key == 32 :
-
+          Buffer.clear_data(window_inp)
+          for sentence in NPC.get_special_content(npc)[0][0] :
+            draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
+          turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
+          Buffer.clear_data(window_inp)
+          ending_sentence = (2,"32 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
+          draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
+          time.sleep(30)
           break       
       else :
         Button.draw_button(window_inp,button_lst[0],0)
@@ -288,7 +326,14 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         if key == ord('q') :
           choice -= 1
         elif key == 32 :
-
+          Buffer.clear_data(window_inp)
+          for sentence in NPC.get_special_content(npc)[0][1] :
+            draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
+          turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
+          Buffer.clear_data(window_inp)
+          ending_sentence = (2,"32 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
+          draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
+          time.sleep(30)
           break
       Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
       Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
