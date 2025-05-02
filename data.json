@@ -42,5 +42,79 @@
   "NPCS":   [
     "images/NPCS/chuck.txt",
     "images/NPCS/nix.txt"
-  ]
+  ],
+  "MemoryGame" : {
+    "Cards":[
+        {
+          "id" :[0,1],
+          "path_visual": "images/Cards/langue.txt",
+          "couple_id" : 0
+        },
+        {
+          "id" :[2,3],
+          "path_visual": "images/Cards/oeil.txt",
+          "couple_id" : 1
+        },
+        {
+          "id" :[4,5],
+          "path_visual": "images/Cards/larme.txt",
+          "couple_id" : 2
+        },
+        {
+          "id" :[6,7],
+          "path_visual": "images/Cards/os.txt",
+          "couple_id" : 3
+        },
+        {
+          "id" :[8,9],
+          "path_visual": "images/Cards/griffe.txt",
+          "couple_id" : 4
+        },
+        {
+          "id" :[10,11],
+          "path_visual": "images/Cards/coeur.txt",
+          "couple_id" : 5
+        },
+        {
+          "id" :[12,13],
+          "path_visual": "images/Cards/crane.txt",
+          "couple_id" : 6
+        },
+        {
+          "id" :[14,15],
+          "path_visual": "images/Cards/dent.txt",
+          "couple_id" : 7
+        },
+        {
+          "id" :[16,17],
+          "path_visual": "images/Cards/piment.txt",
+          "couple_id" : 8
+        },
+        {
+          "id" :[18,19],
+          "path_visual": "images/Cards/cerveau.txt",
+          "couple_id" : 9
+        },
+        {
+          "id" :[20,21],
+          "path_visual": "images/Cards/araignee.txt",
+          "couple_id" : 10
+        },
+        {
+          "id" :[22,23],
+          "path_visual": "images/Cards/citrouille.txt",
+          "couple_id" : 11
+        },
+        {
+          "id" :[24,25],
+          "path_visual": "images/Cards/champignon.txt",
+          "couple_id" : 12
+        },
+        {
+          "id" :[26,27],
+          "path_visual": "images/Cards/feuille.txt",
+          "couple_id" : 13
+        }
+    ]
+  }
 }

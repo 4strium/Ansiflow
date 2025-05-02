@@ -12,6 +12,7 @@ import engine.Color as Color
 import engine.Button as Button
 import engine.Buffer as Buffer
 import engine.Tools as Tools
+import type.game.memory.MemoryGame as MemoryGame
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -231,7 +232,19 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   time.sleep(4)
   Buffer.clear_data(window_inp)
 
+def response_wheel(window_inp,game_inp,player_inp,npc,sentence,color, statement):
+  Buffer.clear_data(window_inp)
+  for sentence in NPC.get_special_content(npc)[0][statement] :
+    draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
+  turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
+  Buffer.clear_data(window_inp)
+  ending_sentence = (2,"28 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
+  draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
+  time.sleep(30)
+
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
+
+  MemoryGame.run_game(window_inp,blue_cyber,wall_pink)
 
   padding = 12
 
@@ -306,19 +319,15 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
     while True :
 
       if choice == 1 :
-        Button.draw_button(window_inp,button_lst[0],1)
-        Button.draw_button(window_inp,button_lst[1],0)
+        Button.draw_text_button(window_inp,button_lst[0],1)
+        Button.draw_text_button(window_inp,button_lst[1],0)
         if key == ord('d') :
           choice += 1
         elif key == 32 :
-          Buffer.clear_data(window_inp)
-          for sentence in NPC.get_special_content(npc)[0][0] :
-            draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
-          turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
-          Buffer.clear_data(window_inp)
-          ending_sentence = (2,"32 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
-          draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
-          time.sleep(30)
+          response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,0)
+          mem_game = MemoryGame.create('data.json')
+          MemoryGame.display_game(window_inp,mem_game,blue_cyber,wall_pink)
+          time.sleep(60)
           break       
       else :
         Button.draw_button(window_inp,button_lst[0],0)
@@ -326,14 +335,10 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         if key == ord('q') :
           choice -= 1
         elif key == 32 :
-          Buffer.clear_data(window_inp)
-          for sentence in NPC.get_special_content(npc)[0][1] :
-            draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
-          turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
-          Buffer.clear_data(window_inp)
-          ending_sentence = (2,"32 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
-          draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
-          time.sleep(30)
+          response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,1)
+          mem_game = MemoryGame.create('data.json')
+          MemoryGame.display_game(window_inp,mem_game,blue_cyber,wall_pink)
+          time.sleep(60)
           break
       Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
       Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)

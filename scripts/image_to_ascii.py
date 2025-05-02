@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 # Caractères ASCII du plus foncé au plus clair
-ASCII_CHARS = "@%#*+=-. "
+ASCII_CHARS = "@%#*+=-."
 
 def resize_image(image, new_width=100):
     width, height = image.size
@@ -93,4 +93,4 @@ def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", wi
             f.write("__ENDCONTENT__\n")
 
 # Appel de la fonction
-image_to_ascii_by_color("roue-5.jpg", "sortie_ascii.txt", width=80, n_colors=11)
+image_to_ascii_by_color("back-card.jpg", "sortie_ascii.txt", width=15, n_colors=2)
