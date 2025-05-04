@@ -2,6 +2,7 @@ import json
 import random
 import time
 import type.game.memory.Card as Card
+import type.game.Game as Game
 import engine.Image as  Image
 import engine.Buffer as Buffer
 import engine.Button as Button
@@ -14,6 +15,7 @@ def create(path_data):
 
   memory_export.cards_list = []
   memory_export.acc_points = 0
+  memory_export.elapsed_time = 0.0
   memory_export.first_card_selected = -1
   memory_export.second_card_selected = -1
   memory_export.cursor_position = 0
@@ -42,6 +44,8 @@ def get_cursor_selection(mem_inp):
   return mem_inp.cursor_position
 def get_backcard(mem_inp):
   return mem_inp.backcard
+def get_elapsed_time(mem_inp):
+  return mem_inp.elapsed_time
 
 def set_cursor_selection(mem_inp, n_select):
   mem_inp.cursor_position = n_select
@@ -92,8 +96,9 @@ def check_correspondance(mem_inp):
   set_first_card_selected(mem_inp,-1)
   set_second_card_selected(mem_inp,-1)
 
-def run_game(window_inp, color_no_hover, color_hover):
+def run_game(window_inp, game_inp, color_no_hover, color_hover):
   mem_game = create('data.json')
+  start_time = time.time()
 
   while True :
     key = Tools.get_key()
@@ -118,8 +123,14 @@ def run_game(window_inp, color_no_hover, color_hover):
     if mem_game.acc_points == 14 :
       break
     display_game(window_inp,mem_game,color_no_hover,color_hover)
+    diff_time = Game.get_diff_time(game_inp)
+    time.sleep(diff_time)
+  
+  mem_game.elapsed_time = time.time() - start_time
 
   Buffer.clear_data(window_inp)
+
+  return get_elapsed_time(mem_game)
 
 if __name__ == "__main__":
   create("data.json")

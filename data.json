@@ -115,6 +115,7 @@
           "path_visual": "images/Cards/feuille.txt",
           "couple_id" : 13
         }
-    ]
+    ],
+    "Doors":[[[23,23],[22,11]],[[25,23],[26,16]],[[27,23],[26,16]]]
   }
 }

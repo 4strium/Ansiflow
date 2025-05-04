@@ -8,3 +8,6 @@ def isData():
 def get_key():
     if isData() :
         return ord(sys.stdin.read(1))
+
+def convert_sec_to_min(sec_time):
+    return (int(sec_time // 60), int(sec_time % 60))

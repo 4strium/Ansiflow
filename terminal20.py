@@ -3,6 +3,7 @@ import termios
 import sys
 import tty
 import time
+import json
 import type.game.Wall as Wall
 import type.game.Game as Game
 import type.game.Player as Player
@@ -240,11 +241,31 @@ def response_wheel(window_inp,game_inp,player_inp,npc,sentence,color, statement)
   Buffer.clear_data(window_inp)
   ending_sentence = (2,"28 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
   draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
-  time.sleep(30)
+  time.sleep(2)
+
+def play_memory(window_inp,game_inp,player_inp,npc,color):
+  time_memory_game = MemoryGame.run_game(window_inp,game_inp,blue_cyber,wall_pink)
+  minutes, seconds = Tools.convert_sec_to_min(time_memory_game)[0], Tools.convert_sec_to_min(time_memory_game)[1]
+  sentence_end_memory = (2,"Tu en as mis du temps, "+str(minutes)+"m"+str(seconds)+"s pour ça ?!")
+  draw_sentence(window_inp,game_inp,player_inp,npc,sentence_end_memory,color)
+
+  with open(game_inp.datafile, 'r') as file :
+    data = json.load(file)
+
+  doors_available = data['MemoryGame']['Doors']
+
+  if minutes < 2 :
+    open_doors(game_inp,doors_available[0])
+  elif minutes < 4 :
+    open_doors(game_inp,doors_available[1])
+  else :
+    open_doors(game_inp,doors_available[2])  
+
+  Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
 
-  MemoryGame.run_game(window_inp,blue_cyber,wall_pink)
+  play_memory(window_inp,game_inp,player_inp,npc,color)
 
   padding = 12
 
@@ -268,9 +289,9 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
     while True :
 
       if choice == 1 :
-        Button.draw_button(window_inp,button_lst[0],1)
-        Button.draw_button(window_inp,button_lst[1],0)
-        Button.draw_button(window_inp,button_lst[2],0)
+        Button.draw_text_button(window_inp,button_lst[0],1)
+        Button.draw_text_button(window_inp,button_lst[1],0)
+        Button.draw_text_button(window_inp,button_lst[2],0)
         if key == ord('d') :
           choice += 1
         elif key == 32 :
@@ -278,9 +299,9 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
           break       
       elif choice == 2 :
-        Button.draw_button(window_inp,button_lst[0],0)
-        Button.draw_button(window_inp,button_lst[1],1)
-        Button.draw_button(window_inp,button_lst[2],0)
+        Button.draw_text_button(window_inp,button_lst[0],0)
+        Button.draw_text_button(window_inp,button_lst[1],1)
+        Button.draw_text_button(window_inp,button_lst[2],0)
         if key == ord('d') :
           choice += 1
         elif key == ord('q') :
@@ -290,9 +311,9 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
           break
       else :
-        Button.draw_button(window_inp,button_lst[0],0)
-        Button.draw_button(window_inp,button_lst[1],0)
-        Button.draw_button(window_inp,button_lst[2],1)
+        Button.draw_text_button(window_inp,button_lst[0],0)
+        Button.draw_text_button(window_inp,button_lst[1],0)
+        Button.draw_text_button(window_inp,button_lst[2],1)
         if key is None :
           pass
         elif key == ord('q') :
@@ -325,20 +346,16 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           choice += 1
         elif key == 32 :
           response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,0)
-          mem_game = MemoryGame.create('data.json')
-          MemoryGame.display_game(window_inp,mem_game,blue_cyber,wall_pink)
-          time.sleep(60)
-          break       
+          play_memory(window_inp,game_inp,player_inp,npc,color)
+          break
       else :
-        Button.draw_button(window_inp,button_lst[0],0)
-        Button.draw_button(window_inp,button_lst[1],1)
+        Button.draw_text_button(window_inp,button_lst[0],0)
+        Button.draw_text_button(window_inp,button_lst[1],1)
         if key == ord('q') :
           choice -= 1
         elif key == 32 :
           response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,1)
-          mem_game = MemoryGame.create('data.json')
-          MemoryGame.display_game(window_inp,mem_game,blue_cyber,wall_pink)
-          time.sleep(60)
+          play_memory(window_inp,game_inp,player_inp,npc,color)
           break
       Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
       Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)

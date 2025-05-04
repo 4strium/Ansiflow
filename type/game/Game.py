@@ -12,6 +12,7 @@ def create(differential_time, map_path, old_settings_terminal , npc_list=[]):
   game_export.dt = differential_time
   game_export.npc_list = npc_list
   game_export.backup_term = old_settings_terminal
+  game_export.datafile = "data.json"
 
   upload_map(game_export, map_path)
 
