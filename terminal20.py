@@ -224,9 +224,14 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
 
   padding = 12
   x_index = padding
+  y_line = (Buffer.get_height(window_inp) // 4)*3
   for letter in sentence[1] :
     if x_index < Buffer.get_width(window_inp) - padding :
-      Buffer.set_str_buffer(window_inp, letter, color, x_index, (Buffer.get_height(window_inp) // 4)*3)
+      if x_index > ((Buffer.get_width(window_inp)//2)-4) :
+        if letter == ' ' :
+          x_index = padding-1
+          y_line += 1
+      Buffer.set_str_buffer(window_inp, letter, color, x_index, y_line)
       x_index += 1
       Buffer.show_data(window_inp)
       time.sleep(Game.get_diff_time(game_inp)*8)
@@ -263,9 +268,12 @@ def play_memory(window_inp,game_inp,player_inp,npc,color):
 
   Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
 
-def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
+def annotations_user(window_inp, color):
+  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, Buffer.get_width(window_inp)-30, Buffer.get_height(window_inp)-12)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, Buffer.get_width(window_inp)-30, Buffer.get_width(window_inp)-10)
+  Buffer.show_data(window_inp)
 
-  play_memory(window_inp,game_inp,player_inp,npc,color)
+def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
 
   padding = 12
 
@@ -322,9 +330,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           open_doors(game_inp,NPC.get_enigma(npc)[1][2][1])
           Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
           break
-      Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
-      Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
-      Buffer.show_data(window_inp)
+      annotations_user(window_inp,color)
       key = Tools.get_key()
       time.sleep(Game.get_diff_time(game_inp))
   elif NPC.get_type(npc) == 2 :
@@ -357,9 +363,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,1)
           play_memory(window_inp,game_inp,player_inp,npc,color)
           break
-      Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, x_shift+2, Buffer.get_height(window_inp)-5)
-      Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, x_shift, Buffer.get_height(window_inp)-3)
-      Buffer.show_data(window_inp)
+      annotations_user(window_inp,color)
       key = Tools.get_key()
       time.sleep(Game.get_diff_time(game_inp))
      
