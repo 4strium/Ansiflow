@@ -14,6 +14,8 @@ import engine.Button as Button
 import engine.Buffer as Buffer
 import engine.Tools as Tools
 import type.game.memory.MemoryGame as MemoryGame
+import type.game.combat.Fight as Fight
+import type.game.combat.Enemy as Enemy
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -227,7 +229,7 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   y_line = (Buffer.get_height(window_inp) // 4)*3
   for letter in sentence[1] :
     if x_index < Buffer.get_width(window_inp) - padding :
-      if x_index > ((Buffer.get_width(window_inp)//2)-4) :
+      if x_index > ((Buffer.get_width(window_inp)//2)-6) :
         if letter == ' ' :
           x_index = padding-1
           y_line += 1
@@ -269,8 +271,8 @@ def play_memory(window_inp,game_inp,player_inp,npc,color):
   Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
 
 def annotations_user(window_inp, color):
-  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, Buffer.get_width(window_inp)-30, Buffer.get_height(window_inp)-12)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, Buffer.get_width(window_inp)-30, Buffer.get_width(window_inp)-10)
+  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
   Buffer.show_data(window_inp)
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
@@ -413,9 +415,12 @@ def run():
 
   game_run = Game.create(0.01, "data.json", termios.tcgetattr(sys.stdin))
   tty.setcbreak(sys.stdin.fileno())
-  player_run = Player.create([27.1, 25], 80)
+  player_run = Player.create([33.5, 23], 80)
 
   NPC.dispatch_NPCS(game_run,"data.json")
+
+  fight_game = Fight.create(buffer_window)
+  Enemy.dispatch_Enemies(fight_game,"data.json")
 
   while True :
     refresh_buffer(buffer_window)
@@ -430,6 +435,9 @@ def run():
     get_rays(buffer_window, game_run, player_run)
 
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
+    Enemy.draw_Enemy(buffer_window,fight_game,player_run,blue_cyber)
+
+    Fight.update_fight(buffer_window,fight_game)
 
     Buffer.show_data(buffer_window)
 

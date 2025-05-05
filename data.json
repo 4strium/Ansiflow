@@ -43,6 +43,12 @@
     "images/NPCS/chuck.txt",
     "images/NPCS/nix.txt"
   ],
+  "Enemy":[
+    {
+      "position" : [33.7,23],
+      "path_visual": "images/Enemy/enemy1.txt"
+    }
+  ],
   "MemoryGame" : {
     "Cards":[
         {
