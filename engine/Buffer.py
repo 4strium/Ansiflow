@@ -26,6 +26,8 @@ def get_width(buff_inp):
   return buff_inp.width
 def get_height(buff_inp):
   return buff_inp.height
+def get_pixel(buff__inp,x,y):
+  return buff__inp.data[y][x]
 
 def set_width(buff_inp, n_width):
   buff_inp.width = n_width

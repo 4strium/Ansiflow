@@ -268,7 +268,7 @@ def play_memory(window_inp,game_inp,player_inp,npc,color):
   else :
     open_doors(game_inp,doors_available[2])  
 
-  Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+  Game.get_npcs(game_inp).remove(npc)
 
 def annotations_user(window_inp, color):
   Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
@@ -306,7 +306,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           choice += 1
         elif key == 32 :
           open_doors(game_inp,NPC.get_enigma(npc)[1][0][1])
-          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          Game.get_npcs(game_inp).remove(npc)
           break       
       elif choice == 2 :
         Button.draw_text_button(window_inp,button_lst[0],0)
@@ -318,7 +318,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           choice -= 1
         elif key == 32 :
           open_doors(game_inp,NPC.get_enigma(npc)[1][1][1])
-          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          Game.get_npcs(game_inp).remove(npc)
           break
       else :
         Button.draw_text_button(window_inp,button_lst[0],0)
@@ -330,7 +330,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           choice -= 1
         elif key == 32 :
           open_doors(game_inp,NPC.get_enigma(npc)[1][2][1])
-          Game.set_npcs(game_inp, Game.get_npcs(game_inp).remove(npc))
+          Game.get_npcs(game_inp).remove(npc)
           break
       annotations_user(window_inp,color)
       key = Tools.get_key()
@@ -423,6 +423,13 @@ def run():
   Enemy.dispatch_Enemies(fight_game,"data.json")
 
   while True :
+    key = Tools.get_key()
+
+    if key == 27:  # Quitter avec 'échap'
+      termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_run))
+      sys.exit()
+      exit()
+
     refresh_buffer(buffer_window)
 
     if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
@@ -430,14 +437,17 @@ def run():
       endGame(buffer_window, 0)
       break
 
-    Player.move(game_run,player_run,buffer_window)
+    Player.move(game_run,player_run,buffer_window,key)
     drawFloor(buffer_window)
     get_rays(buffer_window, game_run, player_run)
 
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
-    Enemy.draw_Enemy(buffer_window,fight_game,player_run,blue_cyber)
 
-    Fight.update_fight(buffer_window,fight_game)
+    if Fight.is_fight_time(fight_game,player_run)[0] :
+      Enemy.draw_Enemy(buffer_window,fight_game,player_run,blue_cyber)
+      Fight.update_fight(buffer_window,fight_game,blue_cyber)
+      if key == 32 :
+        Enemy.shoot_ennemy(buffer_window,Fight.is_fight_time(fight_game,player_run)[1],fight_game)
 
     Buffer.show_data(buffer_window)
 

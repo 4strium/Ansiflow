@@ -1,6 +1,7 @@
 import math
 import json
 import type.game.Player as Player
+import type.game.combat.Fight as Fight
 import engine.Buffer as Buffer
 import engine.Image as Image
 import engine.Color as Color
@@ -21,6 +22,17 @@ def create(visuals, x, y):
 
 def get_position(enemy_inp): return enemy_inp.position
 def get_visuals(enemy_inp): return enemy_inp.visuals
+def get_pvs(enemy_inp): return enemy_inp.pv
+
+def set_pvs(enemy_inp, n_pv):
+  enemy_inp.pv = n_pv
+
+def shoot_ennemy(window_inp, enemy_inp, fight_game):
+  if (Buffer.get_pixel(window_inp,(Buffer.get_width(window_inp)//2)+2,(Buffer.get_height(window_inp)//2)-2)[0] not in [' ', '█']) or ( Buffer.get_pixel(window_inp,(Buffer.get_width(window_inp)//2)+3,(Buffer.get_height(window_inp)//2)-2)[0] not in [' ', '█']) :
+    set_pvs(enemy_inp,get_pvs(enemy_inp)-10)
+
+    if get_pvs(enemy_inp) <= 0 :
+      Fight.get_enemy_list(fight_game).remove(enemy_inp)
 
 def upload_enemy(figth_inp, enemy_pack):
 
@@ -83,3 +95,4 @@ def draw_Enemy(window_inp, fight_inp, player_inp, UI_color):
           Image.set_pos(enemy_t.visuals[0][i],[x_fix,2])
           Image.draw(window_inp, get_visuals(enemy_t)[0][i])
       Buffer.set_str_buffer(window_inp, str(angle_player_npc),UI_color,Buffer.get_width(window_inp) // 2, 2)
+      Buffer.set_str_buffer(window_inp, str(enemy_t.pv)+" PV", UI_color,Buffer.get_width(window_inp)-6, 1)

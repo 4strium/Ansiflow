@@ -1,5 +1,8 @@
+import math
 import engine.Image as Image
 import engine.Buffer as Buffer
+import type.game.Player as Player
+import type.game.combat.Enemy as Enemy
 
 class Fight : pass
 
@@ -12,5 +15,20 @@ def create(window_inp):
 
   return fight_element
 
-def update_fight(window_inp, fight_inp):
+def get_enemy_list(fight_inp): return fight_inp.enemy_list
+
+def set_enemy_list(fight_game, n_enemy_list) :
+  fight_game.enemy_list = n_enemy_list
+
+def is_fight_time(fight_inp, player_inp):
+  for enemy_t in get_enemy_list(fight_inp):
+    distance = math.sqrt((Enemy.get_position(enemy_t)[0] - Player.get_position(player_inp)[0])**2 + (Enemy.get_position(enemy_t)[1] - Player.get_position(player_inp)[1])**2)
+
+    if 0.01 < distance < 2.5 :
+      return [True,enemy_t]
+  
+  return[False,None]
+
+def update_fight(window_inp, fight_inp, UI_color):
   Image.draw(window_inp, fight_inp.target_image)
+  Buffer.set_str_buffer(window_inp,"Appuie sur ESPACE pour lui tirer dessus !",UI_color, (Buffer.get_width(window_inp)//3)+14,Buffer.get_height(window_inp)-8)
