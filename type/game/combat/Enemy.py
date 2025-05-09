@@ -55,9 +55,6 @@ def upload_enemy(figth_inp, enemy_pack):
         blue = int(content[line+2].split("__COLORB__")[1].strip())
         line += 3
 
-
-        print(content[line])
-
         tmp_visual = []
         while "__ENDVISUAL__" not in content[line] :
           tmp_visual.append(content[line])
@@ -65,8 +62,6 @@ def upload_enemy(figth_inp, enemy_pack):
         line += 1
         colors.append(Image.create(tmp_visual,0,0,Color.create_color(red,green,blue)))
       visuals.append(colors)
-
-  print(visuals)
 
   figth_inp.enemy_list.append(create(visuals,enemy_pack['position'][0],enemy_pack['position'][1]))
 
@@ -93,6 +88,6 @@ def draw_Enemy(window_inp, fight_inp, player_inp, UI_color):
       if -fov_limits <= angle_player_npc <= fov_limits :
         for i in range(len(get_visuals(enemy_t)[0])):
           Image.set_pos(enemy_t.visuals[0][i],[x_fix,2])
-          Image.draw(window_inp, get_visuals(enemy_t)[0][i])
-      Buffer.set_str_buffer(window_inp, str(angle_player_npc),UI_color,Buffer.get_width(window_inp) // 2, 2)
-      Buffer.set_str_buffer(window_inp, str(enemy_t.pv)+" PV", UI_color,Buffer.get_width(window_inp)-6, 1)
+          Image.draw(window_inp, get_visuals(enemy_t)[0][i], distance)
+      Buffer.set_str_buffer(window_inp, str(angle_player_npc),UI_color,0,Buffer.get_width(window_inp) // 2, 2)
+      Buffer.set_str_buffer(window_inp, str(enemy_t.pv)+" PV", UI_color,0,Buffer.get_width(window_inp)-6, 1)

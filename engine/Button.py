@@ -40,21 +40,21 @@ def draw_text_button(window_inp, button_inp, hover):
   x_fix = get_position(button_inp)[0]
   y_fix = get_position(button_inp)[1]
   x_index = x_fix+1
-  Buffer.set_str_buffer(window_inp,get_content(button_inp), color_drawing, x_fix+1,y_fix+2)
-  Buffer.set_str_buffer(window_inp,'┌', color_drawing, x_fix,y_fix)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+1)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+2)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_fix,y_fix+3)
-  Buffer.set_str_buffer(window_inp,'└', color_drawing, x_fix,y_fix+4)
+  Buffer.set_str_buffer(window_inp,get_content(button_inp), color_drawing,0, x_fix+1,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'┌', color_drawing,0, x_fix,y_fix)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_fix,y_fix+1)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_fix,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_fix,y_fix+3)
+  Buffer.set_str_buffer(window_inp,'└', color_drawing,0, x_fix,y_fix+4)
   for i in range(space_needed):
-    Buffer.set_str_buffer(window_inp,'─', color_drawing, x_index,y_fix)
-    Buffer.set_str_buffer(window_inp,'─', color_drawing, x_index,y_fix+4)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing,0, x_index,y_fix)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing,0, x_index,y_fix+4)
     x_index += 1
-  Buffer.set_str_buffer(window_inp,'┐', color_drawing, x_index,y_fix)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+1)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+2)
-  Buffer.set_str_buffer(window_inp,'│', color_drawing, x_index,y_fix+3)
-  Buffer.set_str_buffer(window_inp,'┘', color_drawing, x_index,y_fix+4)
+  Buffer.set_str_buffer(window_inp,'┐', color_drawing,0, x_index,y_fix)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_index,y_fix+1)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_index,y_fix+2)
+  Buffer.set_str_buffer(window_inp,'│', color_drawing,0, x_index,y_fix+3)
+  Buffer.set_str_buffer(window_inp,'┘', color_drawing,0, x_index,y_fix+4)
 
 def draw_image_button(window_inp, button_inp, hover):
   if hover :
@@ -69,12 +69,12 @@ def draw_image_button(window_inp, button_inp, hover):
     Image.set_pos(color,[x_fix+1,y_fix+1])
     Image.draw(window_inp, color)
   for y_index in range(y_fix+1,y_fix+y_space_needed):
-    Buffer.set_str_buffer(window_inp,'|', color_drawing,x_fix,y_index)
-    Buffer.set_str_buffer(window_inp,'|', color_drawing,x_fix+x_space_needed,y_index)
+    Buffer.set_str_buffer(window_inp,'|', color_drawing,0,x_fix,y_index)
+    Buffer.set_str_buffer(window_inp,'|', color_drawing,0,x_fix+x_space_needed,y_index)
   for x_index in range(x_fix+1,x_fix+x_space_needed):
-    Buffer.set_str_buffer(window_inp,'─', color_drawing,x_index,y_fix)
-    Buffer.set_str_buffer(window_inp,'─', color_drawing,x_index,y_fix+y_space_needed)
-  Buffer.set_str_buffer(window_inp,'┌', color_drawing,x_fix,y_fix)
-  Buffer.set_str_buffer(window_inp,'└', color_drawing, x_fix,y_fix+y_space_needed)
-  Buffer.set_str_buffer(window_inp,'┐', color_drawing, x_fix+x_space_needed,y_fix)
-  Buffer.set_str_buffer(window_inp,'┘', color_drawing, x_fix+x_space_needed,y_fix+y_space_needed)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing,0,x_index,y_fix)
+    Buffer.set_str_buffer(window_inp,'─', color_drawing,0,x_index,y_fix+y_space_needed)
+  Buffer.set_str_buffer(window_inp,'┌', color_drawing,0,x_fix,y_fix)
+  Buffer.set_str_buffer(window_inp,'└', color_drawing,0, x_fix,y_fix+y_space_needed)
+  Buffer.set_str_buffer(window_inp,'┐', color_drawing,0, x_fix+x_space_needed,y_fix)
+  Buffer.set_str_buffer(window_inp,'┘', color_drawing,0, x_fix+x_space_needed,y_fix+y_space_needed)

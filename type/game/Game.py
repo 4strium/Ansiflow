@@ -44,10 +44,10 @@ def running_time(game_inp):
 
 def draw_backtalk(window_inp, color):
   for i in range(Buffer.get_width(window_inp)):
-    Buffer.set_str_buffer(window_inp,"─",color,i,(Buffer.get_height(window_inp) // 3)*2)
+    Buffer.set_str_buffer(window_inp,"─",color,0,i,(Buffer.get_height(window_inp) // 3)*2)
   for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
     for k in range(Buffer.get_width(window_inp)):
-      Buffer.set_str_buffer(window_inp," ",color,k,j)
+      Buffer.set_str_buffer(window_inp," ",color,0,k,j)
 
 def upload_map(game_inp, path):
   with open(path, 'r') as file :

@@ -8,7 +8,7 @@ def clear_data(buff_inp):
   for i in range(get_height(buff_inp)):
     rows = []
     for j in range(get_width(buff_inp)):
-      rows.append([' ',Color.create_color(255,255,255)])
+      rows.append([' ',Color.create_color(255,255,255),100])
     columns.append(rows)
 
   buff_inp.data = columns
@@ -34,14 +34,17 @@ def set_width(buff_inp, n_width):
 def set_height(buff_inp, n_height):
   buff_inp.height = n_height
 
-def set_str_buffer(buff_inp,char,color,x,y):
-  if len(char) > 1 :
-    x_acc = x
-    for i in range(len(char)) :
-      buff_inp.data[y][x_acc] = [char[i],color]
-      x_acc += 1
-  else :
-    buff_inp.data[y][x] = [char,color]
+def set_str_buffer(buff_inp,char,color,depth,x,y):
+  if x+len(char) < buff_inp.width+1 :
+    if len(char) > 1 :
+      x_acc = x
+      for i in range(len(char)) :
+        if buff_inp.data[y][x_acc][2] > depth :
+          buff_inp.data[y][x_acc] = [char[i],color,depth]
+        x_acc += 1
+    else :
+      if buff_inp.data[y][x][2] > depth :
+        buff_inp.data[y][x] = [char,color,depth]
 
 
 def rgb_fg(r, g, b):
@@ -62,6 +65,15 @@ def show_data(buff_inp):
         for cell in row:
             char = cell[0]
             color_fg = [Color.get_red(cell[1]),Color.get_green(cell[1]),Color.get_blue(cell[1])]
+
+            # Moduler la couleur en fonction de la profondeur
+            if cell[2] > 2:
+              depth_factor = (1 - (max(2, min(6, cell[2])) / 8))*1.1
+              color_fg = [
+              int(color_fg[0] * depth_factor),
+              int(color_fg[1] * depth_factor),
+              int(color_fg[2] * depth_factor),
+              ]
 
             # Changer couleur si nécessaire
             if color_fg != prev_fg:

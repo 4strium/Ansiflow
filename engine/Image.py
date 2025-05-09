@@ -64,7 +64,7 @@ def upload_with_colors(path):
 
   return colors
 
-def draw(window, img_inp):
+def draw(window, img_inp, depth = 0):
   height = Buffer.get_height(window)
   width = Buffer.get_width(window)
 
@@ -80,6 +80,7 @@ def draw(window, img_inp):
               window,
               char,
               img_inp.color,
+              depth,
               x_pos, 
               y_pos,                    
           )

@@ -29,7 +29,7 @@ def digitalDifferentialAnalyzer(game_inp, angle, x0, y0, max_distance = 30):
     """
     Cette fonction permet de retourner les coordonnées du point d'impact avec un obstacle 
     d'un rayon émis depuis la position (x0,y0) d'un joueur avec un angle spécifié en radians.
-    - max-distance correspond à la distance maximale de recherhe d'obstacle, 
+    - max-distance correspond à la distance maximale de recherche d'obstacle, 
     si aucun obstacle n'est trouvé la fonction renvoie None
     """
 
@@ -138,16 +138,16 @@ def draw3DWall(window, ray_distance, player_angle, ray_angle, wall_design) :
       for i in range(round(Wall.get_start_ind(wall_design)), Wall.get_end_ind(wall_design)) :
         if 0 <= i < Buffer.get_width(window):
           if i == Wall.get_end_ind(wall_design)-1 :
-            Buffer.set_str_buffer(window, " ", blue_cyber, i, y_axis)
+            Buffer.set_str_buffer(window, " ", blue_cyber, 400, i, y_axis)
           else :
-            Buffer.set_str_buffer(window, Wall.get_texture(wall_design), Wall.get_color(wall_design), i, y_axis)
+            Buffer.set_str_buffer(window, Wall.get_texture(wall_design), Wall.get_color(wall_design), ray_distance, i, y_axis)
 
 def drawFloor(window) :
   global blue_cyber
   for y_axis in range(Buffer.get_height(window)//2, Buffer.get_height(window)) :
     if 0 <= y_axis < Buffer.get_height(window) -1 :
       for x_axis in range(0, Buffer.get_width(window)) :
-        Buffer.set_str_buffer(window, "-", blue_cyber, x_axis, y_axis)
+        Buffer.set_str_buffer(window, "-", blue_cyber, 30, x_axis, y_axis)
 
 def get_rays(window, game_inp, player) :
     """
@@ -198,7 +198,7 @@ def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
   for color_repartition in visuals_wheels[0]:
     Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
     Image.draw(window_inp, color_repartition)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color, 4, Buffer.get_height(window_inp)//2)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color,0, 4, Buffer.get_height(window_inp)//2)
   Buffer.show_data(window_inp)
   while True :
     if Tools.get_key() == 32 :
@@ -233,7 +233,7 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
         if letter == ' ' :
           x_index = padding-1
           y_line += 1
-      Buffer.set_str_buffer(window_inp, letter, color, x_index, y_line)
+      Buffer.set_str_buffer(window_inp, letter, color,0, x_index, y_line)
       x_index += 1
       Buffer.show_data(window_inp)
       time.sleep(Game.get_diff_time(game_inp)*8)
@@ -271,8 +271,8 @@ def play_memory(window_inp,game_inp,player_inp,npc,color):
   Game.get_npcs(game_inp).remove(npc)
 
 def annotations_user(window_inp, color):
-  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse", color, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
+  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",0, color, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
   Buffer.show_data(window_inp)
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
@@ -283,7 +283,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
     draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
   get_rays(window_inp, game_inp, player_inp)
   Game.draw_backtalk(window_inp, color)
-  Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color,padding,(Buffer.get_height(window_inp) // 4)*3)
+  Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color, 0, padding,(Buffer.get_height(window_inp) // 4)*3)
   Buffer.show_data(window_inp)
   time.sleep(4)
 
@@ -375,8 +375,8 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
     distance = math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2)
 
     if distance < 10 :
-      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, Buffer.get_width(window_inp) // 2, 0)
-      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, Buffer.get_width(window_inp) // 2, 1)
+      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, Buffer.get_width(window_inp) // 2, 0)
+      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, Buffer.get_width(window_inp) // 2, 1)
 
     if 0.01 < distance < 2.5 :
       if distance > 1 :
@@ -390,8 +390,8 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
         if -fov_limits <= angle_player_npc <= fov_limits :
           for i in range(len(NPC.get_visuals(npc_g)[0])):
             Image.set_pos(npc_g.visuals[0][i],[x_fix,2])
-            Image.draw(window_inp, NPC.get_visuals(npc_g)[0][i])
-        Buffer.set_str_buffer(window_inp, str(angle_player_npc),talk_color,Buffer.get_width(window_inp) // 2, 2)
+            Image.draw(window_inp, NPC.get_visuals(npc_g)[0][i],distance)
+        Buffer.set_str_buffer(window_inp, str(angle_player_npc),talk_color, 0, Buffer.get_width(window_inp) // 2, 2)
       else :
         Game.draw_backtalk(window_inp, talk_color)
         talk_to_NPC(window_inp, player_inp, game_inp, npc_g, talk_color)
@@ -433,7 +433,7 @@ def run():
     refresh_buffer(buffer_window)
 
     if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
-      buffer_window = refresh_buffer()
+      refresh_buffer(buffer_window)
       endGame(buffer_window, 0)
       break
 
@@ -447,6 +447,7 @@ def run():
       Enemy.draw_Enemy(buffer_window,fight_game,player_run,blue_cyber)
       Fight.update_fight(buffer_window,fight_game,blue_cyber)
       if key == 32 :
+        fight_game.flame_state = 10
         Enemy.shoot_ennemy(buffer_window,Fight.is_fight_time(fight_game,player_run)[1],fight_game)
 
     Buffer.show_data(buffer_window)
