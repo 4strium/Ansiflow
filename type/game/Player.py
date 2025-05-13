@@ -1,11 +1,4 @@
-import math
-import sys
-import termios
-import engine.Buffer as Buffer
-import type.game.Game as Game
-
 INCREMENT_RAD = 0.017
-PI = 3.142
 
 class Player : pass
 
@@ -27,23 +20,3 @@ def set_fov(player_inp, n_fov) : player_inp.fov = n_fov
 def set_angle(player_inp, n_angle) : 
   player_inp.angle = n_angle
   player_inp.left_angle = player_inp.angle + (player_inp.fov//2) * INCREMENT_RAD
-
-def move(game_inp,player, window, key):
-  dt = Game.get_diff_time(game_inp)
-
-  if key == ord('z'):
-    # Simuler l'avancement du personnage :
-    player.position[0] += dt * 5 * math.cos(get_angle(player))
-    player.position[1] += dt * 5 * math.sin(get_angle(player))
-    Buffer.clear_data(window)
-  elif key == ord('s'):
-    # Simuler le reculement du personnage par rapport au sol :
-    player.position[0] -= dt * 5 * math.cos(get_angle(player))
-    player.position[1] -= dt * 5 * math.sin(get_angle(player)) 
-    Buffer.clear_data(window) 
-  elif key == ord('q'):
-    set_angle(player, player.angle + dt*5)
-    Buffer.clear_data(window)
-  elif key == ord('d'):
-    set_angle(player, player.angle - dt*5)
-    Buffer.clear_data(window)

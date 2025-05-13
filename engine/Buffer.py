@@ -39,11 +39,11 @@ def set_str_buffer(buff_inp,char,color,depth,x,y):
     if len(char) > 1 :
       x_acc = x
       for i in range(len(char)) :
-        if buff_inp.data[y][x_acc][2] > depth :
+        if buff_inp.data[y][x_acc][2] >= depth :
           buff_inp.data[y][x_acc] = [char[i],color,depth]
         x_acc += 1
     else :
-      if buff_inp.data[y][x][2] > depth :
+      if buff_inp.data[y][x][2] >= depth :
         buff_inp.data[y][x] = [char,color,depth]
 
 

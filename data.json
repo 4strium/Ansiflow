@@ -49,6 +49,19 @@
       "path_visual": "images/Enemy/enemy1.txt"
     }
   ],
+  "Timer":[
+    "images/Timer/two_points.txt",
+    "images/Timer/0.txt",
+    "images/Timer/1.txt",
+    "images/Timer/2.txt",
+    "images/Timer/3.txt",
+    "images/Timer/4.txt",
+    "images/Timer/5.txt",
+    "images/Timer/6.txt",
+    "images/Timer/7.txt",
+    "images/Timer/8.txt",
+    "images/Timer/9.txt"
+  ],
   "MemoryGame" : {
     "Cards":[
         {

@@ -16,6 +16,7 @@ import engine.Tools as Tools
 import type.game.memory.MemoryGame as MemoryGame
 import type.game.combat.Fight as Fight
 import type.game.combat.Enemy as Enemy
+import type.game.Timer as Timer
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -173,6 +174,39 @@ def get_rays(window, game_inp, player) :
 
         angle_acc -= angle_step
 
+
+def interact(game_inp,player,window):
+  dt = Game.get_diff_time(game_inp)
+  key = Tools.get_key()
+
+  if key == 27:  # Quitter avec 'échap'
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
+    sys.exit()
+    exit()
+  elif key == ord('z'):
+    # Simuler l'avancement du personnage :
+    player.position[0] += dt * 5 * math.cos(Player.get_angle(player))
+    player.position[1] += dt * 5 * math.sin(Player.get_angle(player))
+    Buffer.clear_data(window)
+  elif key == ord('s'):
+    # Simuler le reculement du personnage par rapport au sol :
+    player.position[0] -= dt * 5 * math.cos(Player.get_angle(player))
+    player.position[1] -= dt * 5 * math.sin(Player.get_angle(player)) 
+    Buffer.clear_data(window) 
+  elif key == ord('q'):
+    Player.set_angle(player, player.angle + dt*5)
+    Buffer.clear_data(window)
+  elif key == ord('d'):
+    Player.set_angle(player, player.angle - dt*5)
+    Buffer.clear_data(window)
+
+  if Fight.is_fight_time(Game.get_fight(game_inp),player)[0] :
+    Enemy.draw_Enemy(window,Game.get_fight(game_inp),player,blue_cyber)
+    Fight.update_fight(window,Game.get_fight(game_inp),blue_cyber)
+    if key == 32 :
+      Game.get_fight(game_inp).flame_state = 10
+      Enemy.shoot_ennemy(window,Fight.is_fight_time(Game.get_fight(game_inp),player)[1],Game.get_fight(game_inp))
+
 def endGame(window, death):
 
   x_start = Buffer.get_width(window) // 16
@@ -272,7 +306,7 @@ def play_memory(window_inp,game_inp,player_inp,npc,color):
 
 def annotations_user(window_inp, color):
   Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",0, color, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
   Buffer.show_data(window_inp)
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
@@ -297,7 +331,6 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
     key = None
 
     while True :
-
       if choice == 1 :
         Button.draw_text_button(window_inp,button_lst[0],1)
         Button.draw_text_button(window_inp,button_lst[1],0)
@@ -324,9 +357,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
         Button.draw_text_button(window_inp,button_lst[0],0)
         Button.draw_text_button(window_inp,button_lst[1],0)
         Button.draw_text_button(window_inp,button_lst[2],1)
-        if key is None :
-          pass
-        elif key == ord('q') :
+        if key == ord('q') :
           choice -= 1
         elif key == 32 :
           open_doors(game_inp,NPC.get_enigma(npc)[1][2][1])
@@ -374,7 +405,7 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
   for npc_g in game_inp.npc_list :
     distance = math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2)
 
-    if distance < 10 :
+    if distance < 6 :
       Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, Buffer.get_width(window_inp) // 2, 0)
       Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, Buffer.get_width(window_inp) // 2, 1)
 
@@ -415,20 +446,21 @@ def run():
 
   game_run = Game.create(0.01, "data.json", termios.tcgetattr(sys.stdin))
   tty.setcbreak(sys.stdin.fileno())
-  player_run = Player.create([33.5, 23], 80)
+  player_run = Player.create([4.5, 17], 80)
 
   NPC.dispatch_NPCS(game_run,"data.json")
 
   fight_game = Fight.create(buffer_window)
   Enemy.dispatch_Enemies(fight_game,"data.json")
 
-  while True :
-    key = Tools.get_key()
+  Game.set_fight(game_run,fight_game)
 
-    if key == 27:  # Quitter avec 'échap'
-      termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_run))
-      sys.exit()
-      exit()
+  timer_game = Timer.create("data.json", Color.create_color(255,0,0))
+
+  starting_game_time = time.time()
+  
+  while True :
+    interact(game_run,player_run,buffer_window)
 
     refresh_buffer(buffer_window)
 
@@ -437,23 +469,13 @@ def run():
       endGame(buffer_window, 0)
       break
 
-    Player.move(game_run,player_run,buffer_window,key)
+    Timer.show_timer(buffer_window,timer_game)
+    Timer.remove_time(timer_game,starting_game_time-time.time())
     drawFloor(buffer_window)
     get_rays(buffer_window, game_run, player_run)
-
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
-
-    if Fight.is_fight_time(fight_game,player_run)[0] :
-      Enemy.draw_Enemy(buffer_window,fight_game,player_run,blue_cyber)
-      Fight.update_fight(buffer_window,fight_game,blue_cyber)
-      if key == 32 :
-        fight_game.flame_state = 10
-        Enemy.shoot_ennemy(buffer_window,Fight.is_fight_time(fight_game,player_run)[1],fight_game)
-
     Buffer.show_data(buffer_window)
-
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
-    
 if __name__ == "__main__":
   run()
