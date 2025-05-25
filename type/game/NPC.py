@@ -59,6 +59,7 @@ def upload_NPC_to_game(game_inp, path):
   visuals = []
   special_content = [[],[]]
   type_npc = -1
+  enigma = []
   for line in range(len(content)-1):
     if "__NAME__" in content[line]:
       name = content[line].split("__NAME__")[1].strip()

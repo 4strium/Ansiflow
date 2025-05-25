@@ -2,11 +2,11 @@ INCREMENT_RAD = 0.017
 
 class Player : pass
 
-def create(position, fov):
+def create(position, fov, start_angle):
   player_export = Player()
   player_export.position = position
   player_export.fov = fov
-  player_export.angle = 0.
+  player_export.angle = start_angle
   player_export.left_angle = player_export.angle + (player_export.fov//2) * INCREMENT_RAD
   return player_export
 

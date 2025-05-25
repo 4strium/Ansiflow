@@ -101,7 +101,7 @@ def run_game(window_inp, game_inp, color_no_hover, color_hover):
   start_time = time.time()
 
   while True :
-    key = Tools.get_key()
+    key = Tools.get_key(1)
     cursor = get_cursor_selection(mem_game)
     if key == ord('z') and cursor > 6 :
       mem_game.cursor_position -= 7

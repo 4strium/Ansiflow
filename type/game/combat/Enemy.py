@@ -33,6 +33,7 @@ def shoot_ennemy(window_inp, enemy_inp, fight_game):
 
     if get_pvs(enemy_inp) <= 0 :
       Fight.get_enemy_list(fight_game).remove(enemy_inp)
+      Fight.flame_state = 0
 
 def upload_enemy(figth_inp, enemy_pack):
 
@@ -77,7 +78,7 @@ def draw_Enemy(window_inp, fight_inp, player_inp, UI_color):
   for enemy_t in fight_inp.enemy_list :
     distance = math.sqrt((get_position(enemy_t)[0] - Player.get_position(player_inp)[0])**2 + (get_position(enemy_t)[1] - Player.get_position(player_inp)[1])**2)
 
-    if 0.01 < distance < 2.5 :
+    if 0.01 < distance < 2.0 :
       vector_origin = (math.cos(Player.get_angle(player_inp)),math.sin(Player.get_angle(player_inp)))
       vector_NPC = (get_position(enemy_t)[0] - Player.get_position(player_inp)[0], get_position(enemy_t)[1] - Player.get_position(player_inp)[1])
       angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
@@ -89,5 +90,4 @@ def draw_Enemy(window_inp, fight_inp, player_inp, UI_color):
         for i in range(len(get_visuals(enemy_t)[0])):
           Image.set_pos(enemy_t.visuals[0][i],[x_fix,2])
           Image.draw(window_inp, get_visuals(enemy_t)[0][i], distance)
-      Buffer.set_str_buffer(window_inp, str(angle_player_npc),UI_color,0,Buffer.get_width(window_inp) // 2, 2)
-      Buffer.set_str_buffer(window_inp, str(enemy_t.pv)+" PV", UI_color,0,Buffer.get_width(window_inp)-6, 1)
+      Buffer.set_str_buffer(window_inp, str(enemy_t.pv)+" PV", UI_color,0,Buffer.get_width(window_inp)//2, 0)

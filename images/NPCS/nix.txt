@@ -3,54 +3,54 @@ __TYPE__2
 __POSITIONX__26
 __POSITIONY__25
 __NBTEXTS__5
-__COSTUME__1
+__COSTUME__2
 HIHIHIHI voilà quelqu'un de très courageux qui ose encore se balader seul dans le labyrinthe.
-__COSTUME__1 
+__COSTUME__2 
 Tu te demandes sans doute qui je suis, moi c'est PHOENIX mais tout le monde m'appelle NIX ici.
-__COSTUME__1
+__COSTUME__2
 Mais bon je vis un peu cachée, loin des autres, beaucoup ont peur de moi et de mes chats.
-__COSTUME__1
+__COSTUME__2
 Je ne les comprends pas, mes potions n'ont fait de mal à personne... 
-__COSTUME__1
+__COSTUME__2
 Bon tu croiseras peut-être Gérard, un gentil petit crapaud, je lui ai donné un philtre d'amour mais bref...
 __QUESTION__Enfin peu importe, qu'est-ce que tu fais dans le coin ?
 __NBREPONSES__2
 __REPONSE__Oh rien de spécial, je me baladais juste.
 __REPONSE__Je suis enfermé dans ce monde, à l'aide !
 __CHOICE__1
-__COSTUME__1
+__COSTUME__2
 Mais c'est super ça ! Tu ne dois pas être pressé alors !
-__COSTUME__1
+__COSTUME__2
 Moi qui cherchais de la compagnie en cette belle journée d'été...
-__COSTUME__1
+__COSTUME__2
 J'ai un petit jeu à te proposer.
-__COSTUME__1
+__COSTUME__2
 BIENVENUE DANS ...
-__COSTUME__2
+__COSTUME__3
 LE MEMORY DU SUPPLICE AHAHAHAHAHAHAHAHAHAHAHAHAHAH
-__COSTUME__1
-bon peut-être un peu trop de AHAHAH
 __COSTUME__2
+bon peut-être un peu trop de AHAHAH
+__COSTUME__3
 MAIS TU AS INTÉRÊT À GAGNER ! SINON COUIC.
-__COSTUME__1
+__COSTUME__2
 Je te laisse tourner la roue pour savoir avec combien de cartes tu vas devoir jouer.
 __ENDCHOICE__
 __CHOICE__2
-__COSTUME__1
+__COSTUME__2
 Ah bah ça je le sais bien, tu sais je n'existe pas vraiment, je suis un espèce de virus dans ton ordi.
-__COSTUME__1
+__COSTUME__2
 Mais je peux t'aider.
-__COSTUME__1
+__COSTUME__2
 J'ai un petit jeu à te proposer.
-__COSTUME__1
+__COSTUME__2
 BIENVENUE DANS ...
-__COSTUME__2
+__COSTUME__3
 LE MEMORY DU SUPPLICE AHAHAHAHAHAHAHAHAHAHAHAHAHAH
-__COSTUME__1
-bon peut-être un peu trop de AHAHAH
 __COSTUME__2
+bon peut-être un peu trop de AHAHAH
+__COSTUME__3
 MAIS TU AS INTÉRÊT À GAGNER ! SINON COUIC.
-__COSTUME__1
+__COSTUME__2
 Je te laisse tourner la roue pour savoir avec combien de cartes tu vas devoir jouer.
 __ENDCHOICE__
 __VISUAL0__

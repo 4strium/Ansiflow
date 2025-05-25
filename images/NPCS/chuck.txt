@@ -1,36 +1,33 @@
 __NAME__CHUCK
 __TYPE__1
-__POSITIONX__17.5
-__POSITIONY__18
+__POSITIONX__45
+__POSITIONY__7
 __NBTEXTS__7
-__COSTUME__1
+__COSTUME__2
 Arrrhhhh, satanée bûche, je vais y passer la soirée à ce rythme là...
-__COSTUME__2 
+__COSTUME__3 
 Oh salut, t'es nouveau ? On s'est jamais vu ici je crois, moi c'est CHUCK !
-__COSTUME__1
+__COSTUME__2
 Comme tu peux le voir je suis un peu dans la galère, le soleil va bientôt se coucher et il me reste une tonne de bûche à couper pour chauffer mon foyer...
-__COSTUME__2
+__COSTUME__3
 Oh mais c'est rare de voir des gens habillés comme toi dans le coin. Tu dois être doué avec les chiffres.
-__COSTUME__2
+__COSTUME__3
 Tu tombes bien j'ai une question pour toi, bon tu vois je suis payé par un mec pour te donner l'accès à la suite du labyrinthe si tu m'aides.
-__COSTUME__2
+__COSTUME__3
 Mais par contre si tu te trompes, tu vas devoir marcher beaucoup plus longtemps, mais bon cela te fera les pattes, AHAHAH !
-__COSTUME__1
+__COSTUME__2
 Bon assez bavardé, je sais que ton temps est précieux, le miens aussi d'ailleurs. Voici la fameuse question :
 __QUESTION__Il me faut 1min32s pour couper une bûche en deux. Combien de temps me faut-il pour couper une bûche en 16 morceaux de même taille ?
 __NBREPONSES__3
 __REPONSE__13 minutes
-__NBBLOCKS__2
-15,19
-15,27
+__NBBLOCKS__1
+43,8
 __REPONSE__23 minutes
-__NBBLOCKS__2
-17,19
-17,27
+__NBBLOCKS__1
+45,8
 __REPONSE__11,5 minutes
-__NBBLOCKS__2
-19,19
-14,29
+__NBBLOCKS__1
+47,8
 __VISUAL0__
 __NBCOLORS__7
 __COLORR__226

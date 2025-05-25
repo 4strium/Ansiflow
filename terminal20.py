@@ -177,7 +177,7 @@ def get_rays(window, game_inp, player) :
 
 def interact(game_inp,player,window):
   dt = Game.get_diff_time(game_inp)
-  key = Tools.get_key()
+  key = Tools.get_key(Game.get_diff_time(game_inp)*50)
 
   if key == 27:  # Quitter avec 'échap'
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
@@ -201,27 +201,30 @@ def interact(game_inp,player,window):
     Buffer.clear_data(window)
 
   if Fight.is_fight_time(Game.get_fight(game_inp),player)[0] :
-    Enemy.draw_Enemy(window,Game.get_fight(game_inp),player,blue_cyber)
-    Fight.update_fight(window,Game.get_fight(game_inp),blue_cyber)
     if key == 32 :
-      Game.get_fight(game_inp).flame_state = 10
+      Game.get_fight(game_inp).flame_state = 1
       Enemy.shoot_ennemy(window,Fight.is_fight_time(Game.get_fight(game_inp),player)[1],Game.get_fight(game_inp))
 
-def endGame(window, death):
+def endGame(window, game, death,):
 
   x_start = Buffer.get_width(window) // 16
   y_start = Buffer.get_height(window) // 30
 
-  skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, wall_pink)
-  Image.set_color(skull,Color.create_color(255,0,255))
-  Image.draw(window, skull)
+  Buffer.clear_data(window)
 
   if death == 0:
-    text_walls = Image.upload_classic_image('text/walls.txt', int(Buffer.get_width(window)*0.48), int(Buffer.get_height(window)*0.24), blue_cyber)
-    Image.draw(window, text_walls)
+    skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, wall_pink)
+    Image.set_color(skull,Color.create_color(255,0,255))
+    Image.draw(window, skull)
+  elif death == 1:
+    text_end = Image.upload_classic_image('text/ending.txt', 0, 0, blue_cyber)
+    Image.draw(window, text_end)
 
   Buffer.show_data(window)
   time.sleep(10)
+  termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game))
+  sys.exit()
+  exit()
 
 def open_doors(game_inp, lst_blocks):
   for bloob in range(len(lst_blocks)): 
@@ -235,7 +238,7 @@ def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
   Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color,0, 4, Buffer.get_height(window_inp)//2)
   Buffer.show_data(window_inp)
   while True :
-    if Tools.get_key() == 32 :
+    if Tools.get_key(0.1) == 32 :
       for roundx in range(100):
         Buffer.clear_data(window_inp)
         current_wheel = visuals_wheels[roundx % 5]
@@ -253,9 +256,9 @@ def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
 def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   get_rays(window_inp, game_inp, player_inp)
   Game.draw_backtalk(window_inp, color) 
-  for i in range(len(NPC.get_visuals(npc)[sentence[0]])):
-    Image.set_pos(npc.visuals[sentence[0]][i],[Buffer.get_width(window_inp) // 2,-2])
-    Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]][i])
+  for i in range(len(NPC.get_visuals(npc)[sentence[0]-1])):
+    Image.set_pos(npc.visuals[sentence[0]-1][i],[Buffer.get_width(window_inp) // 2,-2])
+    Image.draw(window_inp, NPC.get_visuals(npc)[sentence[0]-1][i])
   Buffer.show_data(window_inp)
 
   padding = 12
@@ -316,10 +319,15 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
   for sentence in NPC.get_texts(npc) :
     draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
   get_rays(window_inp, game_inp, player_inp)
-  Game.draw_backtalk(window_inp, color)
-  Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color, 0, padding,(Buffer.get_height(window_inp) // 4)*3)
-  Buffer.show_data(window_inp)
-  time.sleep(4)
+  if NPC.get_type(npc) == 0 :
+    Game.get_npcs(game_inp).remove(npc)
+  elif NPC.get_type(npc) == 3 :
+    endGame(window_inp,game_inp,1)
+  else :
+    Game.draw_backtalk(window_inp, color)
+    Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color, 0, padding,(Buffer.get_height(window_inp) // 4)*3)
+    Buffer.show_data(window_inp)
+    time.sleep(4)
 
   if NPC.get_type(npc) == 1 :
     x_shift = 60
@@ -364,7 +372,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           Game.get_npcs(game_inp).remove(npc)
           break
       annotations_user(window_inp,color)
-      key = Tools.get_key()
+      key = Tools.get_key(0.1)
       time.sleep(Game.get_diff_time(game_inp))
   elif NPC.get_type(npc) == 2 :
     x_shift = 60
@@ -397,7 +405,7 @@ def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
           play_memory(window_inp,game_inp,player_inp,npc,color)
           break
       annotations_user(window_inp,color)
-      key = Tools.get_key()
+      key = Tools.get_key(0.1)
       time.sleep(Game.get_diff_time(game_inp))
      
 
@@ -422,7 +430,6 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
           for i in range(len(NPC.get_visuals(npc_g)[0])):
             Image.set_pos(npc_g.visuals[0][i],[x_fix,2])
             Image.draw(window_inp, NPC.get_visuals(npc_g)[0][i],distance)
-        Buffer.set_str_buffer(window_inp, str(angle_player_npc),talk_color, 0, Buffer.get_width(window_inp) // 2, 2)
       else :
         Game.draw_backtalk(window_inp, talk_color)
         talk_to_NPC(window_inp, player_inp, game_inp, npc_g, talk_color)
@@ -446,7 +453,7 @@ def run():
 
   game_run = Game.create(0.01, "data.json", termios.tcgetattr(sys.stdin))
   tty.setcbreak(sys.stdin.fileno())
-  player_run = Player.create([4.5, 17], 80)
+  player_run = Player.create([4.5, 17], 80, -(math.pi/2))
 
   NPC.dispatch_NPCS(game_run,"data.json")
 
@@ -457,6 +464,11 @@ def run():
 
   timer_game = Timer.create("data.json", Color.create_color(255,0,0))
 
+  # Find the NPC with name "JEANNE" and start a conversation
+  mystery_npc = next((npc for npc in Game.get_npcs(game_run) if NPC.get_name(npc) == "MYSTÈRE"), None)
+  if mystery_npc:
+    talk_to_NPC(buffer_window, player_run, game_run, mystery_npc, blue_cyber)
+
   starting_game_time = time.time()
   
   while True :
@@ -466,7 +478,7 @@ def run():
 
     if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
       refresh_buffer(buffer_window)
-      endGame(buffer_window, 0)
+      endGame(buffer_window,game_run, 0)
       break
 
     Timer.show_timer(buffer_window,timer_game)
@@ -474,8 +486,14 @@ def run():
     drawFloor(buffer_window)
     get_rays(buffer_window, game_run, player_run)
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
+    if Fight.is_fight_time(Game.get_fight(game_run),player_run)[0] :
+      Enemy.draw_Enemy(buffer_window,Game.get_fight(game_run),player_run,blue_cyber)
+      Fight.update_fight(buffer_window,Game.get_fight(game_run),blue_cyber)
     Buffer.show_data(buffer_window)
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
+
+    if Timer.get_remaining_time(timer_game) == 0 :
+      endGame(buffer_window,game_run,0)
 if __name__ == "__main__":
   run()

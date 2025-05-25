@@ -42,5 +42,5 @@ def update_fight(window_inp, fight_inp, UI_color):
     for color2 in fight_inp.flame_image :
       Image.set_pos(color2,[Buffer.get_width(window_inp)-74,Buffer.get_height(window_inp)-33])
       Image.draw(window_inp,color2)
-      fight_inp.flame_state -= 1
+    fight_inp.flame_state -= 1
   Buffer.set_str_buffer(window_inp,"Appuie sur ESPACE pour lui tirer dessus !",UI_color,0, (Buffer.get_width(window_inp)//3)+14,Buffer.get_height(window_inp)-8)
