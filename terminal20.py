@@ -1,6 +1,7 @@
 import math
 import termios
 import sys
+import os
 import tty
 import time
 import json
@@ -436,10 +437,12 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
 
 def refresh_buffer(buffer_inp) :
   # Création du buffer :
-  rows, cols = termios.tcgetwinsize(sys.stdout.fileno())
+  size = os.get_terminal_size()
+  columns = size.columns
+  rows = size.lines
   Buffer.clear_data(buffer_inp)
   Buffer.set_height(buffer_inp, rows)
-  Buffer.set_width(buffer_inp, cols)
+  Buffer.set_width(buffer_inp, columns)
 
 def run():
   global wall_pink, blue_cyber
@@ -448,8 +451,10 @@ def run():
   wall_pink = Color.create_color(189, 0, 255)
   blue_cyber = Color.create_color(0,255,159)
 
-  rows, cols = termios.tcgetwinsize(sys.stdout.fileno())
-  buffer_window = Buffer.create(cols, rows)
+  size = os.get_terminal_size()
+  columns = size.columns
+  rows = size.lines
+  buffer_window = Buffer.create(columns, rows)
 
   game_run = Game.create(0.01, "data.json", termios.tcgetattr(sys.stdin))
   tty.setcbreak(sys.stdin.fileno())
