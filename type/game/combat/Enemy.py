@@ -16,7 +16,6 @@ def create(visuals, x, y):
   enemy_element.visuals = visuals
   enemy_element.position = [x,y]
   enemy_element.pv = 100
-  enemy_element.power = 1
 
   return enemy_element
 
