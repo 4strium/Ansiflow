@@ -1,27 +1,28 @@
-class Wall : pass
+class Wall : 
+  def __init__(self,color,texture="#",start_ind=0,width=0):
+    self.__color = color
+    self.__texture=texture
+    self.__start_ind = start_ind
+    self.__end_ind = int(start_ind + width) + 1
+    self.__width = width
 
-def create(color, texture="#", start_ind=0, width=0):
-  wall_export = Wall()
-  wall_export.texture = texture
-  wall_export.start_ind = start_ind
-  wall_export.end_ind = int(start_ind + width) + 1
-  wall_export.color = color
-  return wall_export
-  
-def get_texture(wall_inp):
-  return wall_inp.texture
-def get_start_ind(wall_inp):
-  return wall_inp.start_ind
-def get_end_ind(wall_inp):
-  return wall_inp.end_ind
-def get_color(wall_inp):
-  return wall_inp.color
-
-def set_texture(wall_inp, n_texture):
-  wall_inp.texture = n_texture
-def set_start_ind(wall_inp, n_start_ind):
-  wall_inp.start_ind = n_start_ind
-def set_end_ind(wall_inp, n_end_ind):
-  wall_inp.end_ind = n_end_ind
-def set_color(wall_inp, n_color):
-  wall_inp.color = n_color
+  def get_color(self):
+    return self.__color
+  def set_color(self,color):
+    self.__color = color
+  def get_texture(self):
+    return self.__texture
+  def set_texture(self,texture):
+    self.__texture = texture
+  def get_start_ind(self):
+    return self.__start_ind
+  def set_start_ind(self,start_ind):
+    self.__start_ind = start_ind
+  def get_end_ind(self):
+    return self.__end_ind
+  def set_end_ind(self,end_ind):
+    self.__end_ind = end_ind
+  def get_width(self):
+    return self.__width
+  def set_width(self,width):
+    self.__width = width

@@ -1,59 +1,53 @@
-import engine.Buffer as Buffer
 import json
 
 INCREMENT_RAD = 0.017
 PI = 3.142
 
-class Game : pass
+class Game : 
+  def __init__(self,differential_time, map_path, old_settings_terminal , npc_list=[]):
+    self.__time = 0
+    self.__dt = differential_time
+    self.__npc_list = npc_list
+    self.__backup_term = old_settings_terminal
+    self.__fight_session = None
+    self.__datafile = "data.json"
 
-def create(differential_time, map_path, old_settings_terminal , npc_list=[]):
-  game_export = Game()
-  game_export.time = 0
-  game_export.dt = differential_time
-  game_export.npc_list = npc_list
-  game_export.backup_term = old_settings_terminal
-  game_export.fight_session = None
-  game_export.datafile = "data.json"
+    self.upload_map(map_path)
 
-  upload_map(game_export, map_path)
+  def get_time(self):
+    return self.__time
+  def set_time(self, time):
+    self.__time = time
+  def get_diff_time(self):
+    return self.__dt
+  def set_diff_time(self, n_dt):
+    self.__dt = n_dt
+  def get_map(self):
+    return self.__map
+  def set_map(self,n_map):
+    self.__map = n_map
+  def get_npcs(self):
+    return self.__npc_list
+  def set_npcs(self,n_npcs):
+    self.__npc_list = n_npcs
+  def get_backup_terminal(self):
+    return self.__backup_term
+  def set_backup_terminal(self, n_backup):
+    self.__backup_term = n_backup
+  def get_fight(self):
+    return self.__fight_session
+  def set_fight(self, n_fight):
+    self.__fight_session = n_fight
+  def get_datafile(self):
+    return self.__datafile
+  def set_datafile(self,datafile):
+    self.__datafile = datafile
 
-  return game_export
+  def running_time(self):
+    current_time = self.get_time()
+    self.set_time(current_time + self.get_diff_time())
 
-def get_time(game_inp):
-  return game_inp.time
-def get_diff_time(game_inp):
-  return game_inp.dt
-def get_map(game_inp):
-  return game_inp.map
-def get_npcs(game_inp):
-  return game_inp.npc_list
-def get_backup_terminal(game_inp):
-  return game_inp.backup_term
-def get_fight(game_inp):
-  return game_inp.fight_session
-
-def set_diff_time(game_inp, n_dt):
-  game_inp.dt = n_dt
-def set_map(game_inp,n_map):
-  game_inp.map = n_map
-def set_npcs(game_inp,n_npcs):
-  game_inp.npcs = n_npcs
-def set_backup_terminal(game_inp, n_backup):
-  game_inp.backup_term = n_backup
-def set_fight(game_inp, n_fight):
-  game_inp.fight_session = n_fight
-
-def running_time(game_inp):
-  game_inp.time += get_diff_time(game_inp)
-
-def draw_backtalk(window_inp, color):
-  for i in range(Buffer.get_width(window_inp)):
-    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(Buffer.get_height(window_inp) // 3)*2)
-  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
-    for k in range(Buffer.get_width(window_inp)):
-      Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
-
-def upload_map(game_inp, path):
-  with open(path, 'r') as file :
-    data = json.load(file)
-  set_map(game_inp, data['map'][::-1])
+  def upload_map(self, path):
+    with open(path, 'r') as file :
+      data = json.load(file)
+    self.set_map(data['map'][::-1])
