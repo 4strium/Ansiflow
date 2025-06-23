@@ -4,7 +4,6 @@ import sys
 import os
 import tty
 import time
-import json
 from type.game.Wall import Wall
 from type.game.Game import Game
 from type.game.Player import Player
@@ -14,16 +13,12 @@ from engine.Color import Color
 from engine.Button import Button
 from engine.Buffer import Buffer
 import engine.Tools as Tools
-from type.game.memory.MemoryGame import MemoryGame
 from type.game.combat.Fight import Fight
 from type.game.combat.Enemy import Enemy
 from type.game.Timer import Timer
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
-
-wall_pink = 0
-blue_cyber = 0
 
 def digitalDifferentialAnalyzer(game_inp, angle, x0, y0, max_distance = 30):
     """
@@ -114,7 +109,7 @@ def digitalDifferentialAnalyzer(game_inp, angle, x0, y0, max_distance = 30):
 
     return None
 
-def draw3DWall(window, ray_distance, player_angle, ray_angle, wall_design) :
+def draw3DWall(window, game_inp, ray_distance, player_angle, ray_angle, wall_design) :
   # Correction de l'effet "fish-eye" :
   angle_fix = player_angle - ray_angle
   if angle_fix < 0 :
@@ -138,16 +133,15 @@ def draw3DWall(window, ray_distance, player_angle, ray_angle, wall_design) :
       for i in range(round(Wall.get_start_ind(wall_design)), Wall.get_end_ind(wall_design)) :
         if 0 <= i < Buffer.get_width(window):
           if i == Wall.get_end_ind(wall_design)-1 :
-            Buffer.set_str_buffer(window, " ", blue_cyber, 400, i, y_axis)
+            Buffer.set_str_buffer(window, " ", Game.get_color2(game_inp), 400, i, y_axis)
           else :
             Buffer.set_str_buffer(window, Wall.get_texture(wall_design), Wall.get_color(wall_design), ray_distance, i, y_axis)
 
-def drawFloor(window) :
-  global blue_cyber
+def drawFloor(window, game_inp) :
   for y_axis in range(Buffer.get_height(window)//2, Buffer.get_height(window)) :
     if 0 <= y_axis < Buffer.get_height(window) -1 :
       for x_axis in range(0, Buffer.get_width(window)) :
-        Buffer.set_str_buffer(window, "-", blue_cyber, 30, x_axis, y_axis)
+        Buffer.set_str_buffer(window, "-", Game.get_color2(game_inp), 30, x_axis, y_axis)
 
 def get_rays(window, game_inp, player) :
     """
@@ -157,22 +151,21 @@ def get_rays(window, game_inp, player) :
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
     """
 
-    width   = Buffer.get_width(window)
+    width = Buffer.get_width(window)
     fov_deg = Player.get_fov(player)
     fov_rad = math.radians(fov_deg)
 
-    angle_acc   = Player.get_left_angle(player)
-    angle_step  = fov_rad / width    # un rayon par pixel
-    px, py      = Player.get_position(player)
+    angle_acc = Player.get_left_angle(player)
+    angle_step = fov_rad / width    # un rayon par pixel
+    px, py = Player.get_position(player)
 
     for x in range(width) :
-        res = digitalDifferentialAnalyzer(game_inp,angle_acc, px, py)
-        if res != None :
-          wall_design = Wall(wall_pink,"█",x, 1)
-          draw3DWall(window, res[2], Player.get_angle(player), angle_acc, wall_design)
+      res = digitalDifferentialAnalyzer(game_inp,angle_acc, px, py)
+      if res != None :
+        wall_design = Wall(Game.get_color1(game_inp),"█",x, 1)
+        draw3DWall(window, game_inp, res[2], Player.get_angle(player), angle_acc, wall_design)
 
-        angle_acc -= angle_step
-
+      angle_acc -= angle_step
 
 def interact(game_inp,player,window):
   dt = Game.get_diff_time(game_inp)
@@ -207,18 +200,17 @@ def interact(game_inp,player,window):
       Enemy.shoot_enemy(Fight.is_fight_time(Game.get_fight(game_inp),player)[1],window,Game.get_fight(game_inp))
 
 def endGame(window, game, death):
-
   x_start = Buffer.get_width(window) // 16
   y_start = Buffer.get_height(window) // 30
 
   Buffer.clear_data(window)
 
   if death == 0:
-    skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, wall_pink)
+    skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, Game.get_color1(game))
     Image.set_color(skull,Color(255,0,255))
     Image.draw(skull,window)
   elif death == 1:
-    text_end = Image.upload_classic_image('text/ending.txt', 0, 0, blue_cyber)
+    text_end = Image.upload_classic_image('text/ending.txt', 0, 0, Game.get_color2(game))
     Image.draw(text_end,window)
 
   Buffer.show_data(window)
@@ -231,28 +223,12 @@ def open_doors(game_inp, lst_blocks):
   for bloob in range(len(lst_blocks)): 
     Game.get_map(game_inp)[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
-def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
-  Buffer.clear_data(window_inp)
-  for color_repartition in visuals_wheels[0]:
-    Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
-    Image.draw(color_repartition,window_inp)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color,0, 4, Buffer.get_height(window_inp)//2)
-  Buffer.show_data(window_inp)
-  while True :
-    if Tools.get_key(0.1) == 32 :
-      for roundx in range(100):
-        Buffer.clear_data(window_inp)
-        current_wheel = visuals_wheels[roundx % 5]
-        for color_repartition in current_wheel:
-          Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
-          Image.draw(color_repartition,window_inp)
-        Buffer.show_data(window_inp)
-        coeff_time = roundx ** 1.1 # Réduction du coefficient de temps pour accélérer l'arrêt
-        if coeff_time > 60:  # Réduction de la limite pour arrêter plus tôt
-          break
-        time.sleep(Game.get_diff_time(game_inp) * coeff_time)
-      time.sleep(4)
-      break
+def draw_backtalk(window_inp, color):
+  for i in range(Buffer.get_width(window_inp)):
+    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(Buffer.get_height(window_inp) // 3)*2)
+  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
+    for k in range(Buffer.get_width(window_inp)):
+      Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
 
 def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   get_rays(window_inp, game_inp, player_inp)
@@ -278,144 +254,62 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   time.sleep(1)
   Buffer.clear_data(window_inp)
 
-def response_wheel(window_inp,game_inp,player_inp,npc,sentence,color, statement):
-  Buffer.clear_data(window_inp)
-  for sentence in NPC.get_special_content(npc)[0][statement] :
-    draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
-  turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
-  Buffer.clear_data(window_inp)
-  ending_sentence = (2,"28 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...")
-  draw_sentence(window_inp,game_inp,player_inp,npc,ending_sentence,color)
-  time.sleep(2)
-
-def play_memory(window_inp,game_inp,player_inp,npc,color):
-  time_memory_game = MemoryGame.run_game(window_inp,game_inp,blue_cyber,wall_pink)
-  minutes, seconds = Tools.convert_sec_to_min(time_memory_game)[0], Tools.convert_sec_to_min(time_memory_game)[1]
-  sentence_end_memory = (2,"Tu en as mis du temps, "+str(minutes)+"m"+str(seconds)+"s pour ça ?!")
-  draw_sentence(window_inp,game_inp,player_inp,npc,sentence_end_memory,color)
-
-  with open(Game.get_datafile(game_inp), 'r') as file :
-    data = json.load(file)
-
-  doors_available = data['MemoryGame']['Doors']
-
-  if minutes < 2 :
-    open_doors(game_inp,doors_available[0])
-  elif minutes < 4 :
-    open_doors(game_inp,doors_available[1])
-  else :
-    open_doors(game_inp,doors_available[2])  
-
-  Game.get_npcs(game_inp).remove(npc)
-
 def annotations_user(window_inp, color):
   Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
   Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
-  Buffer.show_data(window_inp)
 
-def draw_backtalk(window_inp, color):
-  for i in range(Buffer.get_width(window_inp)):
-    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(Buffer.get_height(window_inp) // 3)*2)
-  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
-    for k in range(Buffer.get_width(window_inp)):
-      Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
+def ask_question(window_inp, game_inp, npc, sentence, color):
+  padding = 12
+  x_shift = 60
+  nb_buttons = sentence[2][0]
+  button_lst = [Button(sentence[1][i][0],[padding + i*x_shift, (Buffer.get_height(window_inp)//5)*4],Game.get_color2(game_inp), Game.get_color1(game_inp)) for i in range(nb_buttons)]
+
+  draw_backtalk(window_inp, color)
+  Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (Buffer.get_height(window_inp)//4)*3)
+  Buffer.show_data(window_inp)
+  time.sleep(4)
+
+  choice = 0 
+  annotations_user(window_inp, color)
+  key = None
+
+  while True:
+    for idx, btn in enumerate(button_lst):
+      Button.draw_text_button(btn, window_inp, idx == choice)
+
+    key = Tools.get_key(0.1)
+
+    if key == ord('d') and choice + 1 < nb_buttons:
+      choice += 1
+    elif key == ord('q') and choice - 1 >= 0:
+      choice -= 1
+    elif key == 32:  # espace
+      if sentence[2][1] == 'B':
+        open_doors(game_inp, sentence[1][choice][1])
+      elif sentence[2][1] == 'C' :
+        NPC.set_discuss_choice(npc,choice+1)
+      break
+
+    Buffer.show_data(window_inp)
+    time.sleep(Game.get_diff_time(game_inp))
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
-
-  padding = 12
-
   for sentence in NPC.get_texts(npc) :
-    draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
-  get_rays(window_inp, game_inp, player_inp)
-  if NPC.get_type(npc) == 0 :
-    Game.get_npcs(game_inp).remove(npc)
-  elif NPC.get_type(npc) == 3 :
+    if sentence[0] == 'FUNC':
+      Buffer.clear_data(window_inp)
+      eval(sentence[1])
+      Buffer.clear_data(window_inp)
+    elif sentence[2][0] != -1 :
+      get_rays(window_inp, game_inp, player_inp)
+      ask_question(window_inp,game_inp,npc,sentence,color)
+      Buffer.clear_data(window_inp)
+    elif (sentence[3] != None and sentence[3] == NPC.get_discuss_choice(npc)) or sentence[3] == None :
+      draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
+  
+  if NPC.get_type(npc) == 3 :
     endGame(window_inp,game_inp,1)
-  else :
-    draw_backtalk(window_inp, color)
-    Buffer.set_str_buffer(window_inp, NPC.get_enigma(npc)[0], color, 0, padding,(Buffer.get_height(window_inp) // 4)*3)
-    Buffer.show_data(window_inp)
-    time.sleep(4)
 
-  if NPC.get_type(npc) == 1 :
-    x_shift = 60
-    button_lst = []
-    for butt in range(3):
-      button_tmp = Button(NPC.get_enigma(npc)[1][butt][0], [padding+butt*x_shift,(Buffer.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
-      button_lst.append(button_tmp)
-    choice = 1
-    key = None
-
-    while True :
-      if choice == 1 :
-        Button.draw_text_button(button_lst[0],window_inp,1)
-        Button.draw_text_button(button_lst[1],window_inp,0)
-        Button.draw_text_button(button_lst[2],window_inp,0)
-        if key == ord('d') :
-          choice += 1
-        elif key == 32 :
-          open_doors(game_inp,NPC.get_enigma(npc)[1][0][1])
-          Game.get_npcs(game_inp).remove(npc)
-          break       
-      elif choice == 2 :
-        Button.draw_text_button(button_lst[0],window_inp,0)
-        Button.draw_text_button(button_lst[1],window_inp,1)
-        Button.draw_text_button(button_lst[2],window_inp,0)
-        if key == ord('d') :
-          choice += 1
-        elif key == ord('q') :
-          choice -= 1
-        elif key == 32 :
-          open_doors(game_inp,NPC.get_enigma(npc)[1][1][1])
-          Game.get_npcs(game_inp).remove(npc)
-          break
-      else :
-        Button.draw_text_button(button_lst[0],window_inp,0)
-        Button.draw_text_button(button_lst[1],window_inp,0)
-        Button.draw_text_button(button_lst[2],window_inp,1)
-        if key == ord('q') :
-          choice -= 1
-        elif key == 32 :
-          open_doors(game_inp,NPC.get_enigma(npc)[1][2][1])
-          Game.get_npcs(game_inp).remove(npc)
-          break
-      annotations_user(window_inp,color)
-      key = Tools.get_key(0.1)
-      time.sleep(Game.get_diff_time(game_inp))
-  elif NPC.get_type(npc) == 2 :
-    x_shift = 60
-    button_lst = []
-
-    for butt in range(2):
-      button_tmp = Button(NPC.get_enigma(npc)[1][butt], [padding+butt*x_shift,(Buffer.get_height(window_inp) // 5)*4], blue_cyber, wall_pink)
-      button_lst.append(button_tmp)
-    choice = 1
-    key = None
-
-    while True :
-
-      if choice == 1 :
-        Button.draw_text_button(button_lst[0],window_inp,1)
-        Button.draw_text_button(button_lst[1],window_inp,0)
-        if key == ord('d') :
-          choice += 1
-        elif key == 32 :
-          response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,0)
-          play_memory(window_inp,game_inp,player_inp,npc,color)
-          break
-      else :
-        Button.draw_text_button(button_lst[0],window_inp,0)
-        Button.draw_text_button(button_lst[1],window_inp,1)
-        if key == ord('q') :
-          choice -= 1
-        elif key == 32 :
-          response_wheel(window_inp,game_inp,player_inp,npc,sentence,color,1)
-          play_memory(window_inp,game_inp,player_inp,npc,color)
-          break
-      annotations_user(window_inp,color)
-      key = Tools.get_key(0.1)
-      time.sleep(Game.get_diff_time(game_inp))
-     
+  Game.get_npcs(game_inp).remove(npc)   
 
 def draw_NPC(window_inp, game_inp, player_inp, talk_color):
   for npc_g in game_inp.get_npcs() :
@@ -452,7 +346,6 @@ def refresh_buffer(buffer_inp) :
   Buffer.set_width(buffer_inp, columns)
 
 def run():
-  global wall_pink, blue_cyber
 
   # Démarrage du gestionnaire de couleurs :
   wall_pink = Color(189, 0, 255)
@@ -465,6 +358,9 @@ def run():
 
   game_run = Game(0.01, "data.json", termios.tcgetattr(sys.stdin))
   tty.setcbreak(sys.stdin.fileno())
+  Game.set_color1(game_run, wall_pink)
+  Game.set_color2(game_run, blue_cyber)
+
   player_run = Player(4.5,17,80,-(math.pi/2))
 
   NPC.dispatch_NPCS(game_run,"data.json")
@@ -495,7 +391,7 @@ def run():
 
     Timer.show_timer(timer_game,buffer_window)
     Timer.remove_time(timer_game,starting_game_time-time.time())
-    drawFloor(buffer_window)
+    drawFloor(buffer_window, game_run)
     get_rays(buffer_window, game_run, player_run)
     draw_NPC(buffer_window,game_run,player_run,blue_cyber)
     if Fight.is_fight_time(Game.get_fight(game_run),player_run)[0] :

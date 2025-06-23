@@ -1,16 +1,21 @@
 import json
+import time
 from engine.Image import Image
 from engine.Color import Color
 import type.game.Character as Character
+from engine.Buffer import Buffer
+import engine.Tools as Tools
+from type.game.Game import Game
+from type.game.memory.MemoryGame import MemoryGame
 
 class NPC(Character.Character):
-  def __init__(self, x, y, name, type, visuals, texts, pers_enigma):
+  def __init__(self, x, y, name, type, visuals, texts):
     super().__init__(x, y)
     self.__type = type
     self.__name = name
     self.__visuals = visuals
     self.__texts = texts
-    self.__enigma = pers_enigma
+    self.__discuss_choice = -1
     self.__special_content = []
   
   def get_type(self):
@@ -29,10 +34,10 @@ class NPC(Character.Character):
     return self.__texts
   def set_texts(self,texts):
     self.__texts = texts
-  def get_enigma(self):
-    return self.__enigma
-  def set_enigma(self,pers_engima):
-    self.__enigma = pers_engima
+  def get_discuss_choice(self):
+    return self.__discuss_choice
+  def set_discuss_choice(self,n_dc):
+    self.__discuss_choice = n_dc  
   def get_special_content(self):
     return self.__special_content
   def set_special_content(self,special_content):
@@ -49,7 +54,7 @@ class NPC(Character.Character):
     visuals = []
     special_content = [[],[]]
     type_npc = -1
-    enigma = []
+    dialogue = []
     for line in range(len(content)-1):
       if "__NAME__" in content[line]:
         name = content[line].split("__NAME__")[1].strip()
@@ -62,34 +67,54 @@ class NPC(Character.Character):
       elif "__NBTEXTS__" in content[line]: 
         nb_texts = int(content[line].split("__NBTEXTS__")[1].strip())
         line += 1
-        dialogue = []
         for h in range(nb_texts) :
-          costume = int(content[line].split("__COSTUME__")[1].strip())
-          dialogue.append((costume,content[line+1]))
-          line += 2
-      elif "__QUESTION__" in content[line] : 
-        question = content[line].split("__QUESTION__")[1].strip()
-        line += 1
-
-        nb_answers = int(content[line].split("__NBREPONSES__")[1].strip())
-        line += 1
-
-        answers = []
-        for ans in range(nb_answers):
-          ans_prop = content[line].split("__REPONSE__")[1].strip()
-          line += 1
-          if type_npc == 1 :
-            nb_blocks = int(content[line].split("__NBBLOCKS__")[1].strip())
+          if "__CALLFUN__" in content[line] :
+            call = content[line].split("__CALLFUN__")[1].strip()
+            dialogue.append(('FUNC',call))
             line += 1
-            blocks = []
-            for bl in range(nb_blocks):
-              x, y = int(content[line].split(",")[0]), int(content[line].split(",")[1])
-              blocks.append([x,y])
+          elif "__QUESTION__" in content[line] : 
+            blocks_mode = (content[line].split("__QUESTION__")[1].strip() == 'B')
+            choice_mode = (content[line].split("__QUESTION__")[1].strip() == 'C')
+            line += 1
+            question = content[line]
+            line += 1
+
+            nb_answers = int(content[line].split("__NBREPONSES__")[1].strip())
+            line += 1
+
+            answers = []
+            for ans in range(nb_answers):
+              ans_prop = content[line].split("__REPONSE__")[1].strip()
               line += 1
-            answers.append([ans_prop, blocks])
+              if blocks_mode :
+                nb_blocks = int(content[line].split("__NBBLOCKS__")[1].strip())
+                line += 1
+                blocks = []
+                for bl in range(nb_blocks):
+                  x, y = int(content[line].split(",")[0]), int(content[line].split(",")[1])
+                  blocks.append([x,y])
+                  line += 1
+                answers.append([ans_prop, blocks])
+              else :
+                answers.append([ans_prop, None])
+            if blocks_mode :
+              dialogue.append((question, answers, (nb_answers,'B'), -1))
+            elif choice_mode :
+              dialogue.append((question, answers, (nb_answers,'C'), -1))
+            else : 
+              dialogue.append((question, answers, (nb_answers,'Z'), -1))
+          elif "__CHOICE__" in content[line]:
+            num_choice = int(content[line].split("__CHOICE__")[1].strip())
+            line += 1
+            while "__ENDCHOICE__" not in content[line] :
+              costume = int(content[line].split("__COSTUME__")[1].strip())
+              dialogue.append((costume,content[line+1],(-1,'Z'),num_choice))
+              line += 2
+            line+=1
           else :
-            answers.append(ans_prop)
-        enigma = [question, answers]
+            costume = int(content[line].split("__COSTUME__")[1].strip())
+            dialogue.append((costume,content[line+1],(-1,'Z'), None))
+            line += 2
 
       elif "__VISUAL" in content[line]:
         nb_colors = int(content[line+1].split("__NBCOLORS__")[1].strip())
@@ -108,14 +133,6 @@ class NPC(Character.Character):
           line += 1
           colors.append(Image(tmp_visual,0,0,Color(red,green,blue)))
         visuals.append(colors)
-      elif "__CHOICE" in content[line]:
-        line += 1
-        dialogue_extra = []
-        while "__ENDCHOICE__" not in content[line] :
-          costume = int(content[line].split("__COSTUME__")[1].strip())
-          dialogue_extra.append((costume,content[line+1]))
-          line += 2
-        special_content[0].append(dialogue_extra)
       elif "__SPECIALCONTENT__" in content[line]:
         nb_contents = int(content[line].split("__SPECIALCONTENT__")[1].strip())
         line += 1
@@ -137,7 +154,7 @@ class NPC(Character.Character):
             colors.append(Image(tmp_visual,0,0,Color(red,green,blue)))
           special_content[1].append(colors)
 
-    npc = NPC(posx,posy,name,type_npc,visuals,dialogue,enigma)
+    npc = NPC(posx,posy,name,type_npc,visuals,dialogue)
     if special_content != [] :
       NPC.set_special_content(npc,special_content)
     game_inp.get_npcs().append(npc)
@@ -149,3 +166,46 @@ class NPC(Character.Character):
 
     for np in npc_elements :
       NPC.upload_NPC_to_game(game_inp,np)
+
+  def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
+    Buffer.clear_data(window_inp)
+    for color_repartition in visuals_wheels[0]:
+      Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
+      Image.draw(color_repartition,window_inp)
+    Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour tourner la roue",text_color,0, 4, Buffer.get_height(window_inp)//2)
+    Buffer.show_data(window_inp)
+    while True :
+      if Tools.get_key(0.1) == 32 :
+        for roundx in range(100):
+          Buffer.clear_data(window_inp)
+          current_wheel = visuals_wheels[roundx % 5]
+          for color_repartition in current_wheel:
+            Image.set_pos(color_repartition, [Buffer.get_width(window_inp) // 3, 0])
+            Image.draw(color_repartition,window_inp)
+          Buffer.show_data(window_inp)
+          coeff_time = roundx ** 1.1 # Réduction du coefficient de temps pour accélérer l'arrêt
+          if coeff_time > 60:  # Réduction de la limite pour arrêter plus tôt
+            break
+          time.sleep(Game.get_diff_time(game_inp) * coeff_time)
+        time.sleep(4)
+        break
+
+  def play_memory(window_inp,game_inp,player_inp,npc,color):
+    from terminal20 import draw_sentence, open_doors
+
+    time_memory_game = MemoryGame.run_game(window_inp,game_inp,Game.get_color2(game_inp),Game.get_color1(game_inp))
+    minutes, seconds = Tools.convert_sec_to_min(time_memory_game)[0], Tools.convert_sec_to_min(time_memory_game)[1]
+    sentence_end_memory = (2,"Tu en as mis du temps, "+str(minutes)+"m"+str(seconds)+"s pour ça ?!")
+    draw_sentence(window_inp,game_inp,player_inp,npc,sentence_end_memory,color)
+
+    with open(Game.get_datafile(game_inp), 'r') as file :
+      data = json.load(file)
+
+    doors_available = data['MemoryGame']['Doors']
+
+    if minutes < 2 :
+      open_doors(game_inp,doors_available[0])
+    elif minutes < 4 :
+      open_doors(game_inp,doors_available[1])
+    else :
+      open_doors(game_inp,doors_available[2])

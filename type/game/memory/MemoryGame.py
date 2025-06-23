@@ -1,6 +1,8 @@
 import json
 import random
 import time
+import sys
+import termios
 from type.game.memory.Card import Card
 from type.game.Game import Game
 from engine.Image import Image
@@ -110,6 +112,10 @@ class MemoryGame :
     while True :
       key = Tools.get_key(1)
       cursor = mem_game.get_cursor_selection()
+      if key == 27:  # Quitter avec 'échap'
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
+        sys.exit()
+        exit()
       if key == ord('z') and cursor > 6 :
         mem_game.set_cursor_selection(mem_game.get_cursor_selection()-7)
       elif key == ord('s') and cursor < 21 :

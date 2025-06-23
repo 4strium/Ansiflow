@@ -12,6 +12,9 @@ class Game :
     self.__fight_session = None
     self.__datafile = "data.json"
 
+    self.__color1 = None
+    self.__color2 = None
+
     self.upload_map(map_path)
 
   def get_time(self):
@@ -42,6 +45,14 @@ class Game :
     return self.__datafile
   def set_datafile(self,datafile):
     self.__datafile = datafile
+  def get_color1(self):
+    return self.__color1
+  def set_color1(self,n_color1):
+    self.__color1 = n_color1
+  def get_color2(self):
+    return self.__color2
+  def set_color2(self,n_color2):
+    self.__color2 = n_color2
 
   def running_time(self):
     current_time = self.get_time()

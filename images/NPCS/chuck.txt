@@ -2,7 +2,7 @@ __NAME__CHUCK
 __TYPE__1
 __POSITIONX__45
 __POSITIONY__7
-__NBTEXTS__7
+__NBTEXTS__8
 __COSTUME__2
 Arrrhhhh, satanée bûche, je vais y passer la soirée à ce rythme là...
 __COSTUME__3 
@@ -17,7 +17,8 @@ __COSTUME__3
 Mais par contre si tu te trompes, tu vas devoir marcher beaucoup plus longtemps, mais bon cela te fera les pattes, AHAHAH !
 __COSTUME__2
 Bon assez bavardé, je sais que ton temps est précieux, le miens aussi d'ailleurs. Voici la fameuse question :
-__QUESTION__Il me faut 1min32s pour couper une bûche en deux. Combien de temps me faut-il pour couper une bûche en 16 morceaux de même taille ?
+__QUESTION__B
+Il me faut 1min32s pour couper une bûche en deux. Combien de temps me faut-il pour couper une bûche en 16 morceaux de même taille ?
 __NBREPONSES__3
 __REPONSE__23 minutes
 __NBBLOCKS__1

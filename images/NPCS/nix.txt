@@ -2,7 +2,7 @@ __NAME__NIX
 __TYPE__2
 __POSITIONX__26
 __POSITIONY__25
-__NBTEXTS__5
+__NBTEXTS__17
 __COSTUME__2
 HIHIHIHI voilà quelqu'un de très courageux qui ose encore se balader seul dans le labyrinthe.
 __COSTUME__2 
@@ -13,7 +13,8 @@ __COSTUME__2
 Je ne les comprends pas, mes potions n'ont fait de mal à personne... 
 __COSTUME__2
 Bon tu croiseras peut-être Gérard, un gentil petit crapaud, je lui ai donné un philtre d'amour mais bref...
-__QUESTION__Enfin peu importe, qu'est-ce que tu fais dans le coin ?
+__QUESTION__C
+Enfin peu importe, qu'est-ce que tu fais dans le coin ?
 __NBREPONSES__2
 __REPONSE__Oh rien de spécial, je me baladais juste.
 __REPONSE__Je suis enfermé dans ce monde, à l'aide !
@@ -22,24 +23,13 @@ __COSTUME__2
 Mais c'est super ça ! Tu ne dois pas être pressé alors !
 __COSTUME__2
 Moi qui cherchais de la compagnie en cette belle journée d'été...
-__COSTUME__2
-J'ai un petit jeu à te proposer.
-__COSTUME__2
-BIENVENUE DANS ...
-__COSTUME__3
-LE MEMORY DU SUPPLICE AHAHAHAHAHAHAHAHAHAHAHAHAHAH
-__COSTUME__2
-bon peut-être un peu trop de AHAHAH
-__COSTUME__3
-MAIS TU AS INTÉRÊT À GAGNER ! SINON COUIC.
-__COSTUME__2
-Je te laisse tourner la roue pour savoir avec combien de cartes tu vas devoir jouer.
 __ENDCHOICE__
 __CHOICE__2
 __COSTUME__2
 Ah bah ça je le sais bien, tu sais je n'existe pas vraiment, je suis un espèce de virus dans ton ordi.
 __COSTUME__2
 Mais je peux t'aider.
+__ENDCHOICE__
 __COSTUME__2
 J'ai un petit jeu à te proposer.
 __COSTUME__2
@@ -52,7 +42,10 @@ __COSTUME__3
 MAIS TU AS INTÉRÊT À GAGNER ! SINON COUIC.
 __COSTUME__2
 Je te laisse tourner la roue pour savoir avec combien de cartes tu vas devoir jouer.
-__ENDCHOICE__
+__CALLFUN__NPC.turn_wheel(window_inp, game_inp, NPC.get_special_content(npc)[1],color)
+__COSTUME__2
+28 CARTES IHIHIHIHIHIHIH QUEL DOMMAGE FRANCHEMENT...
+__CALLFUN__NPC.play_memory(window_inp,game_inp,player_inp,npc,color)
 __VISUAL0__
 __NBCOLORS__15
 __COLORR__73
