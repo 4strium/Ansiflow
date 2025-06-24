@@ -179,5 +179,10 @@
         }
     ],
     "Doors":[[[23,23],[22,11]],[[25,23],[26,16]],[[27,23],[26,16]]]
+  },
+  "end":
+  {
+    "death_path" :"images/skull.txt",
+    "ending_path":"text/ending.txt"
   }
 }

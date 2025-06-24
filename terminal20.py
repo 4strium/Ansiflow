@@ -21,93 +21,93 @@ PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
 
 def digitalDifferentialAnalyzer(game_inp, angle, x0, y0, max_distance = 30):
-    """
+  """
     Cette fonction permet de retourner les coordonnées du point d'impact avec un obstacle 
     d'un rayon émis depuis la position (x0,y0) d'un joueur avec un angle spécifié en radians.
     - max-distance correspond à la distance maximale de recherche d'obstacle, 
     si aucun obstacle n'est trouvé la fonction renvoie None
-    """
+  """
 
-    # Le rayon émis est caractérisé par un vecteur : 
-    dx = math.cos(angle) # La composante horizontale, qui correspond au cosinus de l'angle passé en paramètre
-    dy = math.sin(angle) # La composante verticale, qui correspond au sinus de l'angle passé en paramètre
+  # Le rayon émis est caractérisé par un vecteur : 
+  dx = math.cos(angle) # La composante horizontale, qui correspond au cosinus de l'angle passé en paramètre
+  dy = math.sin(angle) # La composante verticale, qui correspond au sinus de l'angle passé en paramètre
 
-    # A ce stade de la fonction nous connaissons donc le point d'accroche du vecteur (x0, y0) ainsi que sa valeur.
+  # A ce stade de la fonction nous connaissons donc le point d'accroche du vecteur (x0, y0) ainsi que sa valeur.
 
-    # On détermine dans quelle case de la grille (map) se situe le joueur :
-    x_cellule, y_cellule =  int(x0), int(y0)
+  # On détermine dans quelle case de la grille (map) se situe le joueur :
+  x_cellule, y_cellule =  int(x0), int(y0)
 
-    # On fixe le pas de déplacement à incrémenter durant la recherche de collision.
-    # Si le cosinus de l'angle est positif, cela signifie que l'on va vers la droite.
-    # Sinon on va vers la gauche.
+  # On fixe le pas de déplacement à incrémenter durant la recherche de collision.
+  # Si le cosinus de l'angle est positif, cela signifie que l'on va vers la droite.
+  # Sinon on va vers la gauche.
+  if dx > 0 :
+    stepX = 1
+  else :
+    stepX = -1
+
+  # Si le sinus de l'angle est positif, cela signifie que l'on va vers le haut.
+  # Sinon on va vers le bas.
+  if dy > 0 :
+    stepY = 1
+  else :
+    stepY = -1
+
+  if dx != 0:
     if dx > 0 :
-        stepX = 1
+      next_x = x_cellule + 1 # Abscisse du prochain bord vertical de cellule que le rayon atteindra.
     else :
-        stepX = -1
- 
-    # Si le sinus de l'angle est positif, cela signifie que l'on va vers le haut.
-    # Sinon on va vers le bas.
+      next_x = x_cellule # Vu que le rayon va vers la gauche, le prochain axe vertical qu'il va rencontrer est celui à l'origine de la cellule où il se trouve.
+
+    # tmaxX et tmaxY vont nous permettrent de savoir si le rayon atteint en premier le bord de cellule horizontal ou vertical.
+    # Ici la première valeur attribuée à tmaxX correspond à la distance entre le point exact du joueur dans la cellule et la première bordure verticale, en empruntant l'axe dx.
+
+    # Ce calcul résulte directement d'une formule trigonométrique de base : hypoténuse = adjacent/cos(angle) 
+    # Ici l'hypoténuse c'est la longueur du segment pris sur le rayon entre l'abscisse du joueur et l'abscisse du prochain axe vertical de la grille,
+    # le côté adjacent (next_x - x0) c'est la longueur prise entre l'abscisse du joueur et le même axe vertical, mais avec un angle nul cette fois-ci.
+    tmaxX = (next_x - x0) / dx 
+
+    tDeltaX = abs(1 / dx) # tDeltaX représente la distance à parcourir entre deux bordures verticales de la grille avec un axe dx
+                          # Ici l'hypoténuse c'est la longueur du segment pris entre deux bordures verticales (tDeltaX), et le côté adjacent c'est la longueur d'une cellule : 1
+  else:
+    tmaxX = float('inf') # Si le cosinus est nul, cela signifie qu'il est impossible d'atteindre la prochaine bordure verticale, que ce soit vers la droite ou vers la gauche.
+
+
+  # Le raisonnement est le même que pour les abscisses mais avec les ordonnées :
+  if dy != 0:
     if dy > 0 :
-        stepY = 1
+      next_y = y_cellule + 1
     else :
-        stepY = -1
+      next_y = y_cellule
 
-    if dx != 0:
-        if dx > 0 :
-            next_x = x_cellule + 1 # Abscisse du prochain bord vertical de cellule que le rayon atteindra.
-        else :
-            next_x = x_cellule # Vu que le rayon va vers la gauche, le prochain axe vertical qu'il va rencontrer est celui à l'origine de la cellule où il se trouve.
+    tmaxY = (next_y - y0) / dy
 
-        # tmaxX et tmaxY vont nous permettrent de savoir si le rayon atteint en premier le bord de cellule horizontal ou vertical.
-        # Ici la première valeur attribuée à tmaxX correspond à la distance entre le point exact du joueur dans la cellule et la première bordure verticale, en empruntant l'axe dx.
+    tDeltaY = abs(1 / dy) 
+  else:
+    tmaxY = float('inf')
 
-        # Ce calcul résulte directement d'une formule trigonométrique de base : hypoténuse = adjacent/cos(angle) 
-        # Ici l'hypoténuse c'est la longueur du segment pris sur le rayon entre l'abscisse du joueur et l'abscisse du prochain axe vertical de la grille,
-        # le côté adjacent (next_x - x0) c'est la longueur prise entre l'abscisse du joueur et le même axe vertical, mais avec un angle nul cette fois-ci.
-        tmaxX = (next_x - x0) / dx 
+  distance = 0 # Compteur de la distance parcourue par le rayon depuis la position du joueur
+  while distance < max_distance : # Tant que le rayon est inférieur à la distance maximale désignée par l'utilisateur, il continue à explorer les cellules suivantes quie se trouvent sur son cap.
+      
+    if tmaxX < tmaxY :      # Cette situation a lieu lorsque le rayon touche d'abord l'axe vertical 
+      x_cellule += stepX  # On incrémente d'une cellule vers la droite ou vers la gauche (en fonction de la valeur de stepX)
 
-        tDeltaX = abs(1 / dx) # tDeltaX représente la distance à parcourir entre deux bordures verticales de la grille avec un axe dx
-                              # Ici l'hypoténuse c'est la longueur du segment pris entre deux bordures verticales (tDeltaX), et le côté adjacent c'est la longueur d'une cellule : 1
-    else:
-        tmaxX = float('inf') # Si le cosinus est nul, cela signifie qu'il est impossible d'atteindre la prochaine bordure verticale, que ce soit vers la droite ou vers la gauche.
+      distance = tmaxX    # La distance correspond donc toujours à : (nombre de cellules traversées depuis la position du joueur) × (la distance nécessaire pour traverser une cellule) + distance entre le joueur et la première bordure.
+      tmaxX += tDeltaX
+    else :                  # Cette situation a lieu lorsque le rayon touche d'abord l'axe horizontal (le raisonnement est identique au cas précédent mais verticalement ici)
+      y_cellule += stepY
+      distance = tmaxY
+      tmaxY += tDeltaY
+    
+    if 0 <= x_cellule < len(Game.get_map(game_inp)[0]) and 0 <= y_cellule < len(Game.get_map(game_inp)) :
+      if Game.get_map(game_inp)[y_cellule][x_cellule] == 1:
 
+        # On calcule les coordonnées exactes du point d'impact en fonction du déplacement du rayon :
+        impact_x = x0 + distance * dx
+        impact_y = y0 + distance * dy
+            
+        return (impact_x, impact_y, distance)
 
-    # Le raisonnement est le même que pour les abscisses mais avec les ordonnées :
-    if dy != 0:
-        if dy > 0 :
-            next_y = y_cellule + 1
-        else :
-            next_y = y_cellule
-
-        tmaxY = (next_y - y0) / dy
-
-        tDeltaY = abs(1 / dy) 
-    else:
-        tmaxY = float('inf')
-
-    distance = 0 # Compteur de la distance parcourue par le rayon depuis la position du joueur
-    while distance < max_distance : # Tant que le rayon est inférieur à la distance maximale désignée par l'utilisateur, il continue à explorer les cellules suivantes quie se trouvent sur son cap.
-        
-        if tmaxX < tmaxY :      # Cette situation a lieu lorsque le rayon touche d'abord l'axe vertical 
-            x_cellule += stepX  # On incrémente d'une cellule vers la droite ou vers la gauche (en fonction de la valeur de stepX)
-
-            distance = tmaxX    # La distance correspond donc toujours à : (nombre de cellules traversées depuis la position du joueur) × (la distance nécessaire pour traverser une cellule) + distance entre le joueur et la première bordure.
-            tmaxX += tDeltaX
-        else :                  # Cette situation a lieu lorsque le rayon touche d'abord l'axe horizontal (le raisonnement est identique au cas précédent mais verticalement ici)
-            y_cellule += stepY
-            distance = tmaxY
-            tmaxY += tDeltaY
-        
-        if 0 <= x_cellule < len(Game.get_map(game_inp)[0]) and 0 <= y_cellule < len(Game.get_map(game_inp)) :
-            if Game.get_map(game_inp)[y_cellule][x_cellule] == 1:
-
-                # On calcule les coordonnées exactes du point d'impact en fonction du déplacement du rayon :
-                impact_x = x0 + distance * dx
-                impact_y = y0 + distance * dy
-                
-                return (impact_x, impact_y, distance)
-
-    return None
+  return None
 
 def draw3DWall(window, game_inp, ray_distance, player_angle, ray_angle, wall_design) :
   # Correction de l'effet "fish-eye" :
@@ -144,28 +144,28 @@ def drawFloor(window, game_inp) :
         Buffer.set_str_buffer(window, "-", Game.get_color2(game_inp), 30, x_axis, y_axis)
 
 def get_rays(window, game_inp, player) :
-    """
+  """
     Procédure qui génère des rayons à partir de la position du joueur (pos_x, pos_y).
     - angle_init : angle en radians situé en plein milieu du champ de vision
     - fov : champ de vision en degrés.
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
-    """
+  """
 
-    width = Buffer.get_width(window)
-    fov_deg = Player.get_fov(player)
-    fov_rad = math.radians(fov_deg)
+  width = Buffer.get_width(window)
+  fov_deg = Player.get_fov(player)
+  fov_rad = math.radians(fov_deg)
 
-    angle_acc = Player.get_left_angle(player)
-    angle_step = fov_rad / width    # un rayon par pixel
-    px, py = Player.get_position(player)
+  angle_acc = Player.get_left_angle(player)
+  angle_step = fov_rad / width    # un rayon par pixel
+  px, py = Player.get_position(player)
 
-    for x in range(width) :
-      res = digitalDifferentialAnalyzer(game_inp,angle_acc, px, py)
-      if res != None :
-        wall_design = Wall(Game.get_color1(game_inp),"█",x, 1)
-        draw3DWall(window, game_inp, res[2], Player.get_angle(player), angle_acc, wall_design)
+  for x in range(width) :
+    res = digitalDifferentialAnalyzer(game_inp,angle_acc, px, py)
+    if res != None :
+      wall_design = Wall(Game.get_color1(game_inp),"█",x, 1)
+      draw3DWall(window, game_inp, res[2], Player.get_angle(player), angle_acc, wall_design)
 
-      angle_acc -= angle_step
+    angle_acc -= angle_step
 
 def interact(game_inp,player,window):
   dt = Game.get_diff_time(game_inp)
@@ -206,11 +206,11 @@ def endGame(window, game, death):
   Buffer.clear_data(window)
 
   if death == 0:
-    skull = Image.upload_classic_image('images/skull.txt', x_start, y_start, Game.get_color1(game))
+    skull = Image.upload_classic_image(Game.get_death_path(game), x_start, y_start, Game.get_color1(game))
     Image.set_color(skull,Color(255,0,255))
     Image.draw(skull,window)
   elif death == 1:
-    text_end = Image.upload_classic_image('text/ending.txt', 0, 0, Game.get_color2(game))
+    text_end = Image.upload_classic_image(Game.get_ending_path(game), 0, 0, Game.get_color2(game))
     Image.draw(text_end,window)
 
   Buffer.show_data(window)
@@ -360,6 +360,7 @@ def run():
   tty.setcbreak(sys.stdin.fileno())
   Game.set_color1(game_run, wall_pink)
   Game.set_color2(game_run, blue_cyber)
+  Game.upload_all_end(game_run,"data.json")
 
   player_run = Player(4.5,17,80,-(math.pi/2))
 
@@ -401,7 +402,7 @@ def run():
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
 
-    if Timer.get_remaining_time(timer_game) == 0 :
+    if Timer.get_remaining_time(timer_game) < 0 :
       endGame(buffer_window,game_run,0)
 
 if __name__ == "__main__":

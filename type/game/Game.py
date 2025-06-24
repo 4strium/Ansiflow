@@ -14,6 +14,8 @@ class Game :
 
     self.__color1 = None
     self.__color2 = None
+    self.__death_path = ""
+    self.__ending_path = ""
 
     self.upload_map(map_path)
 
@@ -53,6 +55,14 @@ class Game :
     return self.__color2
   def set_color2(self,n_color2):
     self.__color2 = n_color2
+  def get_death_path(self):
+    return self.__death_path
+  def set_death_path(self,n_deathpath):
+    self.__death_path = n_deathpath
+  def get_ending_path(self):
+    return self.__ending_path
+  def set_ending_path(self,n_endpath):
+    self.__ending_path = n_endpath
 
   def running_time(self):
     current_time = self.get_time()
@@ -62,3 +72,9 @@ class Game :
     with open(path, 'r') as file :
       data = json.load(file)
     self.set_map(data['map'][::-1])
+
+  def upload_all_end(self, path):
+    with open(path, 'r') as file :
+      data = json.load(file)
+    self.set_death_path(data['end']['death_path'])
+    self.set_ending_path(data['end']['ending_path'])
