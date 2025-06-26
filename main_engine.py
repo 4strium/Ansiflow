@@ -4,18 +4,18 @@ import sys
 import os
 import tty
 import time
-from type.game.Wall import Wall
-from type.game.Game import Game
-from type.game.Player import Player
+from game.Wall import Wall
+from game.Game import Game
+from game.Player import Player
 from engine.Image import Image
-from type.game.NPC import NPC
+from game.NPC import NPC
 from engine.Color import Color
 from engine.Button import Button
 from engine.Buffer import Buffer
 import engine.Tools as Tools
-from type.game.combat.Fight import Fight
-from type.game.combat.Enemy import Enemy
-from type.game.Timer import Timer
+from game.combat.Fight import Fight
+from game.combat.Enemy import Enemy
+from game.Timer import Timer
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.

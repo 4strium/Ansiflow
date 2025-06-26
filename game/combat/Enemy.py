@@ -1,8 +1,8 @@
 import math
 import json
-import type.game.Character as Character
-from type.game.Player import *
-from type.game.combat.Fight import *
+import game.Character as Character
+from game.Player import *
+from game.combat.Fight import *
 from engine.Buffer import Buffer
 from engine.Image import Image
 from engine.Color import Color

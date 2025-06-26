@@ -1,8 +1,7 @@
 import math
 from engine.Image import Image
 from engine.Buffer import Buffer
-from type.game.Player import Player
-from type.game.combat.Enemy import Enemy
+from game.Player import Player
 
 class Fight : 
   def __init__(self,window_inp):

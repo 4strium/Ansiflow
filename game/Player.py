@@ -1,4 +1,4 @@
-import type.game.Character as Character
+import game.Character as Character
 
 INCREMENT_RAD = 0.017
 

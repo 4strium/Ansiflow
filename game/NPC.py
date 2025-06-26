@@ -2,11 +2,11 @@ import json
 import time
 from engine.Image import Image
 from engine.Color import Color
-import type.game.Character as Character
+import game.Character as Character
 from engine.Buffer import Buffer
 import engine.Tools as Tools
-from type.game.Game import Game
-from type.game.memory.MemoryGame import MemoryGame
+from game.Game import Game
+from game.memory.MemoryGame import MemoryGame
 
 class NPC(Character.Character):
   def __init__(self, x, y, name, type, visuals, texts):
@@ -191,7 +191,7 @@ class NPC(Character.Character):
         break
 
   def play_memory(window_inp,game_inp,player_inp,npc,color):
-    from terminal20 import draw_sentence, open_doors
+    from main_engine import draw_sentence, open_doors
 
     time_memory_game = MemoryGame.run_game(window_inp,game_inp,Game.get_color2(game_inp),Game.get_color1(game_inp))
     minutes, seconds = Tools.convert_sec_to_min(time_memory_game)[0], Tools.convert_sec_to_min(time_memory_game)[1]

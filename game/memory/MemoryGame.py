@@ -3,8 +3,8 @@ import random
 import time
 import sys
 import termios
-from type.game.memory.Card import Card
-from type.game.Game import Game
+from game.memory.Card import Card
+from game.Game import Game
 from engine.Image import Image
 from engine.Buffer import Buffer
 from engine.Button import Button
