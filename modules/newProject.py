@@ -7,7 +7,14 @@ class NewProject(QDialog):
   def __init__(self):
     super().__init__()
     self.setModal(True)
+    self.__setup_finished = False
     self.initializeUI()
+
+  def getSetup_finished(self):
+    return self.__setup_finished
+
+  def setSetup_finished(self, nval):
+    self.__setup_finished = nval
 
   def initializeUI(self):
     self.setFixedSize(450,600)
@@ -98,7 +105,8 @@ class NewProject(QDialog):
       os.makedirs("workingDir", exist_ok=True) 
       with open("workingDir/data.json", "w") as f:
         f.write(json.dumps(details))
-
+      
+      self.setSetup_finished(True)
       self.close()
     else :
       QMessageBox.warning(self, "Nom de projet invalide", "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
