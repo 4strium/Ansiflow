@@ -4,8 +4,7 @@ from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
 from modules.starting import StartWindow
 from modules.grid import GridWidget
-from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtGui import QPainter, QColor, QPen
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
 
 class MainWindow(QMainWindow):
 
@@ -13,7 +12,9 @@ class MainWindow(QMainWindow):
     super().__init__()
     self.border_color = "#000000"
     self.checked_bg_color = "#262626"
+    self.player_color = "#a259f7"
     self.last_tab = None
+    self.last_mode = None
     self.startup()
 
   def startup(self) :
@@ -90,6 +91,7 @@ class MainWindow(QMainWindow):
     self.player_button = QPushButton("Joueur")
     self.player_button.setFont(QFont(self.hunnin,22))
     self.player_button.setStyleSheet(stylesheet_player)
+    self.player_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.player_button.pressed.connect(self.switchToolsTabs)
 
     stylesheet_middle = """
@@ -106,10 +108,12 @@ class MainWindow(QMainWindow):
     self.walls_button = QPushButton("Murs")
     self.walls_button.setFont(QFont(self.hunnin,22))
     self.walls_button.setStyleSheet(stylesheet_middle)
+    self.walls_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.walls_button.pressed.connect(self.switchToolsTabs)
     self.enemies_button = QPushButton("Ennemis")
     self.enemies_button.setFont(QFont(self.hunnin,22))
     self.enemies_button.setStyleSheet(stylesheet_middle)
+    self.enemies_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.enemies_button.pressed.connect(self.switchToolsTabs)
 
     stylesheet_npc = """
@@ -129,6 +133,7 @@ class MainWindow(QMainWindow):
     self.npc_button = QPushButton("Personnages")
     self.npc_button.setFont(QFont(self.hunnin,22))
     self.npc_button.setStyleSheet(stylesheet_npc)
+    self.npc_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.npc_button.pressed.connect(self.switchToolsTabs)
 
     self.tabs_selectors = QHBoxLayout()
@@ -148,7 +153,7 @@ class MainWindow(QMainWindow):
 
     purple_square = QLabel()
     purple_square.setFixedSize(40, 40)
-    purple_square.setStyleSheet("background-color: #a259f7; border-radius: 0px;")
+    purple_square.setStyleSheet(f"""background-color: {self.player_color}; border-radius: 0px;""")
     purple_square.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     page1_legendtext = QLabel("Case d'apparition")
@@ -193,11 +198,12 @@ class MainWindow(QMainWindow):
     painter.drawLine(4, 12, 20, 12)
     painter.end()
     plus_icon = QIcon(plus_pixmap)
-    page2_addbutton = QPushButton(" Ajouter des murs")
-    page2_addbutton.setIcon(plus_icon)
-    page2_addbutton.setIconSize(plus_pixmap.size())
-    page2_addbutton.setFont(QFont(self.hunnin, 22))
-    page2_addbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_addbutton = QPushButton(" Ajouter des murs")
+    self.page2_addbutton.setIcon(plus_icon)
+    self.page2_addbutton.setIconSize(plus_pixmap.size())
+    self.page2_addbutton.setFont(QFont(self.hunnin, 22))
+    self.page2_addbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_addbutton.pressed.connect(self.activateWallTool)
 
     # Créer un QPixmap pour l'icône - rouge
     subs_pixmap = QPixmap(24, 24)
@@ -208,11 +214,13 @@ class MainWindow(QMainWindow):
     painter.drawLine(4, 12, 20, 12)
     painter.end()
     subs_icon = QIcon(subs_pixmap)
-    page2_subsbutton = QPushButton(" Supprimer des murs")
-    page2_subsbutton.setIcon(subs_icon)
-    page2_subsbutton.setIconSize(subs_pixmap.size())
-    page2_subsbutton.setFont(QFont(self.hunnin, 22))
-    page2_subsbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_subsbutton = QPushButton(" Supprimer des murs")
+    self.page2_subsbutton.setIcon(subs_icon)
+    self.page2_subsbutton.setIconSize(subs_pixmap.size())
+    self.page2_subsbutton.setFont(QFont(self.hunnin, 22))
+    self.page2_subsbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_subsbutton.pressed.connect(self.activateWallTool)
+
     page2_legendtext = QLabel("""Tous les murs extérieurs sont immuables.\nLa fin du jeu s'effectue donc obligatoirement par la discussion avec un personnage spécifié.""")
     page2_legendtext.setWordWrap(True)
     page2_legendtext.setFont(QFont(self.hunnin, 18))
@@ -220,9 +228,9 @@ class MainWindow(QMainWindow):
 
     page2_layout = QVBoxLayout()
     page2_layout.addWidget(page2_infotext, stretch=1)
-    page2_layout.addWidget(page2_addbutton, stretch=1)
+    page2_layout.addWidget(self.page2_addbutton, stretch=1)
     page2_layout.setSpacing(10)
-    page2_layout.addWidget(page2_subsbutton, stretch=1)
+    page2_layout.addWidget(self.page2_subsbutton, stretch=1)
     page2_layout.addWidget(page2_legendtext, stretch=2)
     page2_container = QWidget()
     page2_container.setLayout(page2_layout)
@@ -293,11 +301,20 @@ class MainWindow(QMainWindow):
       return
 
     # on remplace self.grid_map (un QWidget vide) par notre GridWidget
-    self.grid_map = GridWidget(map_size=self.map_size, border_color=self.border_color, checked_bg_color=self.checked_bg_color)
+    self.grid_map = GridWidget(map_size=self.map_size, border_color=self.border_color, wall_color=self.checked_bg_color, player_color=self.player_color)
+    self.grid_map.initJsonGrid()
+    
 
   def switchToolsTabs(self):
     sender = self.sender()
     if sender :
+      # Reset possible mode activation :
+      if self.last_mode :        
+        self.last_mode[0].setStyleSheet(self.last_mode[1])
+        self.last_mode[0].setFont(QFont(self.hunnin, 22))
+        self.last_mode = None
+        self.grid_map.setMap_mode(0)
+        self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
       # Reset last button before :
       if self.last_tab :
         self.last_tab[0].setStyleSheet(self.last_tab[1])
@@ -318,12 +335,53 @@ class MainWindow(QMainWindow):
     # Set the current tab in the stacked layout based on which button was pressed
     if sender == self.player_button:
       self.stacked_tools.setCurrentIndex(0)
+      self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+      self.grid_map.setMap_mode(3)
     elif sender == self.walls_button:
       self.stacked_tools.setCurrentIndex(1)
+      self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+      self.grid_map.setMap_mode(0)
     elif sender == self.enemies_button:
       self.stacked_tools.setCurrentIndex(2)
+      self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+      self.grid_map.setMap_mode(4)
     elif sender == self.npc_button:
       self.stacked_tools.setCurrentIndex(3)
+      self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+  
+  def activateWallTool(self):
+    sender = self.sender()
+    if sender :
+      if self.last_mode :
+        if self.last_mode[0] == sender : 
+          sender.setStyleSheet(self.last_mode[1])
+          sender.setFont(QFont(self.hunnin, 22))
+          self.last_mode = None
+          self.grid_map.setMap_mode(0)
+          self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+          return 
+        else :
+          self.last_mode[0].setStyleSheet(self.last_mode[1])
+          self.last_mode[0].setFont(QFont(self.hunnin, 22))
+      currentStyleSheet = sender.styleSheet()
+      newStyle = """
+        QPushButton {
+          color : white;
+          background-color: #29e2ff;
+        }
+        QPushButton:hover {
+          background-color: #29e2ff;
+        }
+      """
+      sender.setStyleSheet(currentStyleSheet + newStyle)
+      sender.setFont(QFont(self.calSans, 30))
+      self.last_mode = [sender, currentStyleSheet]
+      if sender == self.page2_addbutton :
+        self.grid_map.setMap_mode(1)
+        self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+      else : 
+        self.grid_map.setMap_mode(2)
+        self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
   def createActions(self):
     self.quit_act = QAction("&Quitter")

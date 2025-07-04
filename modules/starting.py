@@ -1,7 +1,7 @@
 import sys
 import zipfile
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QFileDialog, QSizePolicy
-from PyQt6.QtGui import QPixmap, QFont, QFontDatabase
+from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt, pyqtSignal
 from modules.newProject import NewProject
 
@@ -87,8 +87,10 @@ class StartWindow(QWidget):
 
     self.new_project_button.setStyleSheet(btn_css)
     self.new_project_button.setFont(QFont(self.calSans, 48))
+    self.new_project_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.charge_project_button.setStyleSheet(btn_css)
     self.charge_project_button.setFont(QFont(self.calSans, 48))
+    self.charge_project_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
     introductive_content = QVBoxLayout()
     introductive_content.addWidget(self.image_label)

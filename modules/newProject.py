@@ -1,6 +1,6 @@
 import os, json
 from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
-from PyQt6.QtGui import QFont, QPixmap, QFontDatabase
+from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt
 
 class NewProject(QDialog):
@@ -72,6 +72,7 @@ class NewProject(QDialog):
     self.ddmenu_size = QComboBox()
     self.ddmenu_size.addItems(sizes_availables)
     self.ddmenu_size.setFont(QFont(self.hunnin, 18))
+    self.ddmenu_size.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
     size_layout = QVBoxLayout()
     size_layout.addWidget(size_label)
@@ -81,6 +82,7 @@ class NewProject(QDialog):
     confirm_btn = QPushButton("Valider")
     confirm_btn.setFont(QFont(self.hunnin, 24))
     confirm_btn.setMinimumHeight(80)
+    confirm_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     confirm_btn.clicked.connect(self.createDataFile)
 
     self.creation_layout = QVBoxLayout()
@@ -104,14 +106,18 @@ class NewProject(QDialog):
       for i in range(self.getSize_choosen()):
         line_tmp = []
         for j in range(self.getSize_choosen()):
-          line_tmp.append(0)
+          if i in [0, self.getSize_choosen()-1] or j in [0,self.getSize_choosen()-1] :
+            line_tmp.append(1)
+          else :
+            line_tmp.append(0)
         map_data.append(line_tmp)
       
       details["map"] = map_data
       
-      os.makedirs("workingDir", exist_ok=True) 
-      with open("workingDir/data.json", "w") as f:
-        f.write(json.dumps(details))
+      os.makedirs("workingDir", exist_ok=True)
+      with open("workingDir/data.json", "w", encoding="utf-8") as f:
+        # Utilisez dump, pas dumps, et ajoutez indent pour l'indentation
+        json.dump(details, f, indent=2, sort_keys=False, ensure_ascii=False)
       
       self.setSetup_finished(True)
       self.close()
