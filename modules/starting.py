@@ -11,6 +11,7 @@ class StartWindow(QWidget):
   def __init__(self):
     super().__init__()
     self.__startup_finished = False
+    self.__map_size = -1
     self.initializeUI()
 
   def getStartup_finished(self):
@@ -18,6 +19,12 @@ class StartWindow(QWidget):
   
   def setStartup_finished(self, nval):
     self.__startup_finished = nval
+
+  def getMap_size(self):
+    return self.__map_size
+  
+  def setMap_size(self, nsize):
+    self.__map_size = nsize
 
   def initializeUI(self):
     self.setWindowTitle("Patate - The 3D ASCII Game Engine")
@@ -98,8 +105,9 @@ class StartWindow(QWidget):
 
   def handleNewProjectFinished(self):
     if self.new_project_dialog.getSetup_finished():
+      self.setMap_size(self.new_project_dialog.getSize_choosen())
       self.setStartup_finished(True)
-      self.finished.emit()
+      self.finished.emit()  
 
   def openPreviousProject(self):
     project_compressed, _ = QFileDialog.getOpenFileName(self,"Ouvrir un fichier de projet","","*.zip")

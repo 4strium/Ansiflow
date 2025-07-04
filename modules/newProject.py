@@ -1,5 +1,5 @@
-import os, sys, json
-from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
+import os, json
+from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
 from PyQt6.QtGui import QFont, QPixmap, QFontDatabase
 from PyQt6.QtCore import Qt
 
@@ -8,6 +8,7 @@ class NewProject(QDialog):
     super().__init__()
     self.setModal(True)
     self.__setup_finished = False
+    self.__size_choosen = -1
     self.initializeUI()
 
   def getSetup_finished(self):
@@ -15,6 +16,12 @@ class NewProject(QDialog):
 
   def setSetup_finished(self, nval):
     self.__setup_finished = nval
+
+  def getSize_choosen(self):
+    return self.__size_choosen
+
+  def setSize_choosen(self, nsize):
+    self.__size_choosen = nsize
 
   def initializeUI(self):
     self.setFixedSize(450,600)
@@ -92,11 +99,11 @@ class NewProject(QDialog):
       details = {"name": self.name_linedit.text()}
 
       map_data = []
-      size_choosen = int((self.ddmenu_size.currentText()).split("x")[0])
+      self.setSize_choosen(int((self.ddmenu_size.currentText()).split("x")[0]))
 
-      for i in range(size_choosen):
+      for i in range(self.getSize_choosen()):
         line_tmp = []
-        for j in range(size_choosen):
+        for j in range(self.getSize_choosen()):
           line_tmp.append(0)
         map_data.append(line_tmp)
       
@@ -110,5 +117,3 @@ class NewProject(QDialog):
       self.close()
     else :
       QMessageBox.warning(self, "Nom de projet invalide", "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
-      
-
