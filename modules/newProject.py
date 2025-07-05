@@ -98,7 +98,7 @@ class NewProject(QDialog):
 
   def createDataFile(self):
     if self.name_linedit.text():
-      details = {"name": self.name_linedit.text()}
+      details = {"name": self.name_linedit.text(), "player": [-1, -1], "Enemy": []}
 
       map_data = []
       self.setSize_choosen(int((self.ddmenu_size.currentText()).split("x")[0]))

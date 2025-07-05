@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
     self.border_color = "#000000"
     self.checked_bg_color = "#262626"
     self.player_color = "#a259f7"
+    self.enemy_color = "#00ff5e"
     self.last_tab = None
     self.last_mode = None
     self.startup()
@@ -203,6 +204,7 @@ class MainWindow(QMainWindow):
     self.page2_addbutton.setIconSize(plus_pixmap.size())
     self.page2_addbutton.setFont(QFont(self.hunnin, 22))
     self.page2_addbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_addbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page2_addbutton.pressed.connect(self.activateWallTool)
 
     # Créer un QPixmap pour l'icône - rouge
@@ -219,6 +221,7 @@ class MainWindow(QMainWindow):
     self.page2_subsbutton.setIconSize(subs_pixmap.size())
     self.page2_subsbutton.setFont(QFont(self.hunnin, 22))
     self.page2_subsbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_subsbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page2_subsbutton.pressed.connect(self.activateWallTool)
 
     page2_legendtext = QLabel("""Tous les murs extérieurs sont immuables.\nLa fin du jeu s'effectue donc obligatoirement par la discussion avec un personnage spécifié.""")
@@ -253,9 +256,23 @@ class MainWindow(QMainWindow):
     page3_legend.addWidget(page3_legendtext, alignment=Qt.AlignmentFlag.AlignLeft)
     page3_legend.addStretch()
 
+    page3_skin = QPushButton("Sélectionner l'apparence des ennemis")
+    page3_skin.setFont(QFont(self.hunnin, 22))
+    page3_skin.setStyleSheet(btn_tools_stylesheet)
+    page3_skin.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+    page3_infoskin = QLabel("Attention : L'apparence n'est pas définie !")
+    page3_infoskin.setFont(QFont(self.hunnin, 18))
+    page3_infoskin.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    page3_infoskin.setWordWrap(True)
+    page3_infoskin.setStyleSheet("color : #f81111;")
+
     page3_layout = QVBoxLayout()
     page3_layout.addWidget(page3_infotext)
     page3_layout.addLayout(page3_legend)
+    page3_layout.addWidget(page3_skin)
+    page3_layout.addWidget(page3_infoskin)
+
     page3_container = QWidget()
     page3_container.setLayout(page3_layout)
 
@@ -301,7 +318,7 @@ class MainWindow(QMainWindow):
       return
 
     # on remplace self.grid_map (un QWidget vide) par notre GridWidget
-    self.grid_map = GridWidget(map_size=self.map_size, border_color=self.border_color, wall_color=self.checked_bg_color, player_color=self.player_color)
+    self.grid_map = GridWidget(self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, enemy_path="/")
     self.grid_map.initJsonGrid()
     
 
@@ -348,6 +365,7 @@ class MainWindow(QMainWindow):
     elif sender == self.npc_button:
       self.stacked_tools.setCurrentIndex(3)
       self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+      self.grid_map.setMap_mode(5)
   
   def activateWallTool(self):
     sender = self.sender()
