@@ -98,7 +98,19 @@ class NewProject(QDialog):
 
   def createDataFile(self):
     if self.name_linedit.text():
-      details = {"name": self.name_linedit.text(), "player": [-1, -1], "Enemy": []}
+      details = {"name": self.name_linedit.text(), "player": [-1, -1], "Enemy": [], "end":{"death_path" :"images/skull.txt","ending_path":"text/ending.txt"}, "NPCS": [],
+                 "Timer":["images/Timer/two_points.txt",
+                          "images/Timer/0.txt",
+                          "images/Timer/1.txt",
+                          "images/Timer/2.txt",
+                          "images/Timer/3.txt",
+                          "images/Timer/4.txt",
+                          "images/Timer/5.txt",
+                          "images/Timer/6.txt",
+                          "images/Timer/7.txt",
+                          "images/Timer/8.txt",
+                          "images/Timer/9.txt"]
+                }
 
       map_data = []
       self.setSize_choosen(int((self.ddmenu_size.currentText()).split("x")[0]))

@@ -1,17 +1,27 @@
 {
-  "name": "3",
+  "name": "cx",
   "player": [
-    2,
-    5
+    3.5,
+    4.5
   ],
-  "Enemy": [
-    {
-      "position": [
-        4,
-        4
-      ],
-      "path_visual": "/"
-    }
+  "Enemy": [],
+  "end": {
+    "death_path": "images/skull.txt",
+    "ending_path": "text/ending.txt"
+  },
+  "NPCS": [],
+  "Timer": [
+    "images/Timer/two_points.txt",
+    "images/Timer/0.txt",
+    "images/Timer/1.txt",
+    "images/Timer/2.txt",
+    "images/Timer/3.txt",
+    "images/Timer/4.txt",
+    "images/Timer/5.txt",
+    "images/Timer/6.txt",
+    "images/Timer/7.txt",
+    "images/Timer/8.txt",
+    "images/Timer/9.txt"
   ],
   "map": [
     [
@@ -29,9 +39,9 @@
       0,
       0,
       0,
-      true,
-      true,
-      true,
+      0,
+      0,
+      0,
       1
     ],
     [
@@ -39,9 +49,9 @@
       0,
       0,
       0,
-      true,
       0,
-      true,
+      0,
+      0,
       1
     ],
     [
@@ -49,9 +59,9 @@
       0,
       0,
       0,
-      true,
-      true,
-      true,
+      0,
+      0,
+      0,
       1
     ],
     [

@@ -1,7 +1,7 @@
 import json, math
 from PyQt6.QtWidgets import QWidget, QMessageBox
-from PyQt6.QtGui import QPainter, QColor
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPainter, QColor, QMouseEvent
+from PyQt6.QtCore import Qt, QPointF, QSize
 
 class GridWidget(QWidget):
     def __init__(self, map_size, border_color, wall_color, player_color, enemy_color, enemy_path, parent=None):
@@ -21,6 +21,15 @@ class GridWidget(QWidget):
     
     def setMap_mode(self, nmode):
         self.map_mode = nmode
+
+    def setEnemyImg(self, path):
+        self.enemy_img = path
+        with open(self.filename, "r") as f:
+            data = json.load(f)
+        with open(self.filename, "w") as f:
+            data["Enemy"] = self.packEnemies()
+            json.dump(data, f, indent=2, sort_keys=False, ensure_ascii=False)
+        
 
     def sizeHint(self):
         return QSize(400, 400)
@@ -52,8 +61,8 @@ class GridWidget(QWidget):
         except (FileNotFoundError, json.JSONDecodeError):
                 data["map"] = [[0]*self.map_size for _ in range(self.map_size)]
         self.cells = data["map"]
-        self.pos_player = data["player"]
-        self.pos_enemies = [element["position"] for element in data["Enemy"]]
+        self.pos_player = [coord - 0.5 for coord in data["player"]]
+        self.pos_enemies = [coord - 0.5 for element in data["Enemy"] for coord in element["position"]]
         
         self.update()
         
@@ -70,7 +79,7 @@ class GridWidget(QWidget):
         package = []
         for position in self.pos_enemies :
             individual_dict = {}
-            individual_dict["position"] = position
+            individual_dict["position"] = [coord + 0.5 for coord in position]
             individual_dict["path_visual"] = self.enemy_img
             package.append(individual_dict)
         return package
@@ -101,7 +110,7 @@ class GridWidget(QWidget):
                 elif self.map_mode == 3 and not data["map"][i][j] and [i,j] not in self.pos_enemies :
                     if self.pos_player != [i, j] :
                         self.pos_player = [i, j]
-                        data["player"] = [i, j]
+                        data["player"] = [i+0.5, j+0.5]
                     else :
                         self.pos_player = [-1, -1]
                         data["player"] = [-1, -1]

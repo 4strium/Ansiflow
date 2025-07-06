@@ -1,10 +1,12 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout, QFileDialog
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
 from modules.starting import StartWindow
 from modules.grid import GridWidget
+from emulatedTerminal import EmulatedTerminal
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
+from scripts.image_to_ascii import image_to_ascii_by_color
 
 class MainWindow(QMainWindow):
 
@@ -14,6 +16,7 @@ class MainWindow(QMainWindow):
     self.checked_bg_color = "#262626"
     self.player_color = "#a259f7"
     self.enemy_color = "#00ff5e"
+    self.enemy_path = None
     self.last_tab = None
     self.last_mode = None
     self.startup()
@@ -260,18 +263,19 @@ class MainWindow(QMainWindow):
     page3_skin.setFont(QFont(self.hunnin, 22))
     page3_skin.setStyleSheet(btn_tools_stylesheet)
     page3_skin.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    page3_skin.pressed.connect(self.changeEnemySkin)
 
-    page3_infoskin = QLabel("Attention : L'apparence n'est pas définie !")
-    page3_infoskin.setFont(QFont(self.hunnin, 18))
-    page3_infoskin.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    page3_infoskin.setWordWrap(True)
-    page3_infoskin.setStyleSheet("color : #f81111;")
+    self.page3_infoskin = QLabel("Attention : L'apparence n'est pas définie !")
+    self.page3_infoskin.setFont(QFont(self.hunnin, 18))
+    self.page3_infoskin.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page3_infoskin.setWordWrap(True)
+    self.page3_infoskin.setStyleSheet("color : #f81111;")
 
     page3_layout = QVBoxLayout()
     page3_layout.addWidget(page3_infotext)
     page3_layout.addLayout(page3_legend)
     page3_layout.addWidget(page3_skin)
-    page3_layout.addWidget(page3_infoskin)
+    page3_layout.addWidget(self.page3_infoskin)
 
     page3_container = QWidget()
     page3_container.setLayout(page3_layout)
@@ -318,9 +322,8 @@ class MainWindow(QMainWindow):
       return
 
     # on remplace self.grid_map (un QWidget vide) par notre GridWidget
-    self.grid_map = GridWidget(self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, enemy_path="/")
-    self.grid_map.initJsonGrid()
-    
+    self.grid_map = GridWidget(self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, self.enemy_path)
+    self.grid_map.initJsonGrid() 
 
   def switchToolsTabs(self):
     sender = self.sender()
@@ -401,10 +404,31 @@ class MainWindow(QMainWindow):
         self.grid_map.setMap_mode(2)
         self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
+  def changeEnemySkin(self):
+    try :
+      skin_filename, _ = QFileDialog.getOpenFileName(self,"Sélectionner l'image représentant un ennemi","","Images (*.png *.jpg *.jpeg)")
+      QApplication.setOverrideCursor(QCursor(Qt.CursorShape.WaitCursor))
+      image_to_ascii_by_color(skin_filename, "workingDir/enemy.txt", 70, 10)
+      self.enemy_path = "workingDir/enemy.txt"
+      self.grid_map.setEnemyImg(self.enemy_path)
+      self.page3_infoskin.setText("Apparence des ennemis correctement définie")
+      self.page3_infoskin.setStyleSheet("color : green;")
+    except :
+      pass
+    QApplication.restoreOverrideCursor()
+
+  def play(self):
+    self.game = EmulatedTerminal()
+    self.game.show()
+
   def createActions(self):
     self.quit_act = QAction("&Quitter")
     self.quit_act.setShortcut("Ctrl+Q")
     self.quit_act.triggered.connect(self.close)
+
+    self.exec_act = QAction("&Démarrer votre jeu")
+    self.exec_act.setShortcut("Ctrl+E")
+    self.exec_act.triggered.connect(self.play)
 
   def createMenu(self):
     file_menu = self.menuBar().addMenu("Fichier")
@@ -412,6 +436,7 @@ class MainWindow(QMainWindow):
 
     edit_menu = self.menuBar().addMenu("Edition")
     exec_menu = self.menuBar().addMenu("Exécution")
+    exec_menu.addAction(self.exec_act)
     help_menu = self.menuBar().addMenu("Aide")
 
   def maintainSpacingLayout(self):

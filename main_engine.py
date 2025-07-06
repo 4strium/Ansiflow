@@ -1,21 +1,18 @@
 import math
-import termios
 import sys
-import os
-import tty
 import time
-from game.Wall import Wall
-from game.Game import Game
-from game.Player import Player
-from engine.Image import Image
-from game.NPC import NPC
-from engine.Color import Color
-from engine.Button import Button
-from engine.Buffer import Buffer
-import engine.Tools as Tools
-from game.combat.Fight import Fight
-from game.combat.Enemy import Enemy
-from game.Timer import Timer
+from modules.game.Wall import Wall
+from modules.game.Game import Game
+from modules.game.Player import Player
+from modules.engine.Image import Image
+from modules.game.NPC import NPC
+from modules.engine.Color import Color
+from modules.engine.Button import Button
+from modules.engine.Buffer import Buffer
+import modules.engine.Tools as Tools
+from modules.game.combat.Fight import Fight
+from modules.game.combat.Enemy import Enemy
+from modules.game.Timer import Timer
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -121,26 +118,26 @@ def draw3DWall(window, game_inp, ray_distance, player_angle, ray_angle, wall_des
   if ray_distance < 0.1 :
     ray_distance = 0.1
 
-  lineHeight = Buffer.get_height(window) / ray_distance
-  if lineHeight > Buffer.get_height(window) :
-    lineHeight = Buffer.get_height(window)
+  lineHeight = window.getHeight() / ray_distance
+  if lineHeight > window.getHeight() :
+    lineHeight = window.getHeight()
 
-  center_h = Buffer.get_height(window) // 2 
+  center_h = window.getHeight() // 2 
   y_start = center_h - (lineHeight //2)
 
   for y_axis in range(round(y_start), round(y_start + lineHeight)) :
-    if 0 <= y_axis < Buffer.get_height(window)-1:
+    if 0 <= y_axis < window.getHeight()-1:
       for i in range(round(Wall.get_start_ind(wall_design)), Wall.get_end_ind(wall_design)) :
-        if 0 <= i < Buffer.get_width(window):
+        if 0 <= i < window.getWidth():
           if i == Wall.get_end_ind(wall_design)-1 :
             Buffer.set_str_buffer(window, " ", Game.get_color2(game_inp), 400, i, y_axis)
           else :
             Buffer.set_str_buffer(window, Wall.get_texture(wall_design), Wall.get_color(wall_design), ray_distance, i, y_axis)
 
 def drawFloor(window, game_inp) :
-  for y_axis in range(Buffer.get_height(window)//2, Buffer.get_height(window)) :
-    if 0 <= y_axis < Buffer.get_height(window) -1 :
-      for x_axis in range(0, Buffer.get_width(window)) :
+  for y_axis in range(window.getHeight()//2, window.getHeight()) :
+    if 0 <= y_axis < window.getHeight() -1 :
+      for x_axis in range(0, window.getWidth()) :
         Buffer.set_str_buffer(window, "-", Game.get_color2(game_inp), 30, x_axis, y_axis)
 
 def get_rays(window, game_inp, player) :
@@ -151,7 +148,7 @@ def get_rays(window, game_inp, player) :
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
   """
 
-  width = Buffer.get_width(window)
+  width = window.getWidth()
   fov_deg = Player.get_fov(player)
   fov_rad = math.radians(fov_deg)
 
@@ -167,55 +164,22 @@ def get_rays(window, game_inp, player) :
 
     angle_acc -= angle_step
 
-def interact(game_inp,player,window):
-  dt = Game.get_diff_time(game_inp)
-  key = Tools.get_key(Game.get_diff_time(game_inp)*50)
+def endGame(emu_terminal, game, death):
+  x_start = emu_terminal.getWidth() // 16
+  y_start = emu_terminal.getHeight() // 30
 
-  if key == 27:  # Quitter avec 'échap'
-    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
-    sys.exit()
-    exit()
-  elif key == ord('z'):
-    # Simuler l'avancement du personnage :
-    position = Player.get_position(player)
-    n_pos = [position[0] + dt * 5 * math.cos(Player.get_angle(player)),position[1]+ dt * 5 * math.sin(Player.get_angle(player))]
-    Player.set_position(player,n_pos[0],n_pos[1])
-    Buffer.clear_data(window)
-  elif key == ord('s'):
-    # Simuler le reculement du personnage par rapport au sol :
-    position = Player.get_position(player)
-    n_pos = [position[0] - dt * 5 * math.cos(Player.get_angle(player)),position[1] - dt * 5 * math.sin(Player.get_angle(player))]
-    Player.set_position(player,n_pos[0],n_pos[1])
-    Buffer.clear_data(window) 
-  elif key == ord('q'):
-    Player.set_angle(player, player.get_angle() + dt*5)
-    Buffer.clear_data(window)
-  elif key == ord('d'):
-    Player.set_angle(player, player.get_angle() - dt*5)
-    Buffer.clear_data(window)
-
-  if Fight.is_fight_time(Game.get_fight(game_inp),player)[0] :
-    if key == 32 :
-      (Game.get_fight(game_inp)).set_flame_state(1)
-      Enemy.shoot_enemy(Fight.is_fight_time(Game.get_fight(game_inp),player)[1],window,Game.get_fight(game_inp))
-
-def endGame(window, game, death):
-  x_start = Buffer.get_width(window) // 16
-  y_start = Buffer.get_height(window) // 30
-
-  Buffer.clear_data(window)
+  emu_terminal.clearBuffer()
 
   if death == 0:
     skull = Image.upload_classic_image(Game.get_death_path(game), x_start, y_start, Game.get_color1(game))
     Image.set_color(skull,Color(255,0,255))
-    Image.draw(skull,window)
+    Image.draw(skull, emu_terminal)
   elif death == 1:
     text_end = Image.upload_classic_image(Game.get_ending_path(game), 0, 0, Game.get_color2(game))
-    Image.draw(text_end,window)
+    Image.draw(text_end, emu_terminal)
 
-  Buffer.show_data(window)
+  emu_terminal.showBuffer()
   time.sleep(10)
-  termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game))
   sys.exit()
   exit()
 
@@ -277,8 +241,6 @@ def ask_question(window_inp, game_inp, npc, sentence, color):
     for idx, btn in enumerate(button_lst):
       Button.draw_text_button(btn, window_inp, idx == choice)
 
-    key = Tools.get_key(0.1)
-
     if key == ord('d') and choice + 1 < nb_buttons:
       choice += 1
     elif key == ord('q') and choice - 1 >= 0:
@@ -335,75 +297,3 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
       else :
         draw_backtalk(window_inp, talk_color)
         talk_to_NPC(window_inp, player_inp, game_inp, npc_g, talk_color)
-
-def refresh_buffer(buffer_inp) :
-  # Création du buffer :
-  size = os.get_terminal_size()
-  columns = size.columns
-  rows = size.lines
-  Buffer.clear_data(buffer_inp)
-  Buffer.set_height(buffer_inp, rows)
-  Buffer.set_width(buffer_inp, columns)
-
-def run():
-
-  # Démarrage du gestionnaire de couleurs :
-  wall_pink = Color(189, 0, 255)
-  blue_cyber = Color(0,255,159)
-
-  size = os.get_terminal_size()
-  columns = size.columns
-  rows = size.lines
-  buffer_window = Buffer(columns, rows)
-
-  game_run = Game(0.01, "data.json", termios.tcgetattr(sys.stdin))
-  tty.setcbreak(sys.stdin.fileno())
-  Game.set_color1(game_run, wall_pink)
-  Game.set_color2(game_run, blue_cyber)
-  Game.upload_all_end(game_run,"data.json")
-
-  player_run = Player(4.5,17,80,-(math.pi/2))
-
-  NPC.dispatch_NPCS(game_run,"data.json")
-
-  fight_game = Fight(buffer_window)
-  Enemy.dispatch_Enemies(fight_game,"data.json")
-
-  Game.set_fight(game_run,fight_game)
-
-  timer_game = Timer("data.json", Color(255,0,0))
-
-  mystery_npc = next((npc for npc in Game.get_npcs(game_run) if NPC.get_name(npc) == "MYSTÈRE"), None)
-  if mystery_npc:
-    talk_to_NPC(buffer_window, player_run, game_run, mystery_npc, blue_cyber)
-
-  starting_game_time = time.time()
-  
-  # Boucle de simulation :
-  while True :
-    interact(game_run,player_run,buffer_window)
-
-    refresh_buffer(buffer_window)
-
-    if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
-      refresh_buffer(buffer_window)
-      endGame(buffer_window,game_run, 0)
-      break
-
-    Timer.show_timer(timer_game,buffer_window)
-    Timer.remove_time(timer_game,starting_game_time-time.time())
-    drawFloor(buffer_window, game_run)
-    get_rays(buffer_window, game_run, player_run)
-    draw_NPC(buffer_window,game_run,player_run,blue_cyber)
-    if Fight.is_fight_time(Game.get_fight(game_run),player_run)[0] :
-      Enemy.draw_Enemy(buffer_window,Game.get_fight(game_run),player_run,blue_cyber)
-      Fight.update_fight(Game.get_fight(game_run),buffer_window,blue_cyber)
-    Buffer.show_data(buffer_window)
-    Game.running_time(game_run)
-    time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
-
-    if Timer.get_remaining_time(timer_game) < 0 :
-      endGame(buffer_window,game_run,0)
-
-if __name__ == "__main__":
-  run()

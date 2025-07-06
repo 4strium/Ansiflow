@@ -55,17 +55,22 @@ def assign_color_labels(image, color_list):
 def build_color_ascii_layers(ascii_str, color_labels, ascii_width, ascii_height, n_colors):
     layers = []
     ascii_matrix = np.array(list(ascii_str)).reshape((ascii_height, ascii_width))
+    colors_comparison = {}
     for color_idx in range(n_colors):
         layer = ""
+        acc_dominant = 0
         for y in range(ascii_height):
             for x in range(ascii_width):
                 if color_labels[y, x] == color_idx:
                     layer += ascii_matrix[y, x]
+                    acc_dominant += 1
                 else:
                     layer += "1"
             layer += "\n"
         layers.append(layer)
-    return layers
+        colors_comparison[str(color_idx)] = acc_dominant
+    color_max = int(max(colors_comparison, key=colors_comparison.get))
+    return layers, color_max
 
 def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", width=100, n_colors=4):
     image = Image.open(image_path)
@@ -81,16 +86,15 @@ def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", wi
     labels = assign_color_labels(color, colors)
 
     ascii_width, ascii_height = resized.size
-    layers = build_color_ascii_layers(ascii_str, labels, ascii_width, ascii_height, n_colors)
+    layers, color_skip = build_color_ascii_layers(ascii_str, labels, ascii_width, ascii_height, n_colors)
 
     with open(output_path, "w") as f:
+        f.write(f"__NBCOLORS__{n_colors-1}\n")
         for idx, layer in enumerate(layers):
-            r, g, b = colors[idx]
-            f.write(f"__COLORR__{r}\n")
-            f.write(f"__COLORG__{g}\n")
-            f.write(f"__COLORB__{b}\n")
-            f.write(layer)
-            f.write("__ENDVISUAL__\n")
-
-# Appel de la fonction
-image_to_ascii_by_color("jeanne-full.png", "sortie_ascii.txt", width=60, n_colors=13)
+            if idx != color_skip :
+                r, g, b = colors[idx]
+                f.write(f"__COLORR__{r}\n")
+                f.write(f"__COLORG__{g}\n")
+                f.write(f"__COLORB__{b}\n")
+                f.write(layer)
+                f.write("__ENDVISUAL__\n")
