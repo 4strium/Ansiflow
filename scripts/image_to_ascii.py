@@ -89,6 +89,7 @@ def image_to_ascii_by_color(image_path, output_path="ascii_art_by_color.txt", wi
     layers, color_skip = build_color_ascii_layers(ascii_str, labels, ascii_width, ascii_height, n_colors)
 
     with open(output_path, "w") as f:
+        f.write(f"__VISUAL0__\n")
         f.write(f"__NBCOLORS__{n_colors-1}\n")
         for idx, layer in enumerate(layers):
             if idx != color_skip :

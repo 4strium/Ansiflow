@@ -418,8 +418,13 @@ class MainWindow(QMainWindow):
     QApplication.restoreOverrideCursor()
 
   def play(self):
-    self.game = EmulatedTerminal()
-    self.game.show()
+    if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
+      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
+      QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    else :
+      self.game = EmulatedTerminal()
+      self.game.show()
 
   def createActions(self):
     self.quit_act = QAction("&Quitter")

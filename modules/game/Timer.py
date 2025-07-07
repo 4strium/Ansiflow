@@ -38,7 +38,7 @@ class Timer :
     self.set_remaining_time(self.get_start_amount() + sec_mesure)
 
 
-  def show_timer(self, buffer_win):
+  def show_timer(self, emuterminal):
     timestamp = Tools.convert_sec_to_min(self.get_remaining_time())
     minutes = str(timestamp[0])
     seconds = str(timestamp[1])
@@ -59,13 +59,13 @@ class Timer :
 
     for image_min in minutes_visuals :
       Image.set_pos(image_min,[x_start, y_fix])
-      Image.draw(image_min,buffer_win)
+      Image.draw(image_min,emuterminal)
       x_start += 10
     Image.set_pos(self.get_two_points(),[x_start, y_fix])
-    Image.draw(self.get_two_points(),buffer_win)
+    Image.draw(self.get_two_points(),emuterminal)
     x_start += 4
     for image_sec in seconds_visuals :
       Image.set_pos(image_sec,[x_start, y_fix])
-      Image.draw(image_sec,buffer_win)
+      Image.draw(image_sec,emuterminal)
       x_start += 10
 

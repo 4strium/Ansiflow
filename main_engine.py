@@ -12,7 +12,6 @@ from modules.engine.Buffer import Buffer
 import modules.engine.Tools as Tools
 from modules.game.combat.Fight import Fight
 from modules.game.combat.Enemy import Enemy
-from modules.game.Timer import Timer
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.

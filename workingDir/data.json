@@ -1,10 +1,18 @@
 {
-  "name": "cx",
+  "name": "ds",
   "player": [
     3.5,
-    4.5
+    3.5
   ],
-  "Enemy": [],
+  "Enemy": [
+    {
+      "position": [
+        2.5,
+        3.5
+      ],
+      "path_visual": null
+    }
+  ],
   "end": {
     "death_path": "images/skull.txt",
     "ending_path": "text/ending.txt"
