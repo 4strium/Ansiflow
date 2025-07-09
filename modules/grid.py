@@ -1,11 +1,12 @@
 import json, math
 from PyQt6.QtWidgets import QWidget, QMessageBox
 from PyQt6.QtGui import QPainter, QColor, QMouseEvent
-from PyQt6.QtCore import Qt, QPointF, QSize
+from PyQt6.QtCore import QSize
 
 class GridWidget(QWidget):
-    def __init__(self, map_size, border_color, wall_color, player_color, enemy_color, enemy_path, parent=None):
+    def __init__(self, main_app, map_size, border_color, wall_color, player_color, enemy_color, enemy_path, parent=None):
         super().__init__(parent)
+        self.mainApp = main_app
         self.map_size = map_size
         self.border_color = QColor(border_color)
         self.wall_color = QColor(wall_color)
@@ -14,9 +15,12 @@ class GridWidget(QWidget):
         self.cells = [[0]*map_size for _ in range(map_size)]
         self.pos_player = []
         self.pos_enemies = []
+        self.pos_NPCS = []
         self.enemy_img = enemy_path
         self.map_mode = 0
         self.filename = "workingDir/data.json"
+        self.pers_pos_attribution = main_app.pos_given
+        self.congestion_limit = 4
         self.setMouseTracking(True)
     
     def setMap_mode(self, nmode):
@@ -49,6 +53,9 @@ class GridWidget(QWidget):
                     painter.fillRect(x, y, sz, sz, QColor(self.player_color))
                 elif [i,j] in self.pos_enemies :
                     painter.fillRect(x, y, sz, sz, QColor(self.enemy_color))
+                elif [i,j] in [npc[0] for npc in self.pos_NPCS]:
+                    npc_color = [npc[1] for npc in self.pos_NPCS if npc[0] == [i, j]][0]
+                    painter.fillRect(x, y, sz, sz, QColor(npc_color))
                 else :
                     painter.fillRect(x, y, sz, sz, self.wall_color if self.cells[i][j] else QColor("#EBEBEB"))
                 painter.setPen(self.border_color)
@@ -71,6 +78,16 @@ class GridWidget(QWidget):
         for pos in self.pos_enemies :
             dist = math.sqrt((pos[0] - position_given[0])**2 + (pos[1] - position_given[1])**2)
             all_pos.append(dist)
+        if len(all_pos) :
+            return min(all_pos)
+        return math.inf
+    
+    def checkNearestNPC(self, position_given, pass_name):
+        all_pos = []
+        for pos in self.pos_NPCS :
+            if pos[2] != pass_name :
+                dist = math.sqrt((pos[0][0] - position_given[0])**2 + (pos[0][1] - position_given[1])**2)
+                all_pos.append(dist)
         if len(all_pos) :
             return min(all_pos)
         return math.inf
@@ -116,12 +133,28 @@ class GridWidget(QWidget):
                         data["player"] = [-1, -1]
                 elif self.map_mode == 4 and not data["map"][i][j] and [i,j] != self.pos_player :
                     if [i,j] not in self.pos_enemies :
-                        if self.checkNearestEnemy([i,j]) > 4 :
+                        if self.checkNearestEnemy([i,j]) > self.congestion_limit :
                             self.pos_enemies.append([i,j])
                         else :
                             QMessageBox.warning(self, "Ennemis trop proches", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un de ses congénères.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
                     else :
                         self.pos_enemies.remove([i,j])
+                elif self.map_mode == 5 and not data["map"][i][j] and [i,j] not in self.pos_enemies and [i,j] != self.pos_player:
+                    npc_select = self.mainApp.current_NPC_selected
+                    if self.checkNearestEnemy([i,j]) > self.congestion_limit :
+                        if self.checkNearestNPC([i,j], npc_select) > self.congestion_limit :
+                            if npc_select :
+                                for npc in self.mainApp.NPCs :
+                                    if npc[0] == npc_select :
+                                        attributed_color = npc[1]
+                                        self.pos_NPCS = [npc for npc in self.pos_NPCS if npc[1] != attributed_color]
+                                self.pos_NPCS.append([[i,j], attributed_color, npc_select])
+                                self.pers_pos_attribution([i, j])
+                        else :
+                           QMessageBox.warning(self, "Personnages trop proches", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un de ses congénères.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close) 
+                    else :
+                        QMessageBox.warning(self, "Ennemis trop proches", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un ennemi.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+                    
                 with open(self.filename, "w") as f:
                     data["Enemy"] = self.packEnemies()
                     json.dump(data, f, indent=2, sort_keys=False, ensure_ascii=False)

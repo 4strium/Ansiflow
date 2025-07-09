@@ -18,6 +18,12 @@ class NPC(Character.Character):
     self.__discuss_choice = -1
     self.__special_content = []
   
+  def get_x(self):
+    return self.x
+
+  def get_y(self):
+    return self.y
+
   def get_type(self):
     return self.__type
   def set_type(self,type):

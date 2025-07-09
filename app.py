@@ -1,9 +1,12 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
 from modules.starting import StartWindow
 from modules.grid import GridWidget
+from modules.newNPC import NewNPC
+from modules.removeNPC import RemoveNPC
+from modules.game import NPC
 from emulatedTerminal import EmulatedTerminal
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
 from scripts.image_to_ascii import image_to_ascii_by_color
@@ -19,6 +22,12 @@ class MainWindow(QMainWindow):
     self.enemy_path = None
     self.last_tab = None
     self.last_mode = None
+    self.nb_perso = 0
+    self.pers_limit = 0
+    self.pers_colors = []
+    self.current_NPC_selected = None
+    self.NPCs = []
+    self.saved_NPCs = {}
     self.startup()
 
   def startup(self) :
@@ -192,6 +201,7 @@ class MainWindow(QMainWindow):
     page2_infotext = QLabel("Sélectionnez l'outil :")
     page2_infotext.setFont(QFont(self.hunnin, 22))
     page2_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
     # Créer un QPixmap pour l'icône + vert
     plus_pixmap = QPixmap(24, 24)
     plus_pixmap.fill(Qt.GlobalColor.transparent)
@@ -253,11 +263,11 @@ class MainWindow(QMainWindow):
     page3_legendtext.setFont(QFont(self.hunnin, 22))
 
     page3_legend = QHBoxLayout()
-    page3_legend.setSpacing(20)
     page3_legend.addStretch()
     page3_legend.addWidget(green_square, alignment=Qt.AlignmentFlag.AlignLeft)
     page3_legend.addWidget(page3_legendtext, alignment=Qt.AlignmentFlag.AlignLeft)
     page3_legend.addStretch()
+    page3_legend.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     page3_skin = QPushButton("Sélectionner l'apparence des ennemis")
     page3_skin.setFont(QFont(self.hunnin, 22))
@@ -272,35 +282,169 @@ class MainWindow(QMainWindow):
     self.page3_infoskin.setStyleSheet("color : #f81111;")
 
     page3_layout = QVBoxLayout()
-    page3_layout.addWidget(page3_infotext)
-    page3_layout.addLayout(page3_legend)
-    page3_layout.addWidget(page3_skin)
-    page3_layout.addWidget(self.page3_infoskin)
+    page3_layout.addWidget(page3_infotext, stretch=1)
+    page3_layout.addLayout(page3_legend, stretch=1)
+    page3_layout.addWidget(page3_skin, stretch=1)
+    page3_layout.addWidget(self.page3_infoskin, stretch=1)
 
     page3_container = QWidget()
     page3_container.setLayout(page3_layout)
 
     # Page 4 :
+    page4_title = QLabel("Vos personnages :")
+    page4_title.setFont(QFont(self.hunnin, 22))
+    page4_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page4_table = QTableWidget()
+    self.page4_table.setColumnCount(3)
+    self.page4_table.setHorizontalHeaderLabels(["Nom", "Couleur", "Attributs"])
+    self.page4_table.setRowCount(self.nb_perso)
+    
+    self.page4_table.setFont(QFont(self.hunnin, 15))
+    self.page4_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    self.page4_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+    self.page4_table.setAlternatingRowColors(True)
+    self.page4_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
+    self.page4_table.verticalHeader().setVisible(False)
+    self.page4_table.verticalHeader().setDefaultSectionSize(50)
+  
+    self.page4_addbutton = QPushButton(" Ajouter un personnage")
+    self.page4_addbutton.setIcon(plus_icon)
+    self.page4_addbutton.setIconSize(plus_pixmap.size())
+    self.page4_addbutton.setFont(QFont(self.hunnin, 22))
+    self.page4_addbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page4_addbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.page4_addbutton.pressed.connect(self.createNewPerso)
+
+    self.page4_subsbutton = QPushButton(" Supprimer un personnage")
+    self.page4_subsbutton.setIcon(subs_icon)
+    self.page4_subsbutton.setIconSize(subs_pixmap.size())
+    self.page4_subsbutton.setFont(QFont(self.hunnin, 22))
+    self.page4_subsbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page4_subsbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.page4_subsbutton.pressed.connect(self.deletePersoDialog)
+    
+    self.page4_limit_text = QLabel(f"(limité à {self.pers_limit} personnages)")
+    self.page4_limit_text.setFont(QFont(self.hunnin, 14))
+    self.page4_limit_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    page4_layout = QVBoxLayout()
+    page4_layout.addWidget(page4_title, stretch=1)
+    page4_layout.addWidget(self.page4_table, stretch=4)
+    page4_layout.addWidget(self.page4_addbutton, stretch=2)
+    page4_layout.addWidget(self.page4_subsbutton, stretch=2)
+    page4_layout.addWidget(self.page4_limit_text, stretch=1)
+
     page4_container = QWidget()
+    page4_container.setLayout(page4_layout)
 
     self.stacked_tools = QStackedLayout()
     self.stacked_tools.addWidget(page1_container)
     self.stacked_tools.addWidget(page2_container)
     self.stacked_tools.addWidget(page3_container)
     self.stacked_tools.addWidget(page4_container)
-    self.stacked_tools.setCurrentIndex(2)
 
     self.tools_layout = QVBoxLayout()
     self.tools_layout.addWidget(self.title_tools, stretch=1)
     self.tools_layout.addLayout(self.tabs_selectors, stretch=1)
     self.tools_layout.addLayout(self.stacked_tools, stretch=8)
 
+    # Page 2 - Right Side :
+    config_question = QLabel("Que souhaitez-vous configurer ?")
+    config_question.setFont(QFont(self.hunnin, 22))
+    config_question.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    self.answer_pos = QPushButton("Emplacement du personnage sur la carte")
+    self.answer_pos.setFont(QFont(self.hunnin, 22))
+    self.answer_pos.setStyleSheet(btn_tools_stylesheet)
+    self.answer_pos.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.answer_pos.pressed.connect(self.selectNPCposition)
+
+    self.answer_dial = QPushButton("Dialogues")
+    self.answer_dial.setFont(QFont(self.hunnin, 22))
+    self.answer_dial.setStyleSheet(btn_tools_stylesheet)
+    self.answer_dial.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    self.answer_skin = QPushButton("Apparences")
+    self.answer_skin.setFont(QFont(self.hunnin, 22))
+    self.answer_skin.setStyleSheet(btn_tools_stylesheet)
+    self.answer_skin.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    close_css = """
+      QPushButton:hover {
+        background-color: #c9c9c9;
+      }
+    """
+    self.close_button = QPushButton("Fermer")
+    self.close_button.setFont(QFont(self.calSans, 18))
+    self.close_button.pressed.connect(self.switchRightSide)
+    self.close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.close_button.setStyleSheet(close_css)
+
+    blank_space = QWidget()
+    spacing_layout = QHBoxLayout()
+    spacing_layout.addWidget(blank_space, stretch=3)
+    spacing_layout.addWidget(self.close_button, stretch=1)
+
+    # Crée un layout pour les boutons de configuration
+    buttons_layout = QVBoxLayout()
+    buttons_layout.addWidget(self.answer_pos)
+    buttons_layout.addWidget(self.answer_dial)
+    buttons_layout.addWidget(self.answer_skin)
+
+    # Ajoute des stretches pour centrer verticalement
+    config_layout = QVBoxLayout()
+    config_layout.addStretch(1)
+    config_layout.addWidget(config_question, alignment=Qt.AlignmentFlag.AlignCenter)
+    config_layout.addSpacing(20)
+    config_layout.addLayout(buttons_layout)
+    config_layout.addStretch(1)
+    config_layout.addLayout(spacing_layout)
+
+    # Page 3 - Right Side :
+    pers_pos_infotext1 = QLabel("Veuillez cliquer sur la case où vous souhaitez positionner votre personnage.")
+    pers_pos_infotext1.setFont(QFont(self.hunnin, 22))
+    pers_pos_infotext1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    pers_pos_infotext1.setWordWrap(True)
+    pers_pos_infotext2 = QLabel("Attention, il ne doit pas être trop proche d'un ennemi ou d'un autre personnage.")
+    pers_pos_infotext2.setFont(QFont(self.hunnin, 22))
+    pers_pos_infotext2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    pers_pos_infotext2.setWordWrap(True)
+
+    pers_pos_layout = QVBoxLayout()
+    pers_pos_close_button = QPushButton("Fermer")
+    pers_pos_close_button.setFont(QFont(self.calSans, 18))
+    pers_pos_close_button.pressed.connect(self.switchRightSide)
+    pers_pos_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+    pers_pos_close_button.setStyleSheet(close_css)
+
+    blank_space2 = QWidget()
+    spacing_layout2 = QHBoxLayout()
+    spacing_layout2.addWidget(blank_space2, stretch=3)
+    spacing_layout2.addWidget(pers_pos_close_button, stretch=1)
+
+    pers_pos_layout.addWidget(pers_pos_infotext1)
+    pers_pos_layout.addWidget(pers_pos_infotext2)
+    pers_pos_layout.addLayout(spacing_layout2)
+
+    pers_pos_container = QWidget()
+    pers_pos_container.setLayout(pers_pos_layout)
+
+    self.right_layout = QStackedLayout()
+    self.tools_container = QWidget()
+    self.tools_container.setLayout(self.tools_layout)
+    self.right_layout.addWidget(self.tools_container)
+    self.config_container = QWidget()
+    self.config_container.setLayout(config_layout)
+    self.right_layout.addWidget(self.config_container)
+    self.right_layout.addWidget(pers_pos_container)
+    self.right_layout.setCurrentIndex(0)
+
     self.map_widget = QWidget()
     self.map_widget.setObjectName("Map")
     self.map_widget.setLayout(self.map_layout)
     self.tools_widget = QWidget()
     self.tools_widget.setObjectName("Tools")
-    self.tools_widget.setLayout(self.tools_layout)
+    self.tools_widget.setLayout(self.right_layout)
 
     self.main_layout = QHBoxLayout()
     self.main_layout.setContentsMargins(20, 0, 20, 20)
@@ -317,13 +461,26 @@ class MainWindow(QMainWindow):
 
   def generateGrid(self):
     self.map_size = self.sw.getMap_size()
+    self.pers_limit = self.map_size // 4
     
     if self.map_size == -1:
       return
 
     # on remplace self.grid_map (un QWidget vide) par notre GridWidget
-    self.grid_map = GridWidget(self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, self.enemy_path)
+    self.grid_map = GridWidget(self, self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, self.enemy_path)
     self.grid_map.initJsonGrid() 
+
+  def switchRightSide(self, mode = None):
+    sender = self.sender()
+    if sender :
+      if sender.text() == "Configurer" :
+        self.current_NPC_selected = sender.objectName()
+        self.right_layout.setCurrentIndex(1)
+      elif mode == 1 :
+        self.right_layout.setCurrentIndex(2)
+      else :
+        self.current_NPC_selected = None
+        self.right_layout.setCurrentIndex(0)
 
   def switchToolsTabs(self):
     sender = self.sender()
@@ -417,6 +574,88 @@ class MainWindow(QMainWindow):
       pass
     QApplication.restoreOverrideCursor()
 
+  def createNewPerso(self):
+    if self.nb_perso < self.pers_limit :
+      self.npc_dialog = NewNPC(self.addPersTable)
+      self.npc_dialog.show()
+    else :
+      QMessageBox.warning(self, "Action impossible", "Désolé, vous avez atteint la limite de personnages.\nVeuillez supprimer un personnage existant avant de poursuivre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+
+  def addPersTable(self, name, color):
+    if name == "" :
+      QMessageBox.warning(self, "Action impossible", "Malheureusement, un nom est requis pour votre personnage.\nMerci de le renseigner.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    elif name in [npc[0] for npc in self.NPCs] :
+      QMessageBox.warning(self, "Action impossible", "Malheureusement, vous utilisez déjà ce nom pour un autre personnage.\nMerci d'en choisir un autre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    elif color in self.pers_colors :
+      QMessageBox.warning(self, "Action impossible", "Désolé, vous utilisez déjà cette couleur pour un autre personnage.\nMerci d'en utiliser une autre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    else :
+      if hasattr(self, 'npc_dialog') and self.npc_dialog.isVisible():
+        self.npc_dialog.close()
+      
+      self.pers_colors.append(color)
+      self.page4_table.setRowCount(self.nb_perso+1)
+      pers_color = QColor(color)
+
+      config_css = """
+        QPushButton:hover {
+          background-color: #c9c9c9;
+        }
+      """
+      config_button = QPushButton("Configurer")
+      config_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+      config_button.setCursor(Qt.CursorShape.PointingHandCursor)
+      config_button.pressed.connect(self.switchRightSide)
+      config_button.setFont(QFont(self.calSans, 18))
+      config_button.setStyleSheet(config_css)
+      config_button.setObjectName(name)
+
+      name_item = QTableWidgetItem(name)
+      name_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+      self.page4_table.setItem(self.nb_perso, 0, name_item)
+      color_item = QTableWidgetItem()
+      color_item.setBackground(pers_color)
+      self.page4_table.setItem(self.nb_perso, 1, color_item)
+      self.page4_table.setCellWidget(self.nb_perso, 2, config_button)
+      self.nb_perso += 1
+      self.NPCs.append([name, color])
+
+  def deletePersoDialog(self):
+    if self.NPCs == [] :
+      QMessageBox.warning(self, "Action impossible", "Aucun personnage à supprimer.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+    else :
+      self.deleteNPCdialog = RemoveNPC(self)
+      self.deleteNPCdialog.show()
+
+  def deletePerso(self, name):
+    if hasattr(self, 'deleteNPCdialog') and self.deleteNPCdialog.isVisible():
+      self.deleteNPCdialog.close()
+    for npc in self.NPCs :
+      if npc[0] == name :
+        self.NPCs.remove(npc)
+        row_to_remove = None
+        for row in range(self.page4_table.rowCount()):
+          item = self.page4_table.item(row, 0)
+          if item and item.text() == name:
+            row_to_remove = row
+            break
+        if row_to_remove is not None:
+          self.page4_table.removeRow(row_to_remove)
+          self.nb_perso -= 1
+        break
+
+  def selectNPCposition(self):
+    self.switchRightSide(1)
+    self.grid_map.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.grid_map.map_mode = 5
+  
+  def pos_given(self, position_transmitted) :
+    if self.current_NPC_selected not in self.saved_NPCs:
+      self.saved_NPCs[self.current_NPC_selected] = {}
+    self.saved_NPCs[self.current_NPC_selected]["position"] = position_transmitted
+    self.grid_map.map_mode = 0
+    self.grid_map.setCursor(Qt.CursorShape.ArrowCursor)
+    self.right_layout.setCurrentIndex(1)
+    
   def play(self):
     if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
       QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
