@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
@@ -363,11 +363,13 @@ class MainWindow(QMainWindow):
     self.answer_dial.setFont(QFont(self.hunnin, 22))
     self.answer_dial.setStyleSheet(btn_tools_stylesheet)
     self.answer_dial.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.answer_dial.pressed.connect(self.defineConversation)
 
     self.answer_skin = QPushButton("Apparences")
     self.answer_skin.setFont(QFont(self.hunnin, 22))
     self.answer_skin.setStyleSheet(btn_tools_stylesheet)
     self.answer_skin.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.answer_skin.pressed.connect(self.defineSkins)
 
     close_css = """
       QPushButton:hover {
@@ -429,6 +431,59 @@ class MainWindow(QMainWindow):
     pers_pos_container = QWidget()
     pers_pos_container.setLayout(pers_pos_layout)
 
+    # Page 4 - Right Side :
+    pers_dialogue = QLabel("Disponible prochainement...")
+
+    # Page 5 - Right Side :
+    perso_skin_text = QLabel("Ajouter des apparences à votre personnage :")
+    perso_skin_text.setFont(QFont(self.hunnin, 22))
+    perso_skin_text.setWordWrap(True)
+    perso_skin_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    perso_skin_1 = QPushButton("Apparence 1 (obligatoire)")
+    perso_skin_1.setFont(QFont(self.hunnin, 22))
+    perso_skin_1.setStyleSheet(btn_tools_stylesheet)
+    perso_skin_1.setCursor(Qt.CursorShape.PointingHandCursor)
+    perso_skin_1.pressed.connect(self.skinGetter)
+
+    perso_skin_2 = QPushButton("Apparence 2 (facultative)")
+    perso_skin_2.setFont(QFont(self.hunnin, 22))
+    perso_skin_2.setStyleSheet(btn_tools_stylesheet)
+    perso_skin_2.setCursor(Qt.CursorShape.PointingHandCursor)
+    perso_skin_2.pressed.connect(self.skinGetter)
+
+    perso_skin_3 = QPushButton("Apparence 3 (facultative)")
+    perso_skin_3.setFont(QFont(self.hunnin, 22))
+    perso_skin_3.setStyleSheet(btn_tools_stylesheet)
+    perso_skin_3.setCursor(Qt.CursorShape.PointingHandCursor)
+    perso_skin_3.pressed.connect(self.skinGetter)
+
+    skins_group = QVBoxLayout()
+    skins_group.addWidget(perso_skin_1)
+    skins_group.addWidget(perso_skin_2)
+    skins_group.addWidget(perso_skin_3)
+
+    skin_close_button = QPushButton("Fermer")
+    skin_close_button.setFont(QFont(self.calSans, 18))
+    skin_close_button.pressed.connect(self.switchRightSide)
+    skin_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+    skin_close_button.setStyleSheet(close_css)
+    blank_space4 = QWidget()
+    spacing_layout4 = QHBoxLayout()
+    spacing_layout4.addWidget(blank_space4, stretch=3)
+    spacing_layout4.addWidget(skin_close_button, stretch=1)
+
+    skin_layout = QVBoxLayout()
+    skin_layout.addStretch(1)
+    skin_layout.addWidget(perso_skin_text)
+    skin_layout.addSpacing(20)
+    skin_layout.addLayout(skins_group)
+    skin_layout.addStretch(1)
+    skin_layout.addLayout(spacing_layout4)
+
+    skin_container = QWidget()
+    skin_container.setLayout(skin_layout)
+
     self.right_layout = QStackedLayout()
     self.tools_container = QWidget()
     self.tools_container.setLayout(self.tools_layout)
@@ -437,6 +492,8 @@ class MainWindow(QMainWindow):
     self.config_container.setLayout(config_layout)
     self.right_layout.addWidget(self.config_container)
     self.right_layout.addWidget(pers_pos_container)
+    self.right_layout.addWidget(pers_dialogue)
+    self.right_layout.addWidget(skin_container)
     self.right_layout.setCurrentIndex(0)
 
     self.map_widget = QWidget()
@@ -478,6 +535,10 @@ class MainWindow(QMainWindow):
         self.right_layout.setCurrentIndex(1)
       elif mode == 1 :
         self.right_layout.setCurrentIndex(2)
+      elif mode == 2:
+        self.right_layout.setCurrentIndex(3)
+      elif mode == 3:
+        self.right_layout.setCurrentIndex(4)
       else :
         self.current_NPC_selected = None
         self.right_layout.setCurrentIndex(0)
@@ -647,6 +708,12 @@ class MainWindow(QMainWindow):
     self.switchRightSide(1)
     self.grid_map.setCursor(Qt.CursorShape.PointingHandCursor)
     self.grid_map.map_mode = 5
+
+  def defineConversation(self):
+    self.switchRightSide(2)
+
+  def defineSkins(self):
+    self.switchRightSide(3)
   
   def pos_given(self, position_transmitted) :
     if self.current_NPC_selected not in self.saved_NPCs:
@@ -655,6 +722,18 @@ class MainWindow(QMainWindow):
     self.grid_map.map_mode = 0
     self.grid_map.setCursor(Qt.CursorShape.ArrowCursor)
     self.right_layout.setCurrentIndex(1)
+
+  def skinGetter(self):
+    sender = self.sender()
+    filename, _ = QFileDialog.getOpenFileName(self,"Sélectionner l'image représentant votre personnage","","Images (*.png *.jpg *.jpeg)")
+    if filename :
+      os.makedirs("workingDir/NPCS/", exist_ok=True)
+      if sender.text() == "Apparence 1 (obligatoire)" :
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 1)
+      elif sender.text() == "Apparence 2 (facultative)" :
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 2)
+      elif sender.text() == "Apparence 3 (facultative)" :
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 3)
     
   def play(self):
     if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
