@@ -33,7 +33,6 @@ class GridWidget(QWidget):
         with open(self.filename, "w") as f:
             data["Enemy"] = self.packEnemies()
             json.dump(data, f, indent=2, sort_keys=False, ensure_ascii=False)
-        
 
     def sizeHint(self):
         return QSize(400, 400)

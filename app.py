@@ -1,5 +1,5 @@
 import sys, os
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QGridLayout, QCheckBox, QSizePolicy, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
 from modules.starting import StartWindow
@@ -7,6 +7,7 @@ from modules.grid import GridWidget
 from modules.newNPC import NewNPC
 from modules.removeNPC import RemoveNPC
 from modules.game import NPC
+from modules.bloc import Bloc
 from emulatedTerminal import EmulatedTerminal
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
 from scripts.image_to_ascii import image_to_ascii_by_color
@@ -432,7 +433,113 @@ class MainWindow(QMainWindow):
     pers_pos_container.setLayout(pers_pos_layout)
 
     # Page 4 - Right Side :
-    pers_dialogue = QLabel("Disponible prochainement...")
+    pers_dialogue_layout = QVBoxLayout()
+    bloc_btn_stylesheet = """
+      QPushButton {
+        background-color : white;
+        color : black;
+        border-radius : 10px;
+        padding : 10px;
+        padding-top: 4px;
+        padding-bottom : 4px;
+      }
+      QPushButton:hover{
+        background-color: #c9c9c9;
+      }
+    """
+
+    bloc_combobox_stylesheet = """
+      QComboBox {
+        background-color : white;
+        color : black;
+        border-radius : 10px;
+        padding : 10px;
+        padding-top: 4px;
+        padding-bottom : 4px;
+      }
+      QComboBox QAbstractItemView {
+        background-color: white;
+        color: black;
+        selection-background-color: #c9c9c9;
+        selection-color: black;
+        padding: 4px;
+      }
+    """
+    pers_dialogue_layout.addWidget(Bloc(self,0,1,QLabel("DÉBUT"), "#00cf23", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    print_text_layout = QHBoxLayout()
+    print_text_layout.setContentsMargins(0,0,0,0)
+    afficher = QLabel("Afficher")
+    afficher.setFont(QFont(self.hunnin, 20))
+    texte_btn = QPushButton("texte")
+    texte_btn.setFont(QFont(self.hunnin, 20))
+    texte_btn.setStyleSheet(bloc_btn_stylesheet)
+    texte_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    print_text_layout.addWidget(afficher)
+    print_text_layout.addWidget(texte_btn)
+    print_text = QWidget()
+    print_text.setLayout(print_text_layout)
+    pers_dialogue_layout.addWidget(Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    ask_layout = QHBoxLayout()
+    ask_layout.setContentsMargins(0,0,0,0)
+    poser = QLabel("Poser")
+    poser.setFont(QFont(self.hunnin, 20))
+    ask_btn = QPushButton("question")
+    ask_btn.setFont(QFont(self.hunnin, 20))
+    ask_btn.setStyleSheet(bloc_btn_stylesheet)
+    ask_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    a_text = QLabel("à")
+    a_text.setFont(QFont(self.hunnin, 20))
+    nb_answers_selector = QComboBox()
+    nb_answers_selector.setFont(QFont(self.hunnin, 20))
+    nb_answers_selector.setStyleSheet(bloc_combobox_stylesheet)
+    nb_answers_selector.addItems(["2","3"])
+    nb_answers_selector.setCursor(Qt.CursorShape.PointingHandCursor)
+    answers_text = QLabel("réponses")
+    answers_text.setFont(QFont(self.hunnin, 20))
+    ask_layout.addWidget(poser)
+    ask_layout.addWidget(ask_btn)
+    ask_layout.addWidget(a_text)
+    ask_layout.addWidget(nb_answers_selector)
+    ask_layout.addWidget(answers_text)
+    ask_container = QWidget()
+    ask_container.setLayout(ask_layout)
+    pers_dialogue_layout.addWidget(Bloc(self,1,3,ask_container, "#ff00b3", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    pers_dialogue_layout.addWidget(Bloc(self,3,1,QLabel("Regroupement des flux"), "#7700e6", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    python_layout = QHBoxLayout()
+    python_layout.setContentsMargins(0,0,0,0)
+    executer = QLabel("Exécuter")
+    executer.setFont(QFont(self.hunnin, 20))
+    python_btn = QPushButton("code Python")
+    python_btn.setFont(QFont(self.hunnin, 20))
+    python_btn.setStyleSheet(bloc_btn_stylesheet)
+    python_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    python_layout.addWidget(executer)
+    python_layout.addWidget(python_btn)
+    python_bloc_container = QWidget()
+    python_bloc_container.setLayout(python_layout)
+    pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    pers_dialogue_layout.addWidget(Bloc(self,1,0,QLabel("FIN"), "#ffae00", "#FFFFFF", QFont(self.hunnin, 20)))
+
+    blank_space5 = QWidget()
+    dialogue_close_button = QPushButton("Fermer")
+    dialogue_close_button.setFont(QFont(self.calSans, 18))
+    dialogue_close_button.pressed.connect(self.switchRightSide)
+    dialogue_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+    dialogue_close_button.setStyleSheet(close_css)
+
+    dialogue_close_layout = QHBoxLayout()
+    dialogue_close_layout.addWidget(blank_space5, stretch=3)
+    dialogue_close_layout.addWidget(dialogue_close_button, stretch=1)
+
+    pers_dialogue_layout.addLayout(dialogue_close_layout)
+
+    perso_dialogue_container = QWidget()
+    perso_dialogue_container.setLayout(pers_dialogue_layout)
 
     # Page 5 - Right Side :
     perso_skin_text = QLabel("Ajouter des apparences à votre personnage :")
@@ -492,7 +599,7 @@ class MainWindow(QMainWindow):
     self.config_container.setLayout(config_layout)
     self.right_layout.addWidget(self.config_container)
     self.right_layout.addWidget(pers_pos_container)
-    self.right_layout.addWidget(pers_dialogue)
+    self.right_layout.addWidget(perso_dialogue_container)
     self.right_layout.addWidget(skin_container)
     self.right_layout.setCurrentIndex(0)
 
@@ -693,6 +800,11 @@ class MainWindow(QMainWindow):
     for npc in self.NPCs :
       if npc[0] == name :
         self.NPCs.remove(npc)
+        self.pers_colors.remove(npc[1])
+        for position in self.grid_map.pos_NPCS :
+          if position[1] == npc[1] :
+            self.grid_map.pos_NPCS.remove(position)
+            self.grid_map.update()
         row_to_remove = None
         for row in range(self.page4_table.rowCount()):
           item = self.page4_table.item(row, 0)
