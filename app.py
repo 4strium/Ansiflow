@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
     self.current_NPC_selected = None
     self.NPCs = []
     self.saved_NPCs = {}
+    self.bloc_zone = []
     self.startup()
 
   def startup(self) :
@@ -83,6 +84,15 @@ class MainWindow(QMainWindow):
     self.map_layout = QVBoxLayout()
     self.map_layout.addWidget(self.title_map)
     self.map_layout.addWidget(self.grid_map, stretch=1)
+
+    title_working_zone = QLabel("Le Schéma du Dialogue")
+    title_working_zone.setFont(QFont(self.calSans, 36))
+    title_working_zone.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+    self.bloc_working_zone = QWidget()
+    self.bloc_layout = QVBoxLayout()
+    self.bloc_layout.addWidget(title_working_zone)
+    self.bloc_layout.addWidget(self.bloc_working_zone, stretch=1)
 
     self.title_tools = QLabel("Les Outils")
     self.title_tools.setFont(QFont(self.calSans, 36))
@@ -465,7 +475,7 @@ class MainWindow(QMainWindow):
         padding: 4px;
       }
     """
-    pers_dialogue_layout.addWidget(Bloc(self,0,1,QLabel("DÉBUT"), "#00cf23", "#FFFFFF", QFont(self.hunnin, 20)))
+    pers_dialogue_layout.addWidget(Bloc(self,0,1,QLabel("DÉBUT"), "#00cf23", "#FFFFFF", QFont(self.hunnin, 20), True))
 
     print_text_layout = QHBoxLayout()
     print_text_layout.setContentsMargins(0,0,0,0)
@@ -506,8 +516,16 @@ class MainWindow(QMainWindow):
     ask_container = QWidget()
     ask_container.setLayout(ask_layout)
     pers_dialogue_layout.addWidget(Bloc(self,1,3,ask_container, "#ff00b3", "#FFFFFF", QFont(self.hunnin, 20)))
+    
 
-    pers_dialogue_layout.addWidget(Bloc(self,3,1,QLabel("Regroupement des flux"), "#7700e6", "#FFFFFF", QFont(self.hunnin, 20)))
+    flux_text = QLabel("Regroupement des flux")
+    flux_text.setFont(QFont(self.hunnin, 20))
+    flux_layout = QHBoxLayout()
+    flux_layout.setContentsMargins(0,0,0,0)
+    flux_layout.addWidget(flux_text)
+    flux_container = QWidget()
+    flux_container.setLayout(flux_layout)
+    pers_dialogue_layout.addWidget(Bloc(self,3,1,flux_container, "#7700e6", "#FFFFFF", QFont(self.hunnin, 20)))
 
     python_layout = QHBoxLayout()
     python_layout.setContentsMargins(0,0,0,0)
@@ -523,7 +541,7 @@ class MainWindow(QMainWindow):
     python_bloc_container.setLayout(python_layout)
     pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", QFont(self.hunnin, 20)))
 
-    pers_dialogue_layout.addWidget(Bloc(self,1,0,QLabel("FIN"), "#ffae00", "#FFFFFF", QFont(self.hunnin, 20)))
+    pers_dialogue_layout.addWidget(Bloc(self,1,0,QLabel("FIN"), "#ffae00", "#FFFFFF", QFont(self.hunnin, 20), True))
 
     blank_space5 = QWidget()
     dialogue_close_button = QPushButton("Fermer")
@@ -603,16 +621,25 @@ class MainWindow(QMainWindow):
     self.right_layout.addWidget(skin_container)
     self.right_layout.setCurrentIndex(0)
 
-    self.map_widget = QWidget()
-    self.map_widget.setObjectName("Map")
-    self.map_widget.setLayout(self.map_layout)
+    self.left_layout = QStackedLayout()
+    self.map_container = QWidget()
+    self.map_container.setLayout(self.map_layout)
+    self.bloc_container = QWidget()
+    self.bloc_container.setLayout(self.bloc_layout)
+    self.left_layout.addWidget(self.map_container)
+    self.left_layout.addWidget(self.bloc_container)
+    self.left_layout.setCurrentIndex(0)
+
+    self.map_bloc_widget = QWidget()
+    self.map_bloc_widget.setObjectName("Map")
+    self.map_bloc_widget.setLayout(self.left_layout)
     self.tools_widget = QWidget()
     self.tools_widget.setObjectName("Tools")
     self.tools_widget.setLayout(self.right_layout)
 
     self.main_layout = QHBoxLayout()
     self.main_layout.setContentsMargins(20, 0, 20, 20)
-    self.main_layout.addWidget(self.map_widget, stretch=2)
+    self.main_layout.addWidget(self.map_bloc_widget, stretch=2)
     self.main_layout.addSpacing(int(self.width() * 0.01))
     self.main_layout.addWidget(self.tools_widget, stretch=1)
     self.setStyleSheet(stylesheet_main_layout)
@@ -644,11 +671,14 @@ class MainWindow(QMainWindow):
         self.right_layout.setCurrentIndex(2)
       elif mode == 2:
         self.right_layout.setCurrentIndex(3)
+        self.left_layout.setCurrentIndex(1)
+        self.resizeReleaseZone()
       elif mode == 3:
         self.right_layout.setCurrentIndex(4)
       else :
         self.current_NPC_selected = None
         self.right_layout.setCurrentIndex(0)
+        self.left_layout.setCurrentIndex(0)
 
   def switchToolsTabs(self):
     sender = self.sender()
@@ -882,11 +912,18 @@ class MainWindow(QMainWindow):
     self.title_map.setFont(QFont(self.calSans, responsive_font_size))
     self.title_tools.setFont(QFont(self.calSans, responsive_font_size))
 
+  def resizeReleaseZone(self):
+    top_left = self.bloc_working_zone.mapTo(self, self.bloc_working_zone.rect().topLeft())
+    bottom_right = self.bloc_working_zone.mapTo(self, self.bloc_working_zone.rect().bottomRight())
+    self.bloc_zone = [(top_left.x()+2, top_left.y()), (bottom_right.x()-2, bottom_right.y()-50)]
+
   def resizeEvent(self, event):
     if hasattr(self, 'main_layout'):
       self.maintainSpacingLayout()
     if hasattr(self, 'title_map'):
       self.resizeTitles()
+    if hasattr(self, "bloc_working_zone"):
+      self.resizeReleaseZone()
     super().resizeEvent(event)
     
 if __name__ == "__main__":

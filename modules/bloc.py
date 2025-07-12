@@ -2,9 +2,10 @@ import sys
 from PyQt6.QtWidgets import QWidget, QApplication, QMainWindow, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QComboBox
 from PyQt6.QtGui import QPainter, QPen, QColor, QPolygon, QBrush, QMouseEvent, QFont
 from PyQt6.QtCore import Qt, QPoint
+from modules.duplicateTools import duplicate_widget
 
 class Bloc(QWidget) :
-  def __init__(self, main_app, nb_inputs, nb_outputs, content, bloc_color, text_color, font, drag_zone = None):
+  def __init__(self, main_app, nb_inputs, nb_outputs, content, bloc_color, text_color, font, unicity = False):
     super().__init__()
     self.mainApp = main_app
     self.nb_inputs = nb_inputs
@@ -18,11 +19,11 @@ class Bloc(QWidget) :
     self.max_height = 100
     self.content_padding = 20
     self.visible = True
+    self.unique = unicity
 
+    self.already_moved = False
     self.dragging = False
     self.dragging_position = QPoint()
-
-    self.dragging_area = drag_zone
 
     self.initializeUI()
 
@@ -99,11 +100,10 @@ class Bloc(QWidget) :
         # Convertir en position locale pour le parent direct
         parent_widget = self.parent()
         if parent_widget and central_widget != parent_widget:
-          parent_pos = parent_widget.mapFromGlobal(central_widget.mapToGlobal(self.new_pos))
-          self.move(parent_pos)
+          self.parent_pos = parent_widget.mapFromGlobal(central_widget.mapToGlobal(self.new_pos))
+          self.move(self.parent_pos)
         else:
           self.move(self.new_pos)
-          
       event.accept()
   
   def mouseReleaseEvent(self, event: QMouseEvent):
@@ -111,9 +111,27 @@ class Bloc(QWidget) :
       self.dragging = False
       self.setCursor(Qt.CursorShape.OpenHandCursor)
       event.accept()
-      if self.dragging_area :
-        if (self.dragging_area[0][0] <= self.new_pos.x() <= self.dragging_area[1][0]) and (self.dragging_area[0][1] <= self.new_pos.y() <= self.dragging_area[1][1]) :
-          pass
+      if self.mainApp.bloc_zone :
+        if (self.mainApp.bloc_zone[0][0] <= self.new_pos.x() <= self.mainApp.bloc_zone[1][0]) and (self.mainApp.bloc_zone[0][1] <= self.new_pos.y() <= self.mainApp.bloc_zone[1][1]) :
+          if not self.already_moved :
+            if self.unique :
+              self.setParent(self.mainApp.bloc_working_zone)
+              self.already_moved = True
+              self.move(self.new_pos)
+              self.show()
+              self.raise_()
+            else :
+              copy_content = duplicate_widget(self.content)
+              bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.text_font, self.unique)
+              bloc_copy.setParent(self.mainApp.bloc_working_zone)
+              bloc_copy.already_moved = True
+              bloc_copy.move(self.new_pos)
+              bloc_copy.show()
+              bloc_copy.raise_()
+              self.move(self.pos_before_drag)
+            self.mainApp.update()
+          else :
+            self.move(self.parent_pos)
         else :
           self.move(self.pos_before_drag)
 
