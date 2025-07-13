@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QPoint
 from modules.duplicateTools import duplicate_widget
 
 class Bloc(QWidget) :
-  def __init__(self, main_app, nb_inputs, nb_outputs, content, bloc_color, text_color, font, unicity = False):
+  def __init__(self, main_app, nb_inputs, nb_outputs, content, bloc_color, text_color, id=-1, unicity = False):
     super().__init__()
     self.mainApp = main_app
     self.nb_inputs = nb_inputs
@@ -13,14 +13,15 @@ class Bloc(QWidget) :
     self.content = content
     self.bloc_color = QColor(bloc_color)
     self.text_color = text_color
-    self.text_font = font
+    self.id = id
     self.max_width = 150
     self.width_value = max(self.max_width*self.nb_inputs, self.max_width*self.nb_outputs)
     self.max_height = 100
     self.content_padding = 20
+    self.content_size = 20
     self.visible = True
     self.unique = unicity
-
+    self.new_pos = None
     self.already_moved = False
     self.dragging = False
     self.dragging_position = QPoint()
@@ -31,9 +32,8 @@ class Bloc(QWidget) :
     self.setCursor(Qt.CursorShape.OpenHandCursor)
 
     self.content.setParent(self)
-    self.content.setFont(self.text_font)
     self.content.setStyleSheet(f"color: {self.text_color}; background: transparent;")
-    self.content.move(self.content_padding, (self.max_height - self.text_font.pointSize())//2)
+    self.content.move(self.content_padding, (self.max_height - self.content_size)//2)
     self.content.raise_()
 
   def setNbInputs(self, nb_inp):
@@ -54,7 +54,7 @@ class Bloc(QWidget) :
 
     painter.setPen(QPen(self.bloc_color, 1))
     painter.setBrush(QBrush(self.bloc_color))
-    
+
     polygon = [
       QPoint(0,0),
       QPoint(max(self.width_value, self.content.width()+(2*self.content_padding)),0),
@@ -111,111 +111,40 @@ class Bloc(QWidget) :
       self.dragging = False
       self.setCursor(Qt.CursorShape.OpenHandCursor)
       event.accept()
-      if self.mainApp.bloc_zone :
+      if self.mainApp.bloc_zone and self.new_pos :
         if (self.mainApp.bloc_zone[0][0] <= self.new_pos.x() <= self.mainApp.bloc_zone[1][0]) and (self.mainApp.bloc_zone[0][1] <= self.new_pos.y() <= self.mainApp.bloc_zone[1][1]) :
           if not self.already_moved :
+            copy_content = duplicate_widget(self.content)
+            bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.id, self.unique)
+            bloc_copy.setParent(self.mainApp.bloc_working_zone)
+            bloc_copy.already_moved = True
+            
+            # Forcer la mise à jour de la taille
+            bloc_copy.content.adjustSize()
+            bloc_copy.width_value = max(bloc_copy.max_width*bloc_copy.nb_inputs, bloc_copy.max_width*bloc_copy.nb_outputs)
+            bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.max_height + 40)
+            
+            bloc_copy.move(self.new_pos)
+            bloc_copy.show()
+            bloc_copy.raise_()
             if self.unique :
-              self.setParent(self.mainApp.bloc_working_zone)
-              self.already_moved = True
-              self.move(self.new_pos)
-              self.show()
-              self.raise_()
-            else :
-              copy_content = duplicate_widget(self.content)
-              bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.text_font, self.unique)
-              bloc_copy.setParent(self.mainApp.bloc_working_zone)
-              bloc_copy.already_moved = True
-              bloc_copy.move(self.new_pos)
-              bloc_copy.show()
-              bloc_copy.raise_()
+              self.hide()
+            else : 
               self.move(self.pos_before_drag)
-            self.mainApp.update()
           else :
             self.move(self.parent_pos)
         else :
-          self.move(self.pos_before_drag)
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Bloc PyQt6")
-        main_layout = QVBoxLayout()
-
-        bloc_btn_stylesheet = """
-          QPushButton {
-            background-color : white;
-            color : black;
-            border-radius : 10px;
-            padding : 10px;
-            padding-top: 4px;
-            padding-bottom : 4px;
-          }
-          QPushButton:hover{
-            background-color: #c9c9c9;
-          }
-        """
-
-        bloc_combobox_stylesheet = """
-          QComboBox {
-            background-color : white;
-            color : black;
-            border-radius : 10px;
-            padding : 10px;
-            padding-top: 4px;
-            padding-bottom : 4px;
-          }
-          QComboBox QAbstractItemView {
-            background-color: white;
-            color: black;
-            selection-background-color: #c9c9c9;
-            selection-color: black;
-            padding: 4px;
-          }
-        """
-
-        print_text_layout = QHBoxLayout()
-        print_text_layout.setContentsMargins(0,0,0,0)
-        afficher = QLabel("Afficher")
-        texte_btn = QPushButton("texte")
-        texte_btn.setFont(QFont("Arial", 20))
-        texte_btn.setStyleSheet(bloc_btn_stylesheet)
-        print_text_layout.addWidget(afficher)
-        print_text_layout.addWidget(texte_btn)
-        print_text = QWidget()
-        print_text.setLayout(print_text_layout)
-        main_layout.addWidget(Bloc(1,1, print_text, "#00ccff", "#FFFFFF", QFont("Arial", 20)))
-
-        ask_layout = QHBoxLayout()
-        ask_layout.setContentsMargins(0,0,0,0)
-        poser = QLabel("Poser")
-        ask_btn = QPushButton("question")
-        ask_btn.setFont(QFont("Arial", 20))
-        ask_btn.setStyleSheet(bloc_btn_stylesheet)
-        a_text = QLabel("à")
-        nb_answers_selector = QComboBox()
-        nb_answers_selector.setFont(QFont("Arial", 20))
-        nb_answers_selector.setStyleSheet(bloc_combobox_stylesheet)
-        nb_answers_selector.addItems(["2","3"])
-        answers_text = QLabel("réponses")
-        ask_layout.addWidget(poser)
-        ask_layout.addWidget(ask_btn)
-        ask_layout.addWidget(a_text)
-        ask_layout.addWidget(nb_answers_selector)
-        ask_layout.addWidget(answers_text)
-        ask_container = QWidget()
-        ask_container.setLayout(ask_layout)
-        main_layout.addWidget(Bloc(1,3,ask_container, "#ff00b3", "#FFFFFF", QFont("Arial", 20)))
-
-
-        main_layout.addWidget(Bloc(0,1,QLabel("DÉBUT"), "#15ff00", "#FFFFFF", QFont("Arial", 20)))
-        main_layout.addWidget(Bloc(1,0,QLabel("FIN"), "#ffae00", "#FFFFFF", QFont("Arial", 20)))
-        main_layout_container = QWidget()
-        main_layout_container.setLayout(main_layout)
-        self.setCentralWidget(main_layout_container)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
-
+          if self.already_moved :
+            if self.unique :
+              for i in range(self.mainApp.pers_dialogue_layout.count()):
+                widget = self.mainApp.pers_dialogue_layout.itemAt(i).widget()
+                if widget is not None :   
+                  if widget.id == self.id :
+                    widget.show()
+                    break
+            else :
+              self.setParent(None)
+              self.deleteLater()
+          else :
+            self.move(self.pos_before_drag)
+        self.mainApp.update()

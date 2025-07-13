@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
 
   def initializeUI(self):
     self.setWindowTitle("Patate - The 3D ASCII Game Engine")
-    self.setMinimumSize(1000,650)
+    self.setMinimumSize(1250,650)
     self.showMaximized()
 
     # Load the custom fonts
@@ -443,7 +443,7 @@ class MainWindow(QMainWindow):
     pers_pos_container.setLayout(pers_pos_layout)
 
     # Page 4 - Right Side :
-    pers_dialogue_layout = QVBoxLayout()
+    self.pers_dialogue_layout = QVBoxLayout()
     bloc_btn_stylesheet = """
       QPushButton {
         background-color : white;
@@ -475,7 +475,15 @@ class MainWindow(QMainWindow):
         padding: 4px;
       }
     """
-    pers_dialogue_layout.addWidget(Bloc(self,0,1,QLabel("DÉBUT"), "#00cf23", "#FFFFFF", QFont(self.hunnin, 20), True))
+    start_text = QLabel("DÉBUT")
+    start_text.setFont(QFont(self.hunnin, 20))
+    start_layout = QHBoxLayout()
+    start_layout.setContentsMargins(0,0,0,0)
+    start_layout.addWidget(start_text)
+    start_container = QWidget()
+    start_container.setLayout(start_layout)
+    self.start_bloc = Bloc(self,0,1, start_container, "#00cf23", "#FFFFFF", 0, True)
+    self.pers_dialogue_layout.addWidget(self.start_bloc)
 
     print_text_layout = QHBoxLayout()
     print_text_layout.setContentsMargins(0,0,0,0)
@@ -489,7 +497,7 @@ class MainWindow(QMainWindow):
     print_text_layout.addWidget(texte_btn)
     print_text = QWidget()
     print_text.setLayout(print_text_layout)
-    pers_dialogue_layout.addWidget(Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", QFont(self.hunnin, 20)))
+    self.pers_dialogue_layout.addWidget(Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", 1))
 
     ask_layout = QHBoxLayout()
     ask_layout.setContentsMargins(0,0,0,0)
@@ -515,7 +523,7 @@ class MainWindow(QMainWindow):
     ask_layout.addWidget(answers_text)
     ask_container = QWidget()
     ask_container.setLayout(ask_layout)
-    pers_dialogue_layout.addWidget(Bloc(self,1,3,ask_container, "#ff00b3", "#FFFFFF", QFont(self.hunnin, 20)))
+    self.pers_dialogue_layout.addWidget(Bloc(self,1,3,ask_container, "#ff00b3", "#FFFFFF", 2))
     
 
     flux_text = QLabel("Regroupement des flux")
@@ -525,7 +533,7 @@ class MainWindow(QMainWindow):
     flux_layout.addWidget(flux_text)
     flux_container = QWidget()
     flux_container.setLayout(flux_layout)
-    pers_dialogue_layout.addWidget(Bloc(self,3,1,flux_container, "#7700e6", "#FFFFFF", QFont(self.hunnin, 20)))
+    self.pers_dialogue_layout.addWidget(Bloc(self,3,1,flux_container, "#7700e6", "#FFFFFF", 3))
 
     python_layout = QHBoxLayout()
     python_layout.setContentsMargins(0,0,0,0)
@@ -539,9 +547,16 @@ class MainWindow(QMainWindow):
     python_layout.addWidget(python_btn)
     python_bloc_container = QWidget()
     python_bloc_container.setLayout(python_layout)
-    pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", QFont(self.hunnin, 20)))
+    self.pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", 4))
 
-    pers_dialogue_layout.addWidget(Bloc(self,1,0,QLabel("FIN"), "#ffae00", "#FFFFFF", QFont(self.hunnin, 20), True))
+    end_text = QLabel("FIN")
+    end_text.setFont(QFont(self.hunnin, 20))
+    end_layout = QHBoxLayout()
+    end_layout.setContentsMargins(0,0,0,0)
+    end_layout.addWidget(end_text)
+    end_container = QWidget()
+    end_container.setLayout(end_layout)
+    self.pers_dialogue_layout.addWidget(Bloc(self,1,0,end_container, "#ffae00", "#FFFFFF", 5, True))
 
     blank_space5 = QWidget()
     dialogue_close_button = QPushButton("Fermer")
@@ -554,10 +569,10 @@ class MainWindow(QMainWindow):
     dialogue_close_layout.addWidget(blank_space5, stretch=3)
     dialogue_close_layout.addWidget(dialogue_close_button, stretch=1)
 
-    pers_dialogue_layout.addLayout(dialogue_close_layout)
+    self.pers_dialogue_layout.addLayout(dialogue_close_layout)
 
     perso_dialogue_container = QWidget()
-    perso_dialogue_container.setLayout(pers_dialogue_layout)
+    perso_dialogue_container.setLayout(self.pers_dialogue_layout)
 
     # Page 5 - Right Side :
     perso_skin_text = QLabel("Ajouter des apparences à votre personnage :")
