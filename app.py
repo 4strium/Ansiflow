@@ -912,8 +912,6 @@ class MainWindow(QMainWindow):
   def openDialogWorkspace(self):
     print("\n--- Ouverture ---\n")
     if (self.current_NPC_selected in self.saved_NPCs) and "dialogWorkspace" in self.saved_NPCs[self.current_NPC_selected]:
-      # Liste des ids uniques présents dans la zone de travail
-      
       for bloc in self.saved_NPCs[self.current_NPC_selected]["dialogWorkspace"]:
         try :
           if hasattr(bloc, "deleted") and bloc.deleted:
@@ -923,7 +921,6 @@ class MainWindow(QMainWindow):
         except RuntimeError :
           continue
       unique_ids_in_workspace = [bloc.id for bloc in self.bloc_working_zone.findChildren(Bloc) if (bloc.isVisibleTo(self.bloc_working_zone) and bloc.unique)]
-      # Pour chaque bloc palette unique, on le cache seulement si son id est dans la zone de travail, sinon on le montre
       for i in range(self.pers_dialogue_layout.count()):
         widget = self.pers_dialogue_layout.itemAt(i).widget()
         if widget is not None and getattr(widget, "unique", False):

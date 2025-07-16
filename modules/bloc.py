@@ -10,17 +10,22 @@ class Bloc(QWidget) :
     self.mainApp = main_app
     self.nb_inputs = nb_inputs
     self.nb_outputs = nb_outputs
+
+    self.used_inputs = [None] * self.nb_inputs
+    self.used_outputs = [None] * self.nb_outputs
+      
     self.content = content
     self.bloc_color = QColor(bloc_color)
     self.text_color = text_color
     self.id = id
-    self.max_width = 150
+    self.max_width = 337
     self.width_value = max(self.max_width*self.nb_inputs, self.max_width*self.nb_outputs)
     self.max_height = 100
     self.content_padding = 20
     self.content_size = 20
     self.visible = True
     self.unique = unicity
+    self.parent_pos = None
     self.new_pos = None
     self.already_moved = False
     self.dragging = False
@@ -118,6 +123,7 @@ class Bloc(QWidget) :
             bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.id, self.unique)
             bloc_copy.setParent(self.mainApp.bloc_working_zone)
             bloc_copy.already_moved = True
+            bloc_copy.parent_pos = self.new_pos
             
             bloc_copy.content.adjustSize()
             bloc_copy.width_value = max(bloc_copy.max_width*bloc_copy.nb_inputs, bloc_copy.max_width*bloc_copy.nb_outputs)
@@ -131,6 +137,7 @@ class Bloc(QWidget) :
             else : 
               self.move(self.pos_before_drag)
           else :
+            self.parent_pos = self.checkMagnetBloc()
             self.move(self.parent_pos)
         else :
           if self.already_moved :
@@ -146,6 +153,50 @@ class Bloc(QWidget) :
           else :
             self.move(self.pos_before_drag)
         self.mainApp.update()
+
+  def checkMagnetBloc(self):
+    magnet_pos = self.parent_pos
+    for bloc in self.mainApp.bloc_working_zone.findChildren(Bloc) :
+      if bloc is not None and bloc.isVisibleTo(self.mainApp.bloc_working_zone):
+        if bloc is self :
+          continue
+
+        # Reset previous connections with the current bloc :
+        for inpu in range(len(bloc.used_inputs)) :
+          if bloc.used_inputs[inpu] is not None :
+            if bloc.used_inputs[inpu][0] == id(self) :
+              bloc.used_inputs[inpu] = None
+        for outp in range(len(bloc.used_outputs)) :
+          if bloc.used_outputs[outp] is not None :
+            if bloc.used_outputs[outp][0] == id(self) :
+              bloc.used_outputs[outp] = None
+
+        diffy = self.parent_pos.y() - bloc.parent_pos.y()
+        if 0 <= diffy <= (2*bloc.max_height) and bloc.nb_outputs :
+          for i in range(self.nb_inputs) :
+            for j in range(bloc.nb_outputs) :
+              diffx = abs((self.parent_pos.x()+(i*self.max_width)) - (bloc.parent_pos.x()+(j*self.max_width)))
+              if diffx <= (self.max_width/2) :
+                if (bloc.used_outputs[j] == None and self.used_inputs[i] == None) :
+                  bloc.used_outputs[j] = (id(self), i)
+                  self.used_inputs[i] = (id(bloc), j)
+                  magnet_pos = QPoint(bloc.parent_pos.x()-(i*self.max_width), bloc.parent_pos.y() + bloc.max_height)
+                  return magnet_pos
+        elif -(2*bloc.max_height) <= diffy < 0 and bloc.nb_inputs :
+          for i in range(self.nb_outputs) :
+            for j in range(bloc.nb_inputs) :
+              diffx = abs((self.parent_pos.x()+(i*self.max_width)) - (bloc.parent_pos.x()+(j*self.max_width)))
+              if diffx <= (self.max_width/2) :
+                if (bloc.used_inputs[j] == None and self.used_outputs[i] == None) :
+                  bloc.used_inputs[j] = (id(self), i)
+                  self.used_outputs[i] = (id(bloc), j)
+                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.max_width), bloc.parent_pos.y() - bloc.max_height)
+                  return magnet_pos
+    
+    self.used_inputs = [None] * self.nb_inputs
+    self.used_outputs = [None] * self.nb_outputs
+
+    return magnet_pos
 
   def hide(self):
     print(f"Bloc caché : {self} (id={self.id}, unique={self.unique})")
