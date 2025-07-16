@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, time
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
 
   def __init__(self):
     super().__init__()
+
     self.border_color = "#000000"
     self.checked_bg_color = "#262626"
     self.player_color = "#a259f7"
@@ -492,7 +493,7 @@ class MainWindow(QMainWindow):
     texte_btn = QPushButton("texte")
     texte_btn.setFont(QFont(self.hunnin, 20))
     texte_btn.setStyleSheet(bloc_btn_stylesheet)
-    texte_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    texte_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     print_text_layout.addWidget(afficher)
     print_text_layout.addWidget(texte_btn)
     print_text = QWidget()
@@ -506,7 +507,7 @@ class MainWindow(QMainWindow):
     ask_btn = QPushButton("question")
     ask_btn.setFont(QFont(self.hunnin, 20))
     ask_btn.setStyleSheet(bloc_btn_stylesheet)
-    ask_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    ask_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     a_text = QLabel("à")
     a_text.setFont(QFont(self.hunnin, 20))
     nb_answers_selector = QComboBox()
@@ -542,7 +543,7 @@ class MainWindow(QMainWindow):
     python_btn = QPushButton("code Python")
     python_btn.setFont(QFont(self.hunnin, 20))
     python_btn.setStyleSheet(bloc_btn_stylesheet)
-    python_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    python_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     python_layout.addWidget(executer)
     python_layout.addWidget(python_btn)
     python_bloc_container = QWidget()
@@ -562,8 +563,9 @@ class MainWindow(QMainWindow):
     dialogue_close_button = QPushButton("Fermer")
     dialogue_close_button.setFont(QFont(self.calSans, 18))
     dialogue_close_button.pressed.connect(self.switchRightSide)
-    dialogue_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+    dialogue_close_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     dialogue_close_button.setStyleSheet(close_css)
+    dialogue_close_button.setObjectName("saveDialog")
 
     dialogue_close_layout = QHBoxLayout()
     dialogue_close_layout.addWidget(blank_space5, stretch=3)
@@ -688,12 +690,18 @@ class MainWindow(QMainWindow):
         self.right_layout.setCurrentIndex(3)
         self.left_layout.setCurrentIndex(1)
         self.resizeReleaseZone()
+        self.openDialogWorkspace()
+        QApplication.processEvents()
       elif mode == 3:
         self.right_layout.setCurrentIndex(4)
+      elif sender.objectName() == "saveDialog" :
+        self.saveDialogWorkspace()
+        QApplication.processEvents()
+        self.right_layout.setCurrentIndex(1)
+        self.left_layout.setCurrentIndex(0)
       else :
         self.current_NPC_selected = None
         self.right_layout.setCurrentIndex(0)
-        self.left_layout.setCurrentIndex(0)
 
   def switchToolsTabs(self):
     sender = self.sender()
@@ -901,6 +909,47 @@ class MainWindow(QMainWindow):
       self.game = EmulatedTerminal()
       self.game.show()
 
+  def openDialogWorkspace(self):
+    print("\n--- Ouverture ---\n")
+    if (self.current_NPC_selected in self.saved_NPCs) and "dialogWorkspace" in self.saved_NPCs[self.current_NPC_selected]:
+      # Liste des ids uniques présents dans la zone de travail
+      
+      for bloc in self.saved_NPCs[self.current_NPC_selected]["dialogWorkspace"]:
+        try :
+          if hasattr(bloc, "deleted") and bloc.deleted:
+            continue
+          bloc.show()
+          bloc.raise_()
+        except RuntimeError :
+          continue
+      unique_ids_in_workspace = [bloc.id for bloc in self.bloc_working_zone.findChildren(Bloc) if (bloc.isVisibleTo(self.bloc_working_zone) and bloc.unique)]
+      # Pour chaque bloc palette unique, on le cache seulement si son id est dans la zone de travail, sinon on le montre
+      for i in range(self.pers_dialogue_layout.count()):
+        widget = self.pers_dialogue_layout.itemAt(i).widget()
+        if widget is not None and getattr(widget, "unique", False):
+          if widget.id in unique_ids_in_workspace:
+            widget.hide()
+    else :
+      for i in range(self.pers_dialogue_layout.count()):
+        widget = self.pers_dialogue_layout.itemAt(i).widget()
+        if widget is not None :   
+          widget.show()
+      
+  def saveDialogWorkspace(self):
+    save = []
+    blocs = self.bloc_working_zone.findChildren(Bloc)
+    print("\n--- Fermeture ---\n")
+    print("Blocs trouvés :", blocs)
+    print("Blocs visibles :", [bloc for bloc in blocs if bloc.isVisibleTo(self.bloc_working_zone)])
+    for bloc in blocs:
+      if bloc.isVisibleTo(self.bloc_working_zone) :
+        save.append(bloc)
+        bloc.hide()
+    if save:
+      if self.current_NPC_selected not in self.saved_NPCs:
+        self.saved_NPCs[self.current_NPC_selected] = {}
+      self.saved_NPCs[self.current_NPC_selected]["dialogWorkspace"] = save
+
   def createActions(self):
     self.quit_act = QAction("&Quitter")
     self.quit_act.setShortcut("Ctrl+Q")
@@ -930,7 +979,7 @@ class MainWindow(QMainWindow):
   def resizeReleaseZone(self):
     top_left = self.bloc_working_zone.mapTo(self, self.bloc_working_zone.rect().topLeft())
     bottom_right = self.bloc_working_zone.mapTo(self, self.bloc_working_zone.rect().bottomRight())
-    self.bloc_zone = [(top_left.x()+2, top_left.y()), (bottom_right.x()-2, bottom_right.y()-50)]
+    self.bloc_zone = [(top_left.x()+2, top_left.y()), (bottom_right.x()-2, bottom_right.y()-100)]
 
   def resizeEvent(self, event):
     if hasattr(self, 'main_layout'):

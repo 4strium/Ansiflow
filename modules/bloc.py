@@ -119,7 +119,6 @@ class Bloc(QWidget) :
             bloc_copy.setParent(self.mainApp.bloc_working_zone)
             bloc_copy.already_moved = True
             
-            # Forcer la mise à jour de la taille
             bloc_copy.content.adjustSize()
             bloc_copy.width_value = max(bloc_copy.max_width*bloc_copy.nb_inputs, bloc_copy.max_width*bloc_copy.nb_outputs)
             bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.max_height + 40)
@@ -142,9 +141,17 @@ class Bloc(QWidget) :
                   if widget.id == self.id :
                     widget.show()
                     break
-            else :
-              self.setParent(None)
-              self.deleteLater()
+            self.setParent(None)
+            self.deleteLater()
           else :
             self.move(self.pos_before_drag)
         self.mainApp.update()
+
+  def hide(self):
+    print(f"Bloc caché : {self} (id={self.id}, unique={self.unique})")
+    super().hide()
+
+  def show(self):
+    print(f"Bloc montré : {self} (id={self.id}, unique={self.unique})")
+    super().show()
+

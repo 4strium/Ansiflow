@@ -47,7 +47,6 @@ def copy_widget_properties(original, duplicated):
 
   # Propriétés de base
   duplicated.setGeometry(original.geometry())
-  duplicated.setFixedSize(original.size())
   duplicated.setStyleSheet(original.styleSheet())
   duplicated.setFont(original.font())
   duplicated.setEnabled(original.isEnabled())
