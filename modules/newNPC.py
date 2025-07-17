@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
+from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QComboBox
 from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt
 

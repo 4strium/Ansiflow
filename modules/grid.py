@@ -136,9 +136,9 @@ class GridWidget(QWidget):
                             if self.checkNearestEnemy([i,j]) > self.congestion_limit :
                                 self.pos_enemies.append([i,j])
                             else :
-                                QMessageBox.warning(self, "Ennemis trop proches", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un de ses congénères.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+                                QMessageBox.warning(self, "Ennemis trop proches", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un de ses congénères.")
                         else :
-                           QMessageBox.warning(self, "Personnage trop proche", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un personnage.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close) 
+                           QMessageBox.warning(self, "Personnage trop proche", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un personnage.") 
                     else :
                         self.pos_enemies.remove([i,j])
                 elif self.map_mode == 5 and not data["map"][i][j] and [i,j] not in self.pos_enemies and [i,j] != self.pos_player:
@@ -153,9 +153,9 @@ class GridWidget(QWidget):
                                 self.pos_NPCS.append([[i,j], attributed_color, npc_select])
                                 self.pers_pos_attribution([i, j])
                         else :
-                           QMessageBox.warning(self, "Personnages trop proches", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un de ses congénères.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close) 
+                           QMessageBox.warning(self, "Personnages trop proches", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un de ses congénères.") 
                     else :
-                        QMessageBox.warning(self, "Ennemi trop proche", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un ennemi.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+                        QMessageBox.warning(self, "Ennemi trop proche", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un ennemi.")
                     
                 with open(self.filename, "w") as f:
                     data["Enemy"] = self.packEnemies()

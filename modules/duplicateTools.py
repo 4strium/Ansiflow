@@ -67,3 +67,8 @@ def copy_widget_properties(original, duplicated):
   if original.metaObject().className() == "QComboBox" and hasattr(duplicated, "addItems"):
     items = [original.itemText(i) for i in range(original.count())]
     duplicated.addItems(items)
+    duplicated.currentIndexChanged.connect(original._change_slot)
+
+  if isinstance(original, QPushButton):
+    if hasattr(original, "_clicked_slot"):
+      duplicated.clicked.connect(original._clicked_slot)

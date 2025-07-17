@@ -134,4 +134,4 @@ class NewProject(QDialog):
       self.setSetup_finished(True)
       self.close()
     else :
-      QMessageBox.warning(self, "Nom de projet invalide", "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Nom de projet invalide", "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner.")

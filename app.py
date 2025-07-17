@@ -1,4 +1,4 @@
-import sys, os, time
+import sys, os
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
@@ -6,11 +6,12 @@ from modules.starting import StartWindow
 from modules.grid import GridWidget
 from modules.newNPC import NewNPC
 from modules.removeNPC import RemoveNPC
-from modules.game import NPC
 from modules.bloc import Bloc
 from emulatedTerminal import EmulatedTerminal
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
 from scripts.image_to_ascii import image_to_ascii_by_color
+from modules.NPCtextDialog import NPCtextDialog
+from modules.NPCresponsesDialog import NPCresponsesDialog
 
 class MainWindow(QMainWindow):
 
@@ -450,7 +451,7 @@ class MainWindow(QMainWindow):
         background-color : white;
         color : black;
         border-radius : 10px;
-        padding : 10px;
+        padding : 6px;
         padding-top: 4px;
         padding-bottom : 4px;
       }
@@ -464,7 +465,7 @@ class MainWindow(QMainWindow):
         background-color : white;
         color : black;
         border-radius : 10px;
-        padding : 10px;
+        padding : 4px;
         padding-top: 4px;
         padding-bottom : 4px;
       }
@@ -476,8 +477,11 @@ class MainWindow(QMainWindow):
         padding: 4px;
       }
     """
+
+    bloc_font = QFont(self.hunnin, 14)
+
     start_text = QLabel("DÉBUT")
-    start_text.setFont(QFont(self.hunnin, 20))
+    start_text.setFont(bloc_font)
     start_layout = QHBoxLayout()
     start_layout.setContentsMargins(0,0,0,0)
     start_layout.addWidget(start_text)
@@ -489,13 +493,26 @@ class MainWindow(QMainWindow):
     print_text_layout = QHBoxLayout()
     print_text_layout.setContentsMargins(0,0,0,0)
     afficher = QLabel("Afficher")
-    afficher.setFont(QFont(self.hunnin, 20))
+    afficher.setFont(bloc_font)
     texte_btn = QPushButton("texte")
-    texte_btn.setFont(QFont(self.hunnin, 20))
+    texte_btn.setFont(bloc_font)
     texte_btn.setStyleSheet(bloc_btn_stylesheet)
     texte_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    texte_btn.clicked.connect(self.textOpenBloc)
+    texte_btn._clicked_slot = self.textOpenBloc
+    skin_text = QLabel("avec l'apparence")
+    skin_text.setFont(bloc_font)
+    skin_selector = QComboBox()
+    skin_selector.setFont(bloc_font)
+    skin_selector.setStyleSheet(bloc_combobox_stylesheet)
+    skin_selector.addItems(["1","2","3"])
+    skin_selector.setCursor(Qt.CursorShape.PointingHandCursor)
+    skin_selector.currentIndexChanged.connect(self.comboBoxSelector)
+    skin_selector._change_slot = self.comboBoxSelector
     print_text_layout.addWidget(afficher)
     print_text_layout.addWidget(texte_btn)
+    print_text_layout.addWidget(skin_text)
+    print_text_layout.addWidget(skin_selector)
     print_text = QWidget()
     print_text.setLayout(print_text_layout)
     self.pers_dialogue_layout.addWidget(Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", 1))
@@ -503,32 +520,39 @@ class MainWindow(QMainWindow):
     ask_layout = QHBoxLayout()
     ask_layout.setContentsMargins(0,0,0,0)
     poser = QLabel("Poser")
-    poser.setFont(QFont(self.hunnin, 20))
+    poser.setFont(bloc_font)
     ask_btn = QPushButton("question")
-    ask_btn.setFont(QFont(self.hunnin, 20))
+    ask_btn.setFont(bloc_font)
     ask_btn.setStyleSheet(bloc_btn_stylesheet)
     ask_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    ask_btn.clicked.connect(self.textOpenBloc)
+    ask_btn._clicked_slot = self.textOpenBloc
     a_text = QLabel("à")
-    a_text.setFont(QFont(self.hunnin, 20))
+    a_text.setFont(bloc_font)
     nb_answers_selector = QComboBox()
-    nb_answers_selector.setFont(QFont(self.hunnin, 20))
+    nb_answers_selector.setFont(bloc_font)
     nb_answers_selector.setStyleSheet(bloc_combobox_stylesheet)
     nb_answers_selector.addItems(["2","3"])
     nb_answers_selector.setCursor(Qt.CursorShape.PointingHandCursor)
-    answers_text = QLabel("réponses")
-    answers_text.setFont(QFont(self.hunnin, 20))
+    nb_answers_selector.currentIndexChanged.connect(self.changeQuantityResponses)
+    nb_answers_selector._change_slot = self.changeQuantityResponses
+    answers_btn = QPushButton("réponses")
+    answers_btn.setFont(bloc_font)
+    answers_btn.setStyleSheet(bloc_btn_stylesheet)
+    answers_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    answers_btn.clicked.connect(self.transmitResponses)
+    answers_btn._clicked_slot = self.transmitResponses
     ask_layout.addWidget(poser)
     ask_layout.addWidget(ask_btn)
     ask_layout.addWidget(a_text)
     ask_layout.addWidget(nb_answers_selector)
-    ask_layout.addWidget(answers_text)
+    ask_layout.addWidget(answers_btn)
     ask_container = QWidget()
     ask_container.setLayout(ask_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,1,3,ask_container, "#ff00b3", "#FFFFFF", 2))
+    self.pers_dialogue_layout.addWidget(Bloc(self,1,2,ask_container, "#ff00b3", "#FFFFFF", 2))
     
-
     flux_text = QLabel("Regroupement des flux")
-    flux_text.setFont(QFont(self.hunnin, 20))
+    flux_text.setFont(bloc_font)
     flux_layout = QHBoxLayout()
     flux_layout.setContentsMargins(0,0,0,0)
     flux_layout.addWidget(flux_text)
@@ -539,11 +563,13 @@ class MainWindow(QMainWindow):
     python_layout = QHBoxLayout()
     python_layout.setContentsMargins(0,0,0,0)
     executer = QLabel("Exécuter")
-    executer.setFont(QFont(self.hunnin, 20))
+    executer.setFont(bloc_font)
     python_btn = QPushButton("code Python")
-    python_btn.setFont(QFont(self.hunnin, 20))
+    python_btn.setFont(bloc_font)
     python_btn.setStyleSheet(bloc_btn_stylesheet)
     python_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    python_btn.clicked.connect(self.textOpenBloc)
+    python_btn._clicked_slot = self.textOpenBloc
     python_layout.addWidget(executer)
     python_layout.addWidget(python_btn)
     python_bloc_container = QWidget()
@@ -551,7 +577,7 @@ class MainWindow(QMainWindow):
     self.pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", 4))
 
     end_text = QLabel("FIN")
-    end_text.setFont(QFont(self.hunnin, 20))
+    end_text.setFont(bloc_font)
     end_layout = QHBoxLayout()
     end_layout.setContentsMargins(0,0,0,0)
     end_layout.addWidget(end_text)
@@ -800,15 +826,15 @@ class MainWindow(QMainWindow):
       self.npc_dialog = NewNPC(self.addPersTable)
       self.npc_dialog.show()
     else :
-      QMessageBox.warning(self, "Action impossible", "Désolé, vous avez atteint la limite de personnages.\nVeuillez supprimer un personnage existant avant de poursuivre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Action impossible", "Désolé, vous avez atteint la limite de personnages.\nVeuillez supprimer un personnage existant avant de poursuivre.")
 
   def addPersTable(self, name, color):
     if name == "" :
-      QMessageBox.warning(self, "Action impossible", "Malheureusement, un nom est requis pour votre personnage.\nMerci de le renseigner.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Action impossible", "Malheureusement, un nom est requis pour votre personnage.\nMerci de le renseigner.")
     elif name in [npc[0] for npc in self.NPCs] :
-      QMessageBox.warning(self, "Action impossible", "Malheureusement, vous utilisez déjà ce nom pour un autre personnage.\nMerci d'en choisir un autre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Action impossible", "Malheureusement, vous utilisez déjà ce nom pour un autre personnage.\nMerci d'en choisir un autre.")
     elif color in self.pers_colors :
-      QMessageBox.warning(self, "Action impossible", "Désolé, vous utilisez déjà cette couleur pour un autre personnage.\nMerci d'en utiliser une autre.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Action impossible", "Désolé, vous utilisez déjà cette couleur pour un autre personnage.\nMerci d'en utiliser une autre.")
     else :
       if hasattr(self, 'npc_dialog') and self.npc_dialog.isVisible():
         self.npc_dialog.close()
@@ -842,7 +868,7 @@ class MainWindow(QMainWindow):
 
   def deletePersoDialog(self):
     if self.NPCs == [] :
-      QMessageBox.warning(self, "Action impossible", "Aucun personnage à supprimer.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
+      QMessageBox.warning(self, "Action impossible", "Aucun personnage à supprimer.")
     else :
       self.deleteNPCdialog = RemoveNPC(self)
       self.deleteNPCdialog.show()
@@ -899,15 +925,6 @@ class MainWindow(QMainWindow):
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 2)
       elif sender.text() == "Apparence 3 (facultative)" :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 3)
-    
-  def play(self):
-    if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
-      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
-    elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
-      QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.", QMessageBox.StandardButton.Close, QMessageBox.StandardButton.Close)
-    else :
-      self.game = EmulatedTerminal()
-      self.game.show()
 
   def openDialogWorkspace(self):
     print("\n--- Ouverture ---\n")
@@ -947,6 +964,118 @@ class MainWindow(QMainWindow):
         self.saved_NPCs[self.current_NPC_selected] = {}
       self.saved_NPCs[self.current_NPC_selected]["dialogWorkspace"] = save
 
+  def textOpenBloc(self):
+    sender = self.sender()
+    bloc = sender.parent().parent()
+    dial = NPCtextDialog(bloc)
+    dial.exec()
+
+  def comboBoxSelector(self):
+    sender = self.sender()
+    bloc = sender.parent().parent()
+    bloc.storage[1] = int(sender.currentText())
+
+  def changeQuantityResponses(self):
+    sender = self.sender()
+    bloc = sender.parent().parent()
+    bloc.storage[1] = int(sender.currentText())
+    bloc.nb_outputs = bloc.storage[1]
+    if bloc.storage[1] == 2 :
+      bloc.used_outputs = bloc.used_outputs[:2]
+    elif bloc.storage[1] == 3 :
+      while len(bloc.used_outputs) < 3 :
+        bloc.used_outputs.append(None)
+
+    bloc.width_value = max(bloc.min_width * bloc.nb_inputs, bloc.min_width * bloc.nb_outputs)
+    bloc.setFixedSize(max(bloc.width_value, bloc.content.width() + (2 * bloc.content_padding)), bloc.min_height + 40)
+    bloc.update()
+    bloc.repaint()
+
+  def transmitResponses(self):
+    sender = self.sender()
+    bloc = sender.parent().parent()
+    dial = NPCresponsesDialog(bloc, bloc.nb_outputs)
+    dial.exec()
+
+  def genNPCfiles(self):
+    for npc_name in self.saved_NPCs.keys() :
+      npc_data = self.saved_NPCs[npc_name]
+      if "position" not in npc_data.keys() :
+        QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
+        return 
+      npc_posx = npc_data["position"][0]
+      npc_posy = npc_data["position"][1]
+      start_bloc = None
+      end_bloc = None
+      ids_bloc = {}
+      for bloc in npc_data["dialogWorkspace"] :
+        ids_bloc[id(bloc)] = bloc
+        if bloc.id == 0 :
+          start_bloc = bloc
+        elif bloc.id == 5 :
+          end_bloc = bloc
+      if not start_bloc :
+        QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
+        return 
+      if not end_bloc :
+        QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
+        return
+      nb_text = 0
+      str_content = []
+      str_content.append(f"__NAME__{npc_name}\n")
+      str_content.append(f"__POSITIONX__{npc_posx}\n")
+      str_content.append(f"__POSITIONY__{npc_posy}\n")
+      ask_state = [None,0,2]
+      current_bloc = start_bloc
+      while current_bloc is not end_bloc :
+        if current_bloc.id == 0 :
+          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+        elif current_bloc.id == 1 :
+          nb_text += 1
+          text_written = current_bloc.storage[0]
+          skin_choosen = current_bloc.storage[1]
+          str_content.append(f"__COSTUME__{skin_choosen}\n")
+          str_content.append(f"{text_written}\n")
+          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+        elif current_bloc.id == 2 :
+          nb_text += 1
+          str_content.append("__QUESTION__C\n")
+          str_content.append(f"{current_bloc.storage[0]}\n")
+          nb_responses = current_bloc.nb_outputs
+          str_content.append(f"__NBRESPONSES__{nb_responses}\n")
+          for i in range(nb_responses) :
+            str_content.append(f"__REPONSE__{current_bloc.storage[i+1]}\n")
+          ask_state[0] = current_bloc
+          ask_state[2] = nb_responses
+          current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+          str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
+        elif current_bloc.id == 3 :
+          str_content.append("__ENDCHOICE__\n")
+          if ask_state[1] >= (ask_state[2]-1) :
+            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          else :
+            ask_state[1] += 1
+            current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+            str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
+        elif current_bloc.id == 4 :
+          funcall = current_bloc.storage[0]
+          str_content.append(f"__CALLFUN__{funcall}\n")
+          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+      str_content.insert(3,f"__NBTEXTS__{nb_text}\n")
+
+      os.makedirs("workingDir/NPCS/", exist_ok=True)
+      output_path = f"workingDir/NPCS/{npc_name}.txt"
+      if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+          existing_content = f.read()
+      else:
+        existing_content = ""
+      
+      with open(output_path, "w", encoding="utf-8") as f:
+        for line in str_content:
+          f.write(line)
+        f.write(existing_content)
+
   def createActions(self):
     self.quit_act = QAction("&Quitter")
     self.quit_act.setShortcut("Ctrl+Q")
@@ -964,6 +1093,16 @@ class MainWindow(QMainWindow):
     exec_menu = self.menuBar().addMenu("Exécution")
     exec_menu.addAction(self.exec_act)
     help_menu = self.menuBar().addMenu("Aide")
+
+  def play(self):
+    if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
+      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+    elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
+      QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+    else :
+      self.genNPCfiles()
+      self.game = EmulatedTerminal()
+      self.game.show()
 
   def maintainSpacingLayout(self):
     self.main_layout.setSpacing(int(self.width() * 0.01))

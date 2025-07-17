@@ -4,6 +4,9 @@ from PyQt6.QtGui import QPainter, QPen, QColor, QPolygon, QBrush, QMouseEvent, Q
 from PyQt6.QtCore import Qt, QPoint
 from modules.duplicateTools import duplicate_widget
 
+MIN_WIDTH = 350
+MIN_HEIGHT = 100
+
 class Bloc(QWidget) :
   def __init__(self, main_app, nb_inputs, nb_outputs, content, bloc_color, text_color, id=-1, unicity = False):
     super().__init__()
@@ -18,11 +21,11 @@ class Bloc(QWidget) :
     self.bloc_color = QColor(bloc_color)
     self.text_color = text_color
     self.id = id
-    self.max_width = 337
-    self.width_value = max(self.max_width*self.nb_inputs, self.max_width*self.nb_outputs)
-    self.max_height = 100
-    self.content_padding = 20
-    self.content_size = 20
+    self.min_width = MIN_WIDTH
+    self.width_value = max(self.min_width*self.nb_inputs, self.min_width*self.nb_outputs)
+    self.min_height = MIN_HEIGHT
+    self.content_padding = 10
+    self.content_size = 14
     self.visible = True
     self.unique = unicity
     self.parent_pos = None
@@ -30,6 +33,8 @@ class Bloc(QWidget) :
     self.already_moved = False
     self.dragging = False
     self.dragging_position = QPoint()
+    
+    self.storage = [None, 1, None, None]
 
     self.initializeUI()
 
@@ -38,7 +43,7 @@ class Bloc(QWidget) :
 
     self.content.setParent(self)
     self.content.setStyleSheet(f"color: {self.text_color}; background: transparent;")
-    self.content.move(self.content_padding, (self.max_height - self.content_size)//2)
+    self.content.move(self.content_padding, (self.min_height - self.content_size)//2)
     self.content.raise_()
 
   def setNbInputs(self, nb_inp):
@@ -63,21 +68,21 @@ class Bloc(QWidget) :
     polygon = [
       QPoint(0,0),
       QPoint(max(self.width_value, self.content.width()+(2*self.content_padding)),0),
-      QPoint(max(self.width_value, self.content.width()+(2*self.content_padding)), self.max_height),
-      QPoint(0, self.max_height)
+      QPoint(max(self.width_value, self.content.width()+(2*self.content_padding)), self.min_height),
+      QPoint(0, self.min_height)
     ]
 
     for i in range(self.nb_inputs):
-      polygon.insert((i*3)+1,QPoint(self.max_width*i+5,0))
-      polygon.insert((i*3)+2,QPoint(self.max_width*i+15,20))
-      polygon.insert((i*3)+3,QPoint(self.max_width*i+25,0))
+      polygon.insert((i*3)+1,QPoint(self.min_width*i+5,0))
+      polygon.insert((i*3)+2,QPoint(self.min_width*i+15,20))
+      polygon.insert((i*3)+3,QPoint(self.min_width*i+25,0))
 
 
     for j in range(self.nb_outputs,0,-1):
       idx = len(polygon) - 1
-      polygon.insert(idx, QPoint(self.max_width*(j-1)+25, self.max_height))
-      polygon.insert(idx+1, QPoint(self.max_width*(j-1)+15, self.max_height+20))
-      polygon.insert(idx+2, QPoint(self.max_width*(j-1)+5, self.max_height))
+      polygon.insert(idx, QPoint(self.min_width*(j-1)+25, self.min_height))
+      polygon.insert(idx+1, QPoint(self.min_width*(j-1)+15, self.min_height+20))
+      polygon.insert(idx+2, QPoint(self.min_width*(j-1)+5, self.min_height))
 
     painter.drawPolygon(QPolygon(polygon))
 
@@ -126,8 +131,8 @@ class Bloc(QWidget) :
             bloc_copy.parent_pos = self.new_pos
             
             bloc_copy.content.adjustSize()
-            bloc_copy.width_value = max(bloc_copy.max_width*bloc_copy.nb_inputs, bloc_copy.max_width*bloc_copy.nb_outputs)
-            bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.max_height + 40)
+            bloc_copy.width_value = max(bloc_copy.min_width*bloc_copy.nb_inputs, bloc_copy.min_width*bloc_copy.nb_outputs)
+            bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.min_height + 40)
             
             bloc_copy.move(self.new_pos)
             bloc_copy.show()
@@ -172,25 +177,29 @@ class Bloc(QWidget) :
               bloc.used_outputs[outp] = None
 
         diffy = self.parent_pos.y() - bloc.parent_pos.y()
-        if 0 <= diffy <= (2*bloc.max_height) and bloc.nb_outputs :
+        if 0 <= diffy <= (2*bloc.min_height) and bloc.nb_outputs :
           for i in range(self.nb_inputs) :
             for j in range(bloc.nb_outputs) :
-              diffx = abs((self.parent_pos.x()+(i*self.max_width)) - (bloc.parent_pos.x()+(j*self.max_width)))
-              if diffx <= (self.max_width/2) :
+              diffx = abs((self.parent_pos.x()+(i*self.min_width)) - (bloc.parent_pos.x()+(j*self.min_width)))
+              if diffx <= (self.min_width/2) :
                 if (bloc.used_outputs[j] == None and self.used_inputs[i] == None) :
                   bloc.used_outputs[j] = (id(self), i)
+                  print("Autre bloc - outputs :", bloc.used_outputs)
                   self.used_inputs[i] = (id(bloc), j)
-                  magnet_pos = QPoint(bloc.parent_pos.x()-(i*self.max_width), bloc.parent_pos.y() + bloc.max_height)
+                  print("Bloc sélectionné - inputs :", self.used_inputs)
+                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() + bloc.min_height)
                   return magnet_pos
-        elif -(2*bloc.max_height) <= diffy < 0 and bloc.nb_inputs :
+        elif -(2*bloc.min_height) <= diffy < 0 and bloc.nb_inputs :
           for i in range(self.nb_outputs) :
             for j in range(bloc.nb_inputs) :
-              diffx = abs((self.parent_pos.x()+(i*self.max_width)) - (bloc.parent_pos.x()+(j*self.max_width)))
-              if diffx <= (self.max_width/2) :
+              diffx = abs((self.parent_pos.x()+(i*self.min_width)) - (bloc.parent_pos.x()+(j*self.min_width)))
+              if diffx <= (self.min_width/2) :
                 if (bloc.used_inputs[j] == None and self.used_outputs[i] == None) :
                   bloc.used_inputs[j] = (id(self), i)
+                  print("Autre bloc - inputs :", bloc.used_inputs)
                   self.used_outputs[i] = (id(bloc), j)
-                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.max_width), bloc.parent_pos.y() - bloc.max_height)
+                  print("Bloc sélectionné - outputs :", self.used_outputs)
+                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() - bloc.min_height)
                   return magnet_pos
     
     self.used_inputs = [None] * self.nb_inputs
