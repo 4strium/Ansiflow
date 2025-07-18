@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, json
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
 from PyQt6.QtCore import Qt
@@ -1002,7 +1002,7 @@ class MainWindow(QMainWindow):
       npc_data = self.saved_NPCs[npc_name]
       if "position" not in npc_data.keys() :
         QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
-        return 
+        return False
       npc_posx = npc_data["position"][0]
       npc_posy = npc_data["position"][1]
       start_bloc = None
@@ -1016,10 +1016,10 @@ class MainWindow(QMainWindow):
           end_bloc = bloc
       if not start_bloc :
         QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
-        return 
+        return False
       if not end_bloc :
         QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
-        return
+        return False
       nb_text = 0
       str_content = []
       str_content.append(f"__NAME__{npc_name}\n")
@@ -1028,15 +1028,24 @@ class MainWindow(QMainWindow):
       ask_state = [None,0,2]
       current_bloc = start_bloc
       while current_bloc is not end_bloc :
+        print(current_bloc.id)
         if current_bloc.id == 0 :
-          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          try :
+            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          except TypeError :
+            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            return False
         elif current_bloc.id == 1 :
           nb_text += 1
           text_written = current_bloc.storage[0]
           skin_choosen = current_bloc.storage[1]
           str_content.append(f"__COSTUME__{skin_choosen}\n")
           str_content.append(f"{text_written}\n")
-          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          try : 
+            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          except TypeError :
+            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            return False
         elif current_bloc.id == 2 :
           nb_text += 1
           str_content.append("__QUESTION__C\n")
@@ -1044,23 +1053,39 @@ class MainWindow(QMainWindow):
           nb_responses = current_bloc.nb_outputs
           str_content.append(f"__NBRESPONSES__{nb_responses}\n")
           for i in range(nb_responses) :
-            str_content.append(f"__REPONSE__{current_bloc.storage[i+1]}\n")
+            str_content.append(f"__RESPONSE__{current_bloc.storage[i+1]}\n")
           ask_state[0] = current_bloc
           ask_state[2] = nb_responses
-          current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+          try :
+            current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+          except TypeError :
+            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            return False
           str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
         elif current_bloc.id == 3 :
           str_content.append("__ENDCHOICE__\n")
           if ask_state[1] >= (ask_state[2]-1) :
-            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+            try :
+              current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+            except TypeError :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+              return False
           else :
             ask_state[1] += 1
-            current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+            try :
+              current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+            except TypeError :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+              return False
             str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
         elif current_bloc.id == 4 :
           funcall = current_bloc.storage[0]
           str_content.append(f"__CALLFUN__{funcall}\n")
-          current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          try :
+            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+          except TypeError :
+            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            return False
       str_content.insert(3,f"__NBTEXTS__{nb_text}\n")
 
       os.makedirs("workingDir/NPCS/", exist_ok=True)
@@ -1075,6 +1100,26 @@ class MainWindow(QMainWindow):
         for line in str_content:
           f.write(line)
         f.write(existing_content)
+
+      json_file_path = "workingDir/data.json"
+      try:
+        with open(json_file_path, "r", encoding="utf-8") as f:
+          json_data = json.load(f)
+        
+        already_saved = json_data["NPCS"]
+        already_saved.append(f"workingDir/NPCS/{npc_name}.txt")
+        json_data["NPCS"] = already_saved
+        
+        with open(json_file_path, "w", encoding="utf-8") as f:
+          json.dump(json_data, f, ensure_ascii=False, indent=2)
+          
+      except FileNotFoundError:
+        QMessageBox.critical(self, "Erreur", f"Le fichier {json_file_path} n'a pas été trouvé.")
+      except json.JSONDecodeError:
+        QMessageBox.critical(self, "Erreur", f"Le fichier {json_file_path} n'est pas un JSON valide.")
+      except Exception as e:
+        QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
+    return True
 
   def createActions(self):
     self.quit_act = QAction("&Quitter")
@@ -1100,9 +1145,10 @@ class MainWindow(QMainWindow):
     elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
       QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
     else :
-      self.genNPCfiles()
-      self.game = EmulatedTerminal()
-      self.game.show()
+      go = self.genNPCfiles()
+      if go :
+        self.game = EmulatedTerminal()
+        self.game.show()
 
   def maintainSpacingLayout(self):
     self.main_layout.setSpacing(int(self.width() * 0.01))

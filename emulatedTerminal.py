@@ -176,9 +176,9 @@ class EmulatedTerminal(QWidget):
     self.timer_game.remove_time(self.starting_game_time-time.time())
     drawFloor(self, self.game_run)
     get_rays(self, self.game_run, self.player_run)
-    draw_NPC(self.buffer, self.game_run, self.player_run, Color(0,255,159)) # Pass blue_cyber directly
+    draw_NPC(self, self.game_run, self.player_run, Color(0,255,159))
     if self.fight_game.is_fight_time(self.player_run)[0] :
-      Enemy.draw_Enemy(self, self.game_run.get_fight(), self.player_run, Color(0,255,159)) # Pass blue_cyber
+      Enemy.draw_Enemy(self, self.game_run.get_fight(), self.player_run, Color(0,255,159))
       self.fight_game.update_fight(self, Color(0,255,159)) 
     self.showBuffer()
     self.game_run.running_time()

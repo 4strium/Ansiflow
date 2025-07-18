@@ -12,6 +12,8 @@ from modules.engine.Buffer import Buffer
 import modules.engine.Tools as Tools
 from modules.game.combat.Fight import Fight
 from modules.game.combat.Enemy import Enemy
+import PyQt6.QtWidgets
+from PyQt6.QtCore import Qt
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -178,7 +180,6 @@ def endGame(emu_terminal, game, death):
     Image.draw(text_end, emu_terminal)
 
   emu_terminal.showBuffer()
-  time.sleep(10)
   sys.exit()
   exit()
 
@@ -187,50 +188,53 @@ def open_doors(game_inp, lst_blocks):
     Game.get_map(game_inp)[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
 def draw_backtalk(window_inp, color):
-  for i in range(Buffer.get_width(window_inp)):
-    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(Buffer.get_height(window_inp) // 3)*2)
-  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
-    for k in range(Buffer.get_width(window_inp)):
+  for i in range(window_inp.getWidth()):
+    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(window_inp.getHeight() // 3)*2)
+  for j in range((window_inp.getHeight() // 3)*2+1,window_inp.getHeight()-1):
+    for k in range(window_inp.getWidth()):
       Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
 
-def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
+def draw_sentence(window_inp, game_inp, player_inp, npc, sentence, color):
   get_rays(window_inp, game_inp, player_inp)
-  draw_backtalk(window_inp, color) 
-  for i in range(len(NPC.get_visuals(npc)[sentence[0]-1])):
-    Image.set_pos(NPC.get_visuals(npc)[sentence[0]-1][i],[Buffer.get_width(window_inp) // 2,-2])
-    Image.draw(NPC.get_visuals(npc)[sentence[0]-1][i],window_inp)
-  Buffer.show_data(window_inp)
+  draw_backtalk(window_inp, color)
+  for i in range(len(NPC.get_visuals(npc)[sentence[0] - 1])):
+    Image.set_pos(NPC.get_visuals(npc)[sentence[0] - 1][i], [window_inp.getWidth() // 2, -2])
+    Image.draw(NPC.get_visuals(npc)[sentence[0] - 1][i], window_inp)
+  window_inp.showBuffer()
 
   padding = 12
   x_index = padding
-  y_line = (Buffer.get_height(window_inp) // 4)*3
-  for letter in sentence[1] :
-    if x_index < Buffer.get_width(window_inp) - padding :
-      if x_index > ((Buffer.get_width(window_inp)//2)-6) :
-        if letter == ' ' :
-          x_index = padding-1
+  y_line = (window_inp.getHeight() // 4) * 3
+  text = sentence[1]
+
+  for letter in text:
+    if x_index < window_inp.getWidth() - padding:
+      if x_index > ((window_inp.getWidth() // 2) - 6):
+        if letter == ' ':
+          x_index = padding - 1
           y_line += 1
-      Buffer.set_str_buffer(window_inp, letter, color,0, x_index, y_line)
+      Buffer.set_str_buffer(window_inp, letter, color, 0, x_index, y_line)
       x_index += 1
-      Buffer.show_data(window_inp)
-      time.sleep(Game.get_diff_time(game_inp)*4)
-  time.sleep(1)
-  Buffer.clear_data(window_inp)
+      window_inp.showBuffer()
+      PyQt6.QtWidgets.QApplication.processEvents()  # Pour rafraîchir l'UI
+      time.sleep(0.01)
+  
+  time.sleep(2)
 
 def annotations_user(window_inp, color):
-  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
+  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, window_inp.getWidth()-45, window_inp.getHeight()-8)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, window_inp.getWidth()-48, window_inp.getHeight()-7)
 
 def ask_question(window_inp, game_inp, npc, sentence, color):
   padding = 12
   x_shift = 60
   nb_buttons = sentence[2][0]
-  button_lst = [Button(sentence[1][i][0],[padding + i*x_shift, (Buffer.get_height(window_inp)//5)*4],Game.get_color2(game_inp), Game.get_color1(game_inp)) for i in range(nb_buttons)]
+  button_lst = [Button(sentence[1][i][0],[padding + i*x_shift, (window_inp.getHeight()//5)*4],Game.get_color2(game_inp), Game.get_color1(game_inp)) for i in range(nb_buttons)]
 
   draw_backtalk(window_inp, color)
-  Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (Buffer.get_height(window_inp)//4)*3)
-  Buffer.show_data(window_inp)
-  time.sleep(4)
+  Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (window_inp.getHeight()//4)*3)
+  window_inp.showBuffer()
+  PyQt6.QtWidgets.QApplication.processEvents()
 
   choice = 0 
   annotations_user(window_inp, color)
@@ -240,30 +244,34 @@ def ask_question(window_inp, game_inp, npc, sentence, color):
     for idx, btn in enumerate(button_lst):
       Button.draw_text_button(btn, window_inp, idx == choice)
 
-    if key == ord('d') and choice + 1 < nb_buttons:
+    key = window_inp.getKey()
+
+    if key == Qt.Key.Key_D and choice + 1 < nb_buttons:
       choice += 1
-    elif key == ord('q') and choice - 1 >= 0:
+    elif key == Qt.Key.Key_Q and choice - 1 >= 0:
       choice -= 1
-    elif key == 32:  # espace
+    elif key == Qt.Key.Key_Space: 
       if sentence[2][1] == 'B':
         open_doors(game_inp, sentence[1][choice][1])
       elif sentence[2][1] == 'C' :
         NPC.set_discuss_choice(npc,choice+1)
       break
 
-    Buffer.show_data(window_inp)
-    time.sleep(Game.get_diff_time(game_inp))
+    window_inp.showBuffer()
+    PyQt6.QtWidgets.QApplication.processEvents()
+
+  window_inp.clearBuffer()
+  PyQt6.QtWidgets.QApplication.processEvents()
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
   for sentence in NPC.get_texts(npc) :
     if sentence[0] == 'FUNC':
-      Buffer.clear_data(window_inp)
+      window_inp.clearBuffer()
       eval(sentence[1])
-      Buffer.clear_data(window_inp)
+      window_inp.clearBuffer()
     elif sentence[2][0] != -1 :
       get_rays(window_inp, game_inp, player_inp)
       ask_question(window_inp,game_inp,npc,sentence,color)
-      Buffer.clear_data(window_inp)
     elif (sentence[3] != None and sentence[3] == NPC.get_discuss_choice(npc)) or sentence[3] == None :
       draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
   
@@ -277,8 +285,8 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
     distance = math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2)
 
     if distance < 6 :
-      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, Buffer.get_width(window_inp) // 2, 0)
-      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, Buffer.get_width(window_inp) // 2, 1)
+      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, window_inp.getWidth() // 2, 0)
+      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, window_inp.getWidth() // 2, 1)
 
     if 0.01 < distance < 2.5 :
       if distance > 1 :
@@ -287,7 +295,7 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
         angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
 
         fov_limits = (Player.get_fov(player_inp)//2)*INCREMENT_RAD
-        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * Buffer.get_width(window_inp))
+        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * window_inp.getWidth())
 
         if -fov_limits <= angle_player_npc <= fov_limits :
           for i in range(len(NPC.get_visuals(npc_g)[0])):

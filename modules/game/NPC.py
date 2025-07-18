@@ -85,12 +85,12 @@ class NPC(Character.Character):
             question = content[line]
             line += 1
 
-            nb_answers = int(content[line].split("__NBREPONSES__")[1].strip())
+            nb_answers = int(content[line].split("__NBRESPONSES__")[1].strip())
             line += 1
 
             answers = []
             for ans in range(nb_answers):
-              ans_prop = content[line].split("__REPONSE__")[1].strip()
+              ans_prop = content[line].split("__RESPONSE__")[1].strip()
               line += 1
               if blocks_mode :
                 nb_blocks = int(content[line].split("__NBBLOCKS__")[1].strip())

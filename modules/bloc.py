@@ -161,6 +161,8 @@ class Bloc(QWidget) :
 
   def checkMagnetBloc(self):
     magnet_pos = self.parent_pos
+    lock_bottom = False
+    lock_top = False
     for bloc in self.mainApp.bloc_working_zone.findChildren(Bloc) :
       if bloc is not None and bloc.isVisibleTo(self.mainApp.bloc_working_zone):
         if bloc is self :
@@ -187,8 +189,9 @@ class Bloc(QWidget) :
                   print("Autre bloc - outputs :", bloc.used_outputs)
                   self.used_inputs[i] = (id(bloc), j)
                   print("Bloc sélectionné - inputs :", self.used_inputs)
-                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() + bloc.min_height)
-                  return magnet_pos
+                  if not lock_bottom :
+                    magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() + bloc.min_height)
+                    lock_bottom = True
         elif -(2*bloc.min_height) <= diffy < 0 and bloc.nb_inputs :
           for i in range(self.nb_outputs) :
             for j in range(bloc.nb_inputs) :
@@ -199,11 +202,13 @@ class Bloc(QWidget) :
                   print("Autre bloc - inputs :", bloc.used_inputs)
                   self.used_outputs[i] = (id(bloc), j)
                   print("Bloc sélectionné - outputs :", self.used_outputs)
-                  magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() - bloc.min_height)
-                  return magnet_pos
+                  if not lock_top :
+                    magnet_pos = QPoint(bloc.parent_pos.x()+(j*self.min_width), bloc.parent_pos.y() - bloc.min_height)
+                    lock_top = True
     
-    self.used_inputs = [None] * self.nb_inputs
-    self.used_outputs = [None] * self.nb_outputs
+    if not lock_top and not lock_bottom :
+      self.used_inputs = [None] * self.nb_inputs
+      self.used_outputs = [None] * self.nb_outputs
 
     return magnet_pos
 
