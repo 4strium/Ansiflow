@@ -18,6 +18,8 @@ class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
 
+    self.game_name = ""
+    self.data_file= "workingDir/data.json"
     self.border_color = "#000000"
     self.checked_bg_color = "#262626"
     self.player_color = "#a259f7"
@@ -42,6 +44,9 @@ class MainWindow(QMainWindow):
   def handleStartupFinished(self):
     if self.sw.getStartup_finished() :
       self.sw.close()
+      with open(self.data_file, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
+      self.game_name = json_data["name"]
       self.initializeUI()
 
   def initializeUI(self):
@@ -880,6 +885,8 @@ class MainWindow(QMainWindow):
       if npc[0] == name :
         self.NPCs.remove(npc)
         self.pers_colors.remove(npc[1])
+        if name in self.saved_NPCs:
+          del self.saved_NPCs[name]
         for position in self.grid_map.pos_NPCS :
           if position[1] == npc[1] :
             self.grid_map.pos_NPCS.remove(position)
@@ -920,11 +927,11 @@ class MainWindow(QMainWindow):
     if filename :
       os.makedirs("workingDir/NPCS/", exist_ok=True)
       if sender.text() == "Apparence 1 (obligatoire)" :
-        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 1)
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 50, 10, 1)
       elif sender.text() == "Apparence 2 (facultative)" :
-        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 2)
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 2)
       elif sender.text() == "Apparence 3 (facultative)" :
-        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 100, 10, 3)
+        image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 3)
 
   def openDialogWorkspace(self):
     print("\n--- Ouverture ---\n")
@@ -1028,7 +1035,6 @@ class MainWindow(QMainWindow):
       ask_state = [None,0,2]
       current_bloc = start_bloc
       while current_bloc is not end_bloc :
-        print(current_bloc.id)
         if current_bloc.id == 0 :
           try :
             current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
@@ -1079,6 +1085,7 @@ class MainWindow(QMainWindow):
               return False
             str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
         elif current_bloc.id == 4 :
+          nb_text += 1
           funcall = current_bloc.storage[0]
           str_content.append(f"__CALLFUN__{funcall}\n")
           try :
@@ -1101,22 +1108,21 @@ class MainWindow(QMainWindow):
           f.write(line)
         f.write(existing_content)
 
-      json_file_path = "workingDir/data.json"
       try:
-        with open(json_file_path, "r", encoding="utf-8") as f:
+        with open(self.data_file, "r", encoding="utf-8") as f:
           json_data = json.load(f)
         
         already_saved = json_data["NPCS"]
         already_saved.append(f"workingDir/NPCS/{npc_name}.txt")
         json_data["NPCS"] = already_saved
         
-        with open(json_file_path, "w", encoding="utf-8") as f:
+        with open(self.data_file, "w", encoding="utf-8") as f:
           json.dump(json_data, f, ensure_ascii=False, indent=2)
           
       except FileNotFoundError:
-        QMessageBox.critical(self, "Erreur", f"Le fichier {json_file_path} n'a pas été trouvé.")
+        QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'a pas été trouvé.")
       except json.JSONDecodeError:
-        QMessageBox.critical(self, "Erreur", f"Le fichier {json_file_path} n'est pas un JSON valide.")
+        QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'est pas un JSON valide.")
       except Exception as e:
         QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
     return True
@@ -1147,7 +1153,7 @@ class MainWindow(QMainWindow):
     else :
       go = self.genNPCfiles()
       if go :
-        self.game = EmulatedTerminal()
+        self.game = EmulatedTerminal(self.game_name)
         self.game.show()
 
   def maintainSpacingLayout(self):

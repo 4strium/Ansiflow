@@ -73,11 +73,14 @@ class NPC(Character.Character):
       elif "__NBTEXTS__" in content[line]: 
         nb_texts = int(content[line].split("__NBTEXTS__")[1].strip())
         line += 1
-        for h in range(nb_texts) :
+        h = 0
+        while h < nb_texts :
+
           if "__CALLFUN__" in content[line] :
             call = content[line].split("__CALLFUN__")[1].strip()
             dialogue.append(('FUNC',call))
             line += 1
+            h += 1
           elif "__QUESTION__" in content[line] : 
             blocks_mode = (content[line].split("__QUESTION__")[1].strip() == 'B')
             choice_mode = (content[line].split("__QUESTION__")[1].strip() == 'C')
@@ -89,6 +92,7 @@ class NPC(Character.Character):
             line += 1
 
             answers = []
+            h += 1
             for ans in range(nb_answers):
               ans_prop = content[line].split("__RESPONSE__")[1].strip()
               line += 1
@@ -116,11 +120,13 @@ class NPC(Character.Character):
               costume = int(content[line].split("__COSTUME__")[1].strip())
               dialogue.append((costume,content[line+1],(-1,'Z'),num_choice))
               line += 2
+              h += 1
             line+=1
           else :
             costume = int(content[line].split("__COSTUME__")[1].strip())
             dialogue.append((costume,content[line+1],(-1,'Z'), None))
             line += 2
+            h += 1
 
       elif "__VISUAL" in content[line]:
         nb_colors = int(content[line+1].split("__NBCOLORS__")[1].strip())

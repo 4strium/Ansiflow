@@ -53,6 +53,5 @@ class NPCtextDialog(QDialog) :
       return
       
     self.savingBloc.storage[0] = self.input_text.text()
-    print(self.savingBloc.storage[0])
     
     self.accept()

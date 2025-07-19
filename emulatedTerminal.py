@@ -36,6 +36,8 @@ class EmulatedTerminal(QWidget):
     self.setWindowTitle(self.game_name)
     self.setStyleSheet("background-color: black;")
 
+    self.setWindowModality(Qt.WindowModality.ApplicationModal)
+
     # Désactive les boutons minimiser / maximiser
     self.setWindowFlag(Qt.WindowType.WindowMinimizeButtonHint, False)
     self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, False)
@@ -185,6 +187,10 @@ class EmulatedTerminal(QWidget):
 
     if self.timer_game.get_remaining_time() < 0 :
       endGame(self, self.game_run, 0)
+
+  def closeEvent(self, event):
+    self.game_timer.stop()
+    event.accept()
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)

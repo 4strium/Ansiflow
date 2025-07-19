@@ -195,12 +195,14 @@ def draw_backtalk(window_inp, color):
       Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
 
 def draw_sentence(window_inp, game_inp, player_inp, npc, sentence, color):
+  window_inp.clearBuffer()
   get_rays(window_inp, game_inp, player_inp)
   draw_backtalk(window_inp, color)
   for i in range(len(NPC.get_visuals(npc)[sentence[0] - 1])):
     Image.set_pos(NPC.get_visuals(npc)[sentence[0] - 1][i], [window_inp.getWidth() // 2, -2])
     Image.draw(NPC.get_visuals(npc)[sentence[0] - 1][i], window_inp)
   window_inp.showBuffer()
+  PyQt6.QtWidgets.QApplication.processEvents()
 
   padding = 12
   x_index = padding
@@ -216,7 +218,7 @@ def draw_sentence(window_inp, game_inp, player_inp, npc, sentence, color):
       Buffer.set_str_buffer(window_inp, letter, color, 0, x_index, y_line)
       x_index += 1
       window_inp.showBuffer()
-      PyQt6.QtWidgets.QApplication.processEvents()  # Pour rafraîchir l'UI
+      PyQt6.QtWidgets.QApplication.processEvents() 
       time.sleep(0.01)
   
   time.sleep(2)

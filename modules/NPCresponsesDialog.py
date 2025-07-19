@@ -12,7 +12,7 @@ class NPCresponsesDialog(QDialog) :
     self.initializeUI()
 
   def initializeUI(self):
-    self.setFixedSize(800,300)
+    self.setFixedSize(800,self.nb_resp*100)
     self.setWindowTitle("Saisissez les réponses possibles...")
 
     # Load the custom font
