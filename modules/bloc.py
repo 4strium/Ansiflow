@@ -124,17 +124,7 @@ class Bloc(QWidget) :
       if self.mainApp.bloc_zone and self.new_pos :
         if (self.mainApp.bloc_zone[0][0] <= self.new_pos.x() <= self.mainApp.bloc_zone[1][0]) and (self.mainApp.bloc_zone[0][1] <= self.new_pos.y() <= self.mainApp.bloc_zone[1][1]) :
           if not self.already_moved :
-            copy_content = duplicate_widget(self.content)
-            bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.id, self.unique)
-            bloc_copy.setParent(self.mainApp.bloc_working_zone)
-            bloc_copy.already_moved = True
-            bloc_copy.parent_pos = self.new_pos
-            
-            bloc_copy.content.adjustSize()
-            bloc_copy.width_value = max(bloc_copy.min_width*bloc_copy.nb_inputs, bloc_copy.min_width*bloc_copy.nb_outputs)
-            bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.min_height + 40)
-            
-            bloc_copy.move(self.new_pos)
+            bloc_copy = self.copyBloc()
             bloc_copy.show()
             bloc_copy.raise_()
             if self.unique :
@@ -158,6 +148,25 @@ class Bloc(QWidget) :
           else :
             self.move(self.pos_before_drag)
         self.mainApp.update()
+
+  def copyBloc(self, pos=None):
+    copy_content = duplicate_widget(self.content)
+    bloc_copy = Bloc(self.mainApp, self.nb_inputs, self.nb_outputs, copy_content, self.bloc_color, self.text_color, self.id, self.unique)
+    bloc_copy.setParent(self.mainApp.bloc_working_zone)
+    bloc_copy.already_moved = True
+    if pos is not None:
+        bloc_copy.parent_pos = pos
+        bloc_copy.move(pos)
+    else:
+        bloc_copy.parent_pos = self.new_pos
+        bloc_copy.move(self.new_pos)
+    bloc_copy.content.adjustSize()
+    bloc_copy.width_value = max(bloc_copy.min_width*bloc_copy.nb_inputs, bloc_copy.min_width*bloc_copy.nb_outputs)
+    bloc_copy.setFixedSize(max(bloc_copy.width_value, bloc_copy.content.width()+(2*bloc_copy.content_padding)), bloc_copy.min_height + 40)
+    bloc_copy.content.show()
+    # AJOUT : Force la visibilité du contenu
+    bloc_copy.content.setVisible(True)
+    return bloc_copy
 
   def checkMagnetBloc(self):
     magnet_pos = self.parent_pos
@@ -211,6 +220,11 @@ class Bloc(QWidget) :
       self.used_outputs = [None] * self.nb_outputs
 
     return magnet_pos
+  
+  def importantPropertiesToDict(self):
+    # On exporte ici un dictionnaire des propriétés sérializables dans un fichier json
+    # Ces propriétés permmetent de reconstituer entiérement un blocd ans une autre session disjointe
+    return {"id": self.id, "storage": self.storage, "position": (self.parent_pos.x(), self.parent_pos.y())}
 
   def hide(self):
     print(f"Bloc caché : {self} (id={self.id}, unique={self.unique})")

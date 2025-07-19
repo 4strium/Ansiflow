@@ -1,17 +1,17 @@
 import sys, os, json
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
-from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction, QIcon, QPainter, QColor, QPen, QCursor
+from PyQt6.QtCore import Qt, QPoint
 from modules.starting import StartWindow
 from modules.grid import GridWidget
 from modules.newNPC import NewNPC
 from modules.removeNPC import RemoveNPC
 from modules.bloc import Bloc
 from emulatedTerminal import EmulatedTerminal
-from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QCursor
 from scripts.image_to_ascii import image_to_ascii_by_color
 from modules.NPCtextDialog import NPCtextDialog
 from modules.NPCresponsesDialog import NPCresponsesDialog
+from modules.otherTools import zip_folder
 
 class MainWindow(QMainWindow):
 
@@ -47,7 +47,15 @@ class MainWindow(QMainWindow):
       with open(self.data_file, "r", encoding="utf-8") as f:
         json_data = json.load(f)
       self.game_name = json_data["name"]
+
       self.initializeUI()
+
+      for npc_couple in json_data["NPCS"] :
+        self.addPersTable(npc_couple[0], npc_couple[2])
+        self.saved_NPCs[npc_couple[0]] = {}
+        self.saved_NPCs[npc_couple[0]]["position"] = npc_couple[3]
+        self.grid_map.pos_NPCS.append([npc_couple[3],npc_couple[2],self.current_NPC_selected])
+        self.deserializeBlocs(npc_couple[0], npc_couple[4])
 
   def initializeUI(self):
     self.setWindowTitle("Patate - The 3D ASCII Game Engine")
@@ -511,7 +519,7 @@ class MainWindow(QMainWindow):
     skin_selector.setFont(bloc_font)
     skin_selector.setStyleSheet(bloc_combobox_stylesheet)
     skin_selector.addItems(["1","2","3"])
-    skin_selector.setCursor(Qt.CursorShape.PointingHandCursor)
+    skin_selector.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     skin_selector.currentIndexChanged.connect(self.comboBoxSelector)
     skin_selector._change_slot = self.comboBoxSelector
     print_text_layout.addWidget(afficher)
@@ -520,7 +528,8 @@ class MainWindow(QMainWindow):
     print_text_layout.addWidget(skin_selector)
     print_text = QWidget()
     print_text.setLayout(print_text_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", 1))
+    self.text_discussion_bloc = Bloc(self,1,1, print_text, "#00ccff", "#FFFFFF", 1) 
+    self.pers_dialogue_layout.addWidget(self.text_discussion_bloc)
 
     ask_layout = QHBoxLayout()
     ask_layout.setContentsMargins(0,0,0,0)
@@ -538,13 +547,13 @@ class MainWindow(QMainWindow):
     nb_answers_selector.setFont(bloc_font)
     nb_answers_selector.setStyleSheet(bloc_combobox_stylesheet)
     nb_answers_selector.addItems(["2","3"])
-    nb_answers_selector.setCursor(Qt.CursorShape.PointingHandCursor)
+    nb_answers_selector.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     nb_answers_selector.currentIndexChanged.connect(self.changeQuantityResponses)
     nb_answers_selector._change_slot = self.changeQuantityResponses
     answers_btn = QPushButton("réponses")
     answers_btn.setFont(bloc_font)
     answers_btn.setStyleSheet(bloc_btn_stylesheet)
-    answers_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    answers_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     answers_btn.clicked.connect(self.transmitResponses)
     answers_btn._clicked_slot = self.transmitResponses
     ask_layout.addWidget(poser)
@@ -554,7 +563,8 @@ class MainWindow(QMainWindow):
     ask_layout.addWidget(answers_btn)
     ask_container = QWidget()
     ask_container.setLayout(ask_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,1,2,ask_container, "#ff00b3", "#FFFFFF", 2))
+    self.question_bloc = Bloc(self,1,2,ask_container, "#ff00b3", "#FFFFFF", 2)
+    self.pers_dialogue_layout.addWidget(self.question_bloc)
     
     flux_text = QLabel("Regroupement des flux")
     flux_text.setFont(bloc_font)
@@ -563,7 +573,8 @@ class MainWindow(QMainWindow):
     flux_layout.addWidget(flux_text)
     flux_container = QWidget()
     flux_container.setLayout(flux_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,3,1,flux_container, "#7700e6", "#FFFFFF", 3))
+    self.regroupement_bloc = Bloc(self,3,1,flux_container, "#7700e6", "#FFFFFF", 3)
+    self.pers_dialogue_layout.addWidget(self.regroupement_bloc)
 
     python_layout = QHBoxLayout()
     python_layout.setContentsMargins(0,0,0,0)
@@ -579,7 +590,8 @@ class MainWindow(QMainWindow):
     python_layout.addWidget(python_btn)
     python_bloc_container = QWidget()
     python_bloc_container.setLayout(python_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", 4))
+    self.python_bloc = Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", 4)
+    self.pers_dialogue_layout.addWidget(self.python_bloc)
 
     end_text = QLabel("FIN")
     end_text.setFont(bloc_font)
@@ -588,7 +600,8 @@ class MainWindow(QMainWindow):
     end_layout.addWidget(end_text)
     end_container = QWidget()
     end_container.setLayout(end_layout)
-    self.pers_dialogue_layout.addWidget(Bloc(self,1,0,end_container, "#ffae00", "#FFFFFF", 5, True))
+    self.end_bloc = Bloc(self,1,0,end_container, "#ffae00", "#FFFFFF", 5, True)
+    self.pers_dialogue_layout.addWidget(self.end_bloc)
 
     blank_space5 = QWidget()
     dialogue_close_button = QPushButton("Fermer")
@@ -855,7 +868,7 @@ class MainWindow(QMainWindow):
       """
       config_button = QPushButton("Configurer")
       config_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-      config_button.setCursor(Qt.CursorShape.PointingHandCursor)
+      config_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
       config_button.pressed.connect(self.switchRightSide)
       config_button.setFont(QFont(self.calSans, 18))
       config_button.setStyleSheet(config_css)
@@ -904,7 +917,7 @@ class MainWindow(QMainWindow):
 
   def selectNPCposition(self):
     self.switchRightSide(1)
-    self.grid_map.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.grid_map.map_mode = 5
 
   def defineConversation(self):
@@ -918,7 +931,7 @@ class MainWindow(QMainWindow):
       self.saved_NPCs[self.current_NPC_selected] = {}
     self.saved_NPCs[self.current_NPC_selected]["position"] = position_transmitted
     self.grid_map.map_mode = 0
-    self.grid_map.setCursor(Qt.CursorShape.ArrowCursor)
+    self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
     self.right_layout.setCurrentIndex(1)
 
   def skinGetter(self):
@@ -1008,7 +1021,7 @@ class MainWindow(QMainWindow):
     for npc_name in self.saved_NPCs.keys() :
       npc_data = self.saved_NPCs[npc_name]
       if "position" not in npc_data.keys() :
-        QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
+        QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de réitérer le processus.")
         return False
       npc_posx = npc_data["position"][0]
       npc_posy = npc_data["position"][1]
@@ -1113,7 +1126,15 @@ class MainWindow(QMainWindow):
           json_data = json.load(f)
         
         already_saved = json_data["NPCS"]
-        already_saved.append(f"workingDir/NPCS/{npc_name}.txt")
+
+        npc_content = [ 
+                        npc_name, # Nom
+                        f"workingDir/NPCS/{npc_name}.txt", # Emplacement du fichier de données
+                        [couple[1] for couple in self.NPCs if couple[0] == npc_name][0], # Couleur représentative
+                        self.saved_NPCs[npc_name]["position"], # Position
+                        self.serializeBlocs(npc_name) # Sauvegarde des blocs de dialogue
+                      ] 
+        already_saved.append(npc_content)
         json_data["NPCS"] = already_saved
         
         with open(self.data_file, "w", encoding="utf-8") as f:
@@ -1126,6 +1147,34 @@ class MainWindow(QMainWindow):
       except Exception as e:
         QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
     return True
+  
+  def serializeBlocs(self, npc_name):
+    serialized_blocs = []
+    for bloc in self.saved_NPCs[npc_name]["dialogWorkspace"] :
+      print(bloc)
+      serialized_blocs.append(bloc.importantPropertiesToDict())
+    return serialized_blocs
+  
+  def deserializeBlocs(self, npc_name, blocs_list):
+    final_lst = []
+    for bloc_properties in blocs_list :
+      possible_archetypes = [self.start_bloc, self.text_discussion_bloc, self.question_bloc, self.regroupement_bloc, self.python_bloc, self.end_bloc]
+      archetype_bloc = possible_archetypes[bloc_properties["id"]]
+      
+      copied_archetype = archetype_bloc.copyBloc(QPoint(bloc_properties["position"][0], bloc_properties["position"][1]))
+      copied_archetype.storage = bloc_properties["storage"]   
+      
+      self.update()
+      final_lst.append(copied_archetype)
+    self.saved_NPCs[npc_name]["dialogWorkspace"] = final_lst
+
+  def saveAs(self):
+    try :
+      file_export_path, _ = QFileDialog.getSaveFileName(self, "Enregistrer sous...", "", "Fichiers de projet ABengine (*.abengine)")
+      self.genNPCfiles()
+      zip_folder("workingDir",file_export_path)
+    except FileNotFoundError :
+      pass
 
   def createActions(self):
     self.quit_act = QAction("&Quitter")
@@ -1136,9 +1185,13 @@ class MainWindow(QMainWindow):
     self.exec_act.setShortcut("Ctrl+E")
     self.exec_act.triggered.connect(self.play)
 
+    self.save_as_act = QAction("&Enregistrer sous")
+    self.save_as_act.triggered.connect(self.saveAs)
+
   def createMenu(self):
     file_menu = self.menuBar().addMenu("Fichier")
     file_menu.addAction(self.quit_act)
+    file_menu.addAction(self.save_as_act)
 
     edit_menu = self.menuBar().addMenu("Edition")
     exec_menu = self.menuBar().addMenu("Exécution")

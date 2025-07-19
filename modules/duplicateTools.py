@@ -50,7 +50,7 @@ def copy_widget_properties(original, duplicated):
   duplicated.setStyleSheet(original.styleSheet())
   duplicated.setFont(original.font())
   duplicated.setEnabled(original.isEnabled())
-  duplicated.setVisible(original.isVisible())
+  duplicated.setVisible(True) # Obligatoirement forcé pour la désérialization.
   duplicated.setToolTip(original.toolTip())
   duplicated.setCursor(original.cursor())
   

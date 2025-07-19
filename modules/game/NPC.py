@@ -177,7 +177,7 @@ class NPC(Character.Character):
     npc_elements = data['NPCS']
 
     for np in npc_elements :
-      NPC.upload_NPC_to_game(game_inp,np)
+      NPC.upload_NPC_to_game(game_inp,np[1])
 
   def turn_wheel(window_inp,game_inp,visuals_wheels, text_color):
     Buffer.clear_data(window_inp)

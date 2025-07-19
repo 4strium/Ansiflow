@@ -1,5 +1,4 @@
-import sys
-import zipfile
+import sys, zipfile, json
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QFileDialog, QSizePolicy
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -112,11 +111,14 @@ class StartWindow(QWidget):
       self.finished.emit()  
 
   def openPreviousProject(self):
-    project_compressed, _ = QFileDialog.getOpenFileName(self,"Ouvrir un fichier de projet","","*.zip")
+    project_compressed, _ = QFileDialog.getOpenFileName(self,"Ouvrir un fichier de projet","","*.abengine")
     if project_compressed :
       with zipfile.ZipFile(project_compressed, 'r') as zip_content:
         zip_content.extractall("workingDir/")    
-  
+      
+      with open("workingDir/data.json", 'r', encoding="utf-8") as f:
+        json_data = json.load(f)
+      self.setMap_size(len(json_data["map"][0]))
       self.setStartup_finished(True)
       self.finished.emit()
 
