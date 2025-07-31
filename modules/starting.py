@@ -1,4 +1,4 @@
-import sys, zipfile, json
+import sys, zipfile, json, shutil, os
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QFileDialog, QSizePolicy
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -113,6 +113,16 @@ class StartWindow(QWidget):
   def openPreviousProject(self):
     project_compressed, _ = QFileDialog.getOpenFileName(self,"Ouvrir un fichier de projet","","*.abengine")
     if project_compressed :
+
+      os.makedirs("workingDir", exist_ok=True)
+
+      for filename in os.listdir("workingDir"):
+        file_path = os.path.join("workingDir", filename)
+        if os.path.isfile(file_path):
+          os.remove(file_path)
+        elif os.path.isdir(file_path):
+          shutil.rmtree(file_path)
+
       with zipfile.ZipFile(project_compressed, 'r') as zip_content:
         zip_content.extractall("workingDir/")    
       

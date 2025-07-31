@@ -68,8 +68,8 @@ class GridWidget(QWidget):
                 data["map"] = [[0]*self.map_size for _ in range(self.map_size)]
         self.cells = data["map"]
         self.pos_player = [coord - 0.5 for coord in data["player"]]
-        self.pos_enemies = [coord - 0.5 for element in data["Enemy"] for coord in element["position"]]
-        
+        for element in data["Enemy"] :
+            self.pos_enemies.append([int(coord - 0.5) for coord in element["position"] ])      
         self.update()
         
     def checkNearestEnemy(self, position_given):

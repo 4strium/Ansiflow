@@ -5,7 +5,8 @@ INCREMENT_RAD = 0.017
 
 class Player(Character.Character):
   def __init__(self, data_path, fov, start_angle):
-    x, y = self.get_packpos(data_path) 
+    x, y, map_height = self.get_packpos(data_path) 
+    y = map_height - y
     super().__init__(x, y)
     self.__fov = fov
     self.__angle = start_angle
@@ -14,6 +15,8 @@ class Player(Character.Character):
   def get_packpos(self, path):
     with open(path, "r") as f:
       data = json.load(f)
+    export = data["player"]
+    export.append(len(data["map"][0]))
     return data["player"]
 
   def get_fov(self):

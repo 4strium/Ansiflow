@@ -19,6 +19,8 @@ class EmulatedTerminal(QWidget):
     self.font_color = "#00ff5e"
     self.capture_active = False
     self.captured_key = None
+    
+    self.color_cache = {}  # Cache pour les couleurs calculées
   
     self.buffer = None
     self.game_run = None
@@ -57,6 +59,7 @@ class EmulatedTerminal(QWidget):
     self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
     self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.FixedColumnWidth)
     self.text_edit.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+    self.text_edit.setUndoRedoEnabled(False)
 
     self.terminal_layout.addWidget(self.text_edit)
 
@@ -70,25 +73,42 @@ class EmulatedTerminal(QWidget):
   def getHeight(self):
     return self.terminal_height
 
-  def showBuffer(self):
-    if self.buffer :
-      html_content = ""
+  def get_cached_color(self, color, depth):
+    """Cache les couleurs calculées pour éviter les recalculs"""
+    cache_key = (color, depth)
+    if cache_key not in self.color_cache:
+      if depth:
+        depth_factor = (1 - (max(2, min(6, depth)) / 8)) * 1.1
+        color_lst = [
+          int(Color.get_red(color) * depth_factor),
+          int(Color.get_green(color) * depth_factor), 
+          int(Color.get_blue(color) * depth_factor)
+        ]
+      else:
+        color_lst = [
+          Color.get_red(color),
+          Color.get_green(color),
+          Color.get_blue(color)
+        ]
+      self.color_cache[cache_key] = f"#{color_lst[0]:02x}{color_lst[1]:02x}{color_lst[2]:02x}"
+    
+    return self.color_cache[cache_key]
 
+  def showBuffer(self):
+    if self.buffer:
+      html_parts = []
+      
       for line in self.buffer.get_data():
-        for charPack in line :
+        for charPack in line:
           character = charPack[0]
-          if charPack[2] :
-            depth_factor = (1 - (max(2, min(6, charPack[2])) / 8))*1.1
-            color_lst = [int(Color.get_red(charPack[1]) * depth_factor),int(Color.get_green(charPack[1]) * depth_factor), int(Color.get_blue(charPack[1]) * depth_factor)]
-          else :
-            color_lst = [Color.get_red(charPack[1]),Color.get_green(charPack[1]),Color.get_blue(charPack[1])]
-          char_color = "#{:02x}{:02x}{:02x}".format(color_lst[0], color_lst[1], color_lst[2]) 
+          char_color = self.get_cached_color(charPack[1], charPack[2])
           if character == ' ':
             character = "&nbsp;"
-          html_content += f"""<span style="color : {char_color};">{character}</span>"""
-        html_content += "<br>"
-      self.text_edit.setHtml(html_content)
-
+          html_parts.append(f'<span style="color:{char_color};">{character}</span>')
+        html_parts.append("<br>")
+      
+      # Une seule opération de concaténation
+      self.text_edit.setHtml(''.join(html_parts))
       self.update()
 
   def clearBuffer(self):

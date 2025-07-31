@@ -1,5 +1,5 @@
 import sys, os, json
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QComboBox, QPushButton, QStackedLayout, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QAction, QIcon, QPainter, QColor, QPen, QCursor
 from PyQt6.QtCore import Qt, QPoint
 from modules.starting import StartWindow
@@ -11,7 +11,9 @@ from emulatedTerminal import EmulatedTerminal
 from scripts.image_to_ascii import image_to_ascii_by_color
 from modules.NPCtextDialog import NPCtextDialog
 from modules.NPCresponsesDialog import NPCresponsesDialog
-from modules.otherTools import zip_folder
+from modules.closeDialog import closeDialog
+from modules.parametersDialog import parametersDialog
+from modules.otherTools import zip_folder, keep_visuals
 
 class MainWindow(QMainWindow):
 
@@ -20,6 +22,7 @@ class MainWindow(QMainWindow):
 
     self.game_name = ""
     self.data_file= "workingDir/data.json"
+    self.file_export_path = None
     self.border_color = "#000000"
     self.checked_bg_color = "#262626"
     self.player_color = "#a259f7"
@@ -790,7 +793,7 @@ class MainWindow(QMainWindow):
     elif sender == self.npc_button:
       self.stacked_tools.setCurrentIndex(3)
       self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
-      self.grid_map.setMap_mode(5)
+      self.grid_map.setMap_mode(0)
   
   def activateWallTool(self):
     sender = self.sender()
@@ -857,6 +860,7 @@ class MainWindow(QMainWindow):
       if hasattr(self, 'npc_dialog') and self.npc_dialog.isVisible():
         self.npc_dialog.close()
       
+      self.saved_NPCs[name] = {}
       self.pers_colors.append(color)
       self.page4_table.setRowCount(self.nb_perso+1)
       pers_color = QColor(color)
@@ -918,7 +922,7 @@ class MainWindow(QMainWindow):
   def selectNPCposition(self):
     self.switchRightSide(1)
     self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-    self.grid_map.map_mode = 5
+    self.grid_map.setMap_mode(5)
 
   def defineConversation(self):
     self.switchRightSide(2)
@@ -930,7 +934,7 @@ class MainWindow(QMainWindow):
     if self.current_NPC_selected not in self.saved_NPCs:
       self.saved_NPCs[self.current_NPC_selected] = {}
     self.saved_NPCs[self.current_NPC_selected]["position"] = position_transmitted
-    self.grid_map.map_mode = 0
+    self.grid_map.setMap_mode(0)
     self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
     self.right_layout.setCurrentIndex(1)
 
@@ -1018,7 +1022,9 @@ class MainWindow(QMainWindow):
     dial.exec()
 
   def genNPCfiles(self):
+    to_json_npc = []
     for npc_name in self.saved_NPCs.keys() :
+      print(npc_name)
       npc_data = self.saved_NPCs[npc_name]
       if "position" not in npc_data.keys() :
         QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de réitérer le processus.")
@@ -1028,131 +1034,134 @@ class MainWindow(QMainWindow):
       start_bloc = None
       end_bloc = None
       ids_bloc = {}
-      for bloc in npc_data["dialogWorkspace"] :
-        ids_bloc[id(bloc)] = bloc
-        if bloc.id == 0 :
-          start_bloc = bloc
-        elif bloc.id == 5 :
-          end_bloc = bloc
-      if not start_bloc :
-        QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
-        return False
-      if not end_bloc :
-        QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de retenter l'exécution du jeu.")
-        return False
-      nb_text = 0
       str_content = []
       str_content.append(f"__NAME__{npc_name}\n")
       str_content.append(f"__POSITIONX__{npc_posx}\n")
       str_content.append(f"__POSITIONY__{npc_posy}\n")
-      ask_state = [None,0,2]
-      current_bloc = start_bloc
-      while current_bloc is not end_bloc :
-        if current_bloc.id == 0 :
-          try :
-            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
-          except TypeError :
-            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
-            return False
-        elif current_bloc.id == 1 :
-          nb_text += 1
-          text_written = current_bloc.storage[0]
-          skin_choosen = current_bloc.storage[1]
-          str_content.append(f"__COSTUME__{skin_choosen}\n")
-          str_content.append(f"{text_written}\n")
-          try : 
-            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
-          except TypeError :
-            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
-            return False
-        elif current_bloc.id == 2 :
-          nb_text += 1
-          str_content.append("__QUESTION__C\n")
-          str_content.append(f"{current_bloc.storage[0]}\n")
-          nb_responses = current_bloc.nb_outputs
-          str_content.append(f"__NBRESPONSES__{nb_responses}\n")
-          for i in range(nb_responses) :
-            str_content.append(f"__RESPONSE__{current_bloc.storage[i+1]}\n")
-          ask_state[0] = current_bloc
-          ask_state[2] = nb_responses
-          try :
-            current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
-          except TypeError :
-            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
-            return False
-          str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
-        elif current_bloc.id == 3 :
-          str_content.append("__ENDCHOICE__\n")
-          if ask_state[1] >= (ask_state[2]-1) :
+      if "dialogWorkspace" in npc_data.keys() :
+        for bloc in npc_data["dialogWorkspace"] :
+          ids_bloc[id(bloc)] = bloc
+          if bloc.id == 0 :
+            start_bloc = bloc
+          elif bloc.id == 5 :
+            end_bloc = bloc
+        if not start_bloc :
+          QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de réitérer le processus.")
+          return False
+        if not end_bloc :
+          QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de réitérer le processus.")
+          return False
+        nb_text = 0
+        ask_state = [None,0,2]
+        current_bloc = start_bloc
+        while current_bloc is not end_bloc :
+          if current_bloc.id == 0 :
             try :
               current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
-            except TypeError :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            except (TypeError, AttributeError) :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
               return False
-          else :
-            ask_state[1] += 1
+          elif current_bloc.id == 1 :
+            nb_text += 1
+            text_written = current_bloc.storage[0]
+            skin_choosen = current_bloc.storage[1]
+            str_content.append(f"__COSTUME__{skin_choosen}\n")
+            str_content.append(f"{text_written}\n")
+            try : 
+              current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+            except (TypeError, AttributeError) :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              return False
+          elif current_bloc.id == 2 :
+            nb_text += 1
+            str_content.append("__QUESTION__C\n")
+            str_content.append(f"{current_bloc.storage[0]}\n")
+            nb_responses = current_bloc.nb_outputs
+            str_content.append(f"__NBRESPONSES__{nb_responses}\n")
+            for i in range(nb_responses) :
+              str_content.append(f"__RESPONSE__{current_bloc.storage[i+1]}\n")
+            ask_state[0] = current_bloc
+            ask_state[2] = nb_responses
             try :
               current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
-            except TypeError :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
+            except (TypeError, AttributeError) :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
               return False
             str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
-        elif current_bloc.id == 4 :
-          nb_text += 1
-          funcall = current_bloc.storage[0]
-          str_content.append(f"__CALLFUN__{funcall}\n")
-          try :
-            current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
-          except TypeError :
-            QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement les blocs du début vers la fin.")
-            return False
-      str_content.insert(3,f"__NBTEXTS__{nb_text}\n")
+          elif current_bloc.id == 3 :
+            str_content.append("__ENDCHOICE__\n")
+            if ask_state[1] >= (ask_state[2]-1) :
+              try :
+                current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+              except (TypeError, AttributeError) :
+                QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+                return False
+            else :
+              ask_state[1] += 1
+              try :
+                current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
+              except (TypeError, AttributeError) :
+                QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+                return False
+              str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
+          elif current_bloc.id == 4 :
+            nb_text += 1
+            funcall = current_bloc.storage[0]
+            str_content.append(f"__CALLFUN__{funcall}\n")
+            try :
+              current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
+            except (TypeError, AttributeError) :
+              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              return False
+        str_content.insert(3,f"__NBTEXTS__{nb_text}\n")
 
       os.makedirs("workingDir/NPCS/", exist_ok=True)
       output_path = f"workingDir/NPCS/{npc_name}.txt"
       if os.path.exists(output_path):
         with open(output_path, "r", encoding="utf-8") as f:
-          existing_content = f.read()
+          existing_content = f.readlines()
+        existing_content = keep_visuals(existing_content)
       else:
-        existing_content = ""
+        existing_content = []
+
       
       with open(output_path, "w", encoding="utf-8") as f:
         for line in str_content:
           f.write(line)
-        f.write(existing_content)
+        for line in existing_content:
+          f.write(line)
 
-      try:
-        with open(self.data_file, "r", encoding="utf-8") as f:
-          json_data = json.load(f)
-        
-        already_saved = json_data["NPCS"]
+      npc_content = [ 
+                      npc_name, # Nom
+                      f"workingDir/NPCS/{npc_name}.txt", # Emplacement du fichier de données
+                      [couple[1] for couple in self.NPCs if couple[0] == npc_name][0], # Couleur représentative
+                      self.saved_NPCs[npc_name]["position"], # Position
+                      self.serializeBlocs(npc_name) # Sauvegarde des blocs de dialogue
+                    ] 
+      to_json_npc.append(npc_content)
 
-        npc_content = [ 
-                        npc_name, # Nom
-                        f"workingDir/NPCS/{npc_name}.txt", # Emplacement du fichier de données
-                        [couple[1] for couple in self.NPCs if couple[0] == npc_name][0], # Couleur représentative
-                        self.saved_NPCs[npc_name]["position"], # Position
-                        self.serializeBlocs(npc_name) # Sauvegarde des blocs de dialogue
-                      ] 
-        already_saved.append(npc_content)
-        json_data["NPCS"] = already_saved
+    try :
+      with open(self.data_file, "r", encoding="utf-8") as f :
+        json_data = json.load(f)
+
+      json_data["NPCS"] = to_json_npc
+      
+      with open(self.data_file, "w", encoding="utf-8") as f:
+        json.dump(json_data, f, ensure_ascii=False, indent=2)
         
-        with open(self.data_file, "w", encoding="utf-8") as f:
-          json.dump(json_data, f, ensure_ascii=False, indent=2)
-          
-      except FileNotFoundError:
-        QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'a pas été trouvé.")
-      except json.JSONDecodeError:
-        QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'est pas un JSON valide.")
-      except Exception as e:
-        QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
+    except FileNotFoundError:
+      QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'a pas été trouvé.")
+    except json.JSONDecodeError:
+      QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'est pas un JSON valide.")
+    except Exception as e:
+      QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
     return True
   
   def serializeBlocs(self, npc_name):
     serialized_blocs = []
-    for bloc in self.saved_NPCs[npc_name]["dialogWorkspace"] :
-      print(bloc)
-      serialized_blocs.append(bloc.importantPropertiesToDict())
+    if "dialogWorkspace" in self.saved_NPCs[npc_name].keys() :
+      for bloc in self.saved_NPCs[npc_name]["dialogWorkspace"] :
+        serialized_blocs.append(bloc.importantPropertiesToDict())
     return serialized_blocs
   
   def deserializeBlocs(self, npc_name, blocs_list):
@@ -1171,10 +1180,24 @@ class MainWindow(QMainWindow):
   def saveAs(self):
     try :
       file_export_path, _ = QFileDialog.getSaveFileName(self, "Enregistrer sous...", "", "Fichiers de projet ABengine (*.abengine)")
-      self.genNPCfiles()
+      self.file_export_path = file_export_path
+      if self.NPCs :
+        self.genNPCfiles()
       zip_folder("workingDir",file_export_path)
     except FileNotFoundError :
       pass
+
+  def save(self):
+    if self.file_export_path :
+      if self.NPCs :
+        self.genNPCfiles()
+      zip_folder("workingDir",self.file_export_path)
+    else :
+      self.saveAs()
+
+  def changeParameters(self):
+    dial = parametersDialog(self)
+    dial.exec()
 
   def createActions(self):
     self.quit_act = QAction("&Quitter")
@@ -1185,15 +1208,24 @@ class MainWindow(QMainWindow):
     self.exec_act.setShortcut("Ctrl+E")
     self.exec_act.triggered.connect(self.play)
 
+    self.save_act = QAction("&Enregistrer")
+    self.save_act.setShortcut("Ctrl+S")
+    self.save_act.triggered.connect(self.save)
+
     self.save_as_act = QAction("&Enregistrer sous")
     self.save_as_act.triggered.connect(self.saveAs)
 
+    self.parameters_act = QAction("&Paramètres")
+    self.parameters_act.triggered.connect(self.changeParameters)
+
   def createMenu(self):
     file_menu = self.menuBar().addMenu("Fichier")
-    file_menu.addAction(self.quit_act)
+    file_menu.addAction(self.save_act)
     file_menu.addAction(self.save_as_act)
-
+    file_menu.addAction(self.quit_act)
+    
     edit_menu = self.menuBar().addMenu("Edition")
+    edit_menu.addAction(self.parameters_act)
     exec_menu = self.menuBar().addMenu("Exécution")
     exec_menu.addAction(self.exec_act)
     help_menu = self.menuBar().addMenu("Aide")
@@ -1230,6 +1262,15 @@ class MainWindow(QMainWindow):
     if hasattr(self, "bloc_working_zone"):
       self.resizeReleaseZone()
     super().resizeEvent(event)
+
+  def closeEvent(self, event):
+    dial = closeDialog(self, event)
+    result = dial.exec()
+    
+    if result == QDialog.DialogCode.Rejected:
+      event.ignore()
+    else:
+      event.accept()
     
 if __name__ == "__main__":
   app = QApplication(sys.argv)

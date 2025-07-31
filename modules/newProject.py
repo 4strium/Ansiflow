@@ -1,4 +1,4 @@
-import os, json
+import os, json, shutil
 from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
 from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt
@@ -55,7 +55,7 @@ class NewProject(QDialog):
     name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     self.name_linedit = QLineEdit(self)
-    self.name_linedit.setMaxLength(15)
+    self.name_linedit.setMaxLength(20)
     self.name_linedit.setFont(QFont(self.hunnin, 18))
     self.name_linedit.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -127,6 +127,14 @@ class NewProject(QDialog):
       details["map"] = map_data
       
       os.makedirs("workingDir", exist_ok=True)
+
+      for filename in os.listdir("workingDir"):
+        file_path = os.path.join("workingDir", filename)
+        if os.path.isfile(file_path):
+          os.remove(file_path)
+        elif os.path.isdir(file_path):
+          shutil.rmtree(file_path)
+
       with open("workingDir/data.json", "w", encoding="utf-8") as f:
         # Utilisez dump, pas dumps, et ajoutez indent pour l'indentation
         json.dump(details, f, indent=2, sort_keys=False, ensure_ascii=False)

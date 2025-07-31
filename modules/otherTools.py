@@ -7,3 +7,13 @@ def zip_folder(folder_path, zip_path):
         file_path = os.path.join(root, file)
         arcname = os.path.relpath(file_path, folder_path)
         zipf.write(file_path, arcname)
+
+def keep_visuals(str_lst_data):
+  index = 0
+  cut_index = len(str_lst_data)
+  for line in str_lst_data :
+    if "__VISUAL1__" in line :
+      cut_index = index
+    index += 1
+  
+  return str_lst_data[cut_index:]

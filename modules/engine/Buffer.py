@@ -2,7 +2,6 @@ from modules.engine.Color import Color
 
 class Buffer() : 
   def __init__(self, emu_terminal):
-
     self.clear_data(emu_terminal)
 
   def clear_data(self, terminal):
@@ -20,7 +19,9 @@ class Buffer() :
   def get_data(self):
     return self.__data
   def set_pixel(self,x,y,n_content):
-    self.__data[y][x] = n_content
+    if self.__data[y][x] != n_content:
+      self.__data[y][x] = n_content
+
   def set_data(self, n_data):
     self.__data = n_data
 

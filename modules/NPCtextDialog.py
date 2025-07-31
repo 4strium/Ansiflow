@@ -49,7 +49,7 @@ class NPCtextDialog(QDialog) :
 
   def entryConfirmation(self):
     if self.input_text.text().strip() == "":
-      QMessageBox.warning(self, "Erreur", "Le texte ne peut pas être vide ou seulement composée d'espaces.")
+      QMessageBox.warning(self, "Erreur", "Le texte ne peut pas être vide ou seulement composé d'espaces.")
       return
       
     self.savingBloc.storage[0] = self.input_text.text()
