@@ -635,22 +635,43 @@ class MainWindow(QMainWindow):
     perso_skin_1.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_1.pressed.connect(self.skinGetter)
 
+    self.perso_skin_1_info = QLabel("Apparence non définie")
+    self.perso_skin_1_info.setFont(QFont(self.hunnin, 14))
+    self.perso_skin_1_info.setStyleSheet("color: red;")
+    self.perso_skin_1_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
     perso_skin_2 = QPushButton("Apparence 2 (facultative)")
     perso_skin_2.setFont(QFont(self.hunnin, 22))
     perso_skin_2.setStyleSheet(btn_tools_stylesheet)
     perso_skin_2.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_2.pressed.connect(self.skinGetter)
 
+    self.perso_skin_2_info = QLabel("Apparence non définie")
+    self.perso_skin_2_info.setFont(QFont(self.hunnin, 14))
+    self.perso_skin_2_info.setStyleSheet("color: orange;")
+    self.perso_skin_2_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
     perso_skin_3 = QPushButton("Apparence 3 (facultative)")
     perso_skin_3.setFont(QFont(self.hunnin, 22))
     perso_skin_3.setStyleSheet(btn_tools_stylesheet)
     perso_skin_3.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_3.pressed.connect(self.skinGetter)
+    
+    self.perso_skin_3_info = QLabel("Apparence non définie")
+    self.perso_skin_3_info.setFont(QFont(self.hunnin, 14))
+    self.perso_skin_3_info.setStyleSheet("color: orange;")
+    self.perso_skin_3_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     skins_group = QVBoxLayout()
     skins_group.addWidget(perso_skin_1)
+    skins_group.addWidget(self.perso_skin_1_info)
+    skins_group.addStretch()
     skins_group.addWidget(perso_skin_2)
+    skins_group.addWidget(self.perso_skin_2_info)
+    skins_group.addStretch()
     skins_group.addWidget(perso_skin_3)
+    skins_group.addWidget(self.perso_skin_3_info)
+    skins_group.addStretch()
 
     skin_close_button = QPushButton("Fermer")
     skin_close_button.setFont(QFont(self.calSans, 18))
@@ -861,6 +882,7 @@ class MainWindow(QMainWindow):
         self.npc_dialog.close()
       
       self.saved_NPCs[name] = {}
+      self.saved_NPCs[name]["skins"] = []
       self.pers_colors.append(color)
       self.page4_table.setRowCount(self.nb_perso+1)
       pers_color = QColor(color)
@@ -928,6 +950,24 @@ class MainWindow(QMainWindow):
     self.switchRightSide(2)
 
   def defineSkins(self):
+    if 1 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
+      self.perso_skin_1_info.setText("Apparence définie !")
+      self.perso_skin_1_info.setStyleSheet("color : green;")
+    else :
+      self.perso_skin_1_info.setText("Apparence non définie")
+      self.perso_skin_1_info.setStyleSheet("color : red;")
+    if 2 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
+      self.perso_skin_2_info.setText("Apparence définie !")
+      self.perso_skin_2_info.setStyleSheet("color : green;")
+    else :
+      self.perso_skin_2_info.setText("Apparence non définie")
+      self.perso_skin_2_info.setStyleSheet("color : orange;")
+    if 3 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
+      self.perso_skin_3_info.setText("Apparence définie !")
+      self.perso_skin_3_info.setStyleSheet("color : green;")
+    else :
+      self.perso_skin_3_info.setText("Apparence non définie")
+      self.perso_skin_3_info.setStyleSheet("color : orange;")
     self.switchRightSide(3)
   
   def pos_given(self, position_transmitted) :
@@ -945,10 +985,19 @@ class MainWindow(QMainWindow):
       os.makedirs("workingDir/NPCS/", exist_ok=True)
       if sender.text() == "Apparence 1 (obligatoire)" :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 50, 10, 1)
+        self.perso_skin_1_info.setText("Apparence définie !")
+        self.perso_skin_1_info.setStyleSheet("color: green;")
+        self.saved_NPCs[self.current_NPC_selected]["skins"].append(1)
       elif sender.text() == "Apparence 2 (facultative)" :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 2)
+        self.perso_skin_2_info.setText("Apparence définie !")
+        self.perso_skin_2_info.setStyleSheet("color: green;")
+        self.saved_NPCs[self.current_NPC_selected]["skins"].append(2)
       elif sender.text() == "Apparence 3 (facultative)" :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 3)
+        self.perso_skin_3_info.setText("Apparence définie !")
+        self.perso_skin_3_info.setStyleSheet("color: green;")
+        self.saved_NPCs[self.current_NPC_selected]["skins"].append(3)
 
   def openDialogWorkspace(self):
     print("\n--- Ouverture ---\n")
@@ -1024,13 +1073,17 @@ class MainWindow(QMainWindow):
   def genNPCfiles(self):
     to_json_npc = []
     for npc_name in self.saved_NPCs.keys() :
-      print(npc_name)
       npc_data = self.saved_NPCs[npc_name]
       if "position" not in npc_data.keys() :
         QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de réitérer le processus.")
         return False
       npc_posx = npc_data["position"][0]
       npc_posy = npc_data["position"][1]
+
+      if 1 not in self.saved_NPCs[npc_name]["skins"] :
+        QMessageBox.critical(self, "Génération du personnage échouée", "Au moins un de vos personnages n'a pas d'apparence obligatoire définie")
+        return False
+
       start_bloc = None
       end_bloc = None
       ids_bloc = {}
@@ -1065,6 +1118,9 @@ class MainWindow(QMainWindow):
             nb_text += 1
             text_written = current_bloc.storage[0]
             skin_choosen = current_bloc.storage[1]
+            if skin_choosen not in self.saved_NPCs[npc_name]["skins"] :
+              QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé l'apparence utilisée durant le dialogue.\nMerci de régulariser cette situation avant de réitérer le processus.")
+              return False
             str_content.append(f"__COSTUME__{skin_choosen}\n")
             str_content.append(f"{text_written}\n")
             try : 

@@ -60,8 +60,8 @@ class Image :
     return colors
 
   def draw(self, window, depth = 0):
-    height = window.getHeight()
-    width = window.getWidth()
+    height = window.get_height()
+    width = window.get_width()
 
     for i in range(len(self.get_visual())):
       y_pos = i + self.get_pos()[1]

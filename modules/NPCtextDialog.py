@@ -30,6 +30,9 @@ class NPCtextDialog(QDialog) :
     self.input_text.setFont(QFont(self.hunnin, 16))
     self.input_text.setMaxLength(78)
     
+    if self.savingBloc.storage[0] :
+      self.input_text.setText(self.savingBloc.storage[0])
+
     self.validation = QPushButton("Confirmer")
     self.validation.setFont(QFont(self.hunnin, 14))
     self.validation.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))

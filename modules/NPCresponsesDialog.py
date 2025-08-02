@@ -36,6 +36,8 @@ class NPCresponsesDialog(QDialog) :
     self.input_text_resp1 = QLineEdit(self)
     self.input_text_resp1.setFont(QFont(self.hunnin, 16))
     self.input_text_resp1.setMaxLength(78)
+    if self.savingPort[1] :
+      self.input_text_resp1.setText(self.savingPort[1])
     layout_resp1 = QVBoxLayout()
     layout_resp1.setContentsMargins(0,0,0,0)
     layout_resp1.setSpacing(0)
@@ -49,6 +51,8 @@ class NPCresponsesDialog(QDialog) :
     self.input_text_resp2 = QLineEdit(self)
     self.input_text_resp2.setFont(QFont(self.hunnin, 16))
     self.input_text_resp2.setMaxLength(78)
+    if self.savingPort[2] :
+      self.input_text_resp2.setText(self.savingPort[2])
     layout_resp2 = QVBoxLayout()
     layout_resp2.setSpacing(0)
     layout_resp2.setContentsMargins(0,0,0,0)

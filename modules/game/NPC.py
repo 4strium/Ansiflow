@@ -61,7 +61,7 @@ class NPC(Character.Character):
     special_content = [[],[]]
     type_npc = -1
     dialogue = []
-    for line in range(len(content)-1):
+    for line in range(len(content)):
       if "__NAME__" in content[line]:
         name = content[line].split("__NAME__")[1].strip()
       elif "__TYPE__" in content[line] :

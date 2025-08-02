@@ -17,3 +17,11 @@ def keep_visuals(str_lst_data):
     index += 1
   
   return str_lst_data[cut_index:]
+
+def checkOS():
+  if os.name == 'posix' :
+    return "UNIX"
+  elif os.name == 'nt' :
+    return "Windows"
+  else :
+    return "Java"
