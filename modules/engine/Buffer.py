@@ -1,4 +1,5 @@
 from modules.engine.Color import Color
+from modules.game.Game import Game
 import curses
 
 class Buffer : 
@@ -49,14 +50,14 @@ class Buffer :
           if self.get_pixel(x,y)[2] >= depth :
             self.set_pixel(x,y,[char,color,depth])
 
-  def show_data(self, stdscr):
+  def show_data(self, stdscr, game):
     for y, row in enumerate(self.get_data()):
       for x, cell in enumerate(row):
         char = cell[0]
         color = cell[1]
-        # Utiliser une couleur de base (par exemple, blanc sur noir)
+        pair_id = Game.get_color(game,Color.get_red(color),Color.get_green(color),Color.get_blue(color))
         try:
-          stdscr.addstr(y, x, char, curses.color_pair(0))
+          stdscr.addstr(y, x, char, curses.color_pair(pair_id))
         except curses.error:
           pass
     stdscr.refresh()

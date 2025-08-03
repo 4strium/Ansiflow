@@ -164,7 +164,7 @@ def get_rays(window, game_inp, player) :
 
 def interact(game_inp,player,window,stdscr):
   dt = Game.get_diff_time(game_inp)
-  key = Tools.get_key(stdscr)
+  key = Tools.get_key(stdscr,Game.get_diff_time(game_inp)*50)
 
   if key == 27:  # Quitter avec 'échap'
     sys.exit()
@@ -207,7 +207,7 @@ def endGame(window, game, death, stdscr):
     text_end = Image.upload_classic_image(Game.get_ending_path(game), 0, 0, Game.get_color2(game))
     Image.draw(text_end,window)
 
-  Buffer.show_data(window, stdscr)
+  Buffer.show_data(window, stdscr, game)
   time.sleep(10)
   sys.exit()
   exit()
@@ -229,7 +229,7 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color, stdscr):
   for i in range(len(NPC.get_visuals(npc)[sentence[0]-1])):
     Image.set_pos(NPC.get_visuals(npc)[sentence[0]-1][i],[Buffer.get_width(window_inp) // 2,-2])
     Image.draw(NPC.get_visuals(npc)[sentence[0]-1][i],window_inp)
-  Buffer.show_data(window_inp, stdscr)
+  Buffer.show_data(window_inp, stdscr, game_inp)
 
   padding = 12
   x_index = padding
@@ -242,7 +242,7 @@ def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color, stdscr):
           y_line += 1
       Buffer.set_str_buffer(window_inp, letter, color,0, x_index, y_line)
       x_index += 1
-      Buffer.show_data(window_inp, stdscr)
+      Buffer.show_data(window_inp, stdscr, game_inp)
       time.sleep(Game.get_diff_time(game_inp)*4)
   time.sleep(1)
   Buffer.clear_data(window_inp)
@@ -259,7 +259,7 @@ def ask_question(window_inp, game_inp, npc, sentence, color, stdscr):
 
   draw_backtalk(window_inp, color)
   Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (Buffer.get_height(window_inp)//4)*3)
-  Buffer.show_data(window_inp, stdscr)
+  Buffer.show_data(window_inp, stdscr, game_inp)
   time.sleep(4)
 
   choice = 0 
@@ -270,7 +270,7 @@ def ask_question(window_inp, game_inp, npc, sentence, color, stdscr):
     for idx, btn in enumerate(button_lst):
       Button.draw_text_button(btn, window_inp, idx == choice)
 
-    key = Tools.get_key(stdscr)
+    key = Tools.get_key(stdscr, Game.get_diff_time(game_inp)*50)
 
     if key == ord('d') and choice + 1 < nb_buttons:
       choice += 1
@@ -283,7 +283,7 @@ def ask_question(window_inp, game_inp, npc, sentence, color, stdscr):
         NPC.set_discuss_choice(npc,choice+1)
       break
 
-    Buffer.show_data(window_inp, stdscr)
+    Buffer.show_data(window_inp, stdscr, game_inp)
     time.sleep(Game.get_diff_time(game_inp))
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color,stdscr):
@@ -341,7 +341,7 @@ def refresh_buffer(buffer_inp) :
 def run(stdscr):
 
   curses.curs_set(0)
-  stdscr.nodelay(1)
+  stdscr.nodelay(True)
   stdscr.timeout(100)
 
   curses.start_color()
@@ -396,8 +396,7 @@ def run(stdscr):
     if Fight.is_fight_time(Game.get_fight(game_run),player_run)[0] :
       Enemy.draw_Enemy(buffer_window,Game.get_fight(game_run),player_run,blue_cyber)
       Fight.update_fight(Game.get_fight(game_run),buffer_window,blue_cyber)
-    stdscr.clear()
-    Buffer.show_data(buffer_window, stdscr)
+    Buffer.show_data(buffer_window, stdscr, game_run)
     Game.running_time(game_run)
     time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
 

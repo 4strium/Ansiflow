@@ -1,4 +1,4 @@
-import json
+import json, curses
 
 INCREMENT_RAD = 0.017
 PI = 3.142
@@ -15,6 +15,11 @@ class Game :
     self.__color2 = None
     self.__death_path = ""
     self.__ending_path = ""
+
+    self.__colors_registered = {}
+    self.color_index = 4
+
+    self.init_colors_tree()
 
     self.upload_map(map_path)
 
@@ -73,3 +78,19 @@ class Game :
       data = json.load(file)
     self.set_death_path(data['end']['death_path'])
     self.set_ending_path(data['end']['ending_path'])
+
+  def init_colors_tree(self) :
+    for i in range (0,256):
+      self.__colors_registered[i] = {}
+      for j in range (0,256):
+        self.__colors_registered[i][j] = {}
+        for k in range (0,256):
+          self.__colors_registered[i][j][k] = None
+
+  def get_color(self,r,g,b):
+    if not self.__colors_registered[r][g][b] :
+      curses.init_color(self.color_index, int(r * 1000 / 255), int(g * 1000 / 255), int(b * 1000 / 255))
+      curses.init_pair(self.color_index, self.color_index, curses.COLOR_BLACK)
+      self.color_index += 1
+      self.__colors_registered[r][g][b] = self.color_index
+    return self.__colors_registered[r][g][b]
