@@ -98,7 +98,7 @@ class NewProject(QDialog):
 
   def createDataFile(self):
     if self.name_linedit.text():
-      details = {"name": self.name_linedit.text(), "player": [-1, -1], "Enemy": [], "end":{"death_path" :"images/skull.txt","ending_path":"text/ending.txt"}, "NPCS": [],
+      details = {"name": self.name_linedit.text(), "player": [-1, -1], "Enemy": [], "end":{"death_path" :"images/skull.txt","ending_path":"text/ending.txt"}, "exit":[], "NPCS": [],
                  "Timer":["images/Timer/two_points.txt",
                           "images/Timer/0.txt",
                           "images/Timer/1.txt",

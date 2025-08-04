@@ -17,6 +17,8 @@ class Game :
     self.__death_path = ""
     self.__ending_path = ""
 
+    self.__exit_position = []
+
     self.upload_map(map_path)
 
   def get_time(self):
@@ -63,6 +65,10 @@ class Game :
     return self.__ending_path
   def set_ending_path(self,n_endpath):
     self.__ending_path = n_endpath
+  def get_exit_position(self):
+    return self.__exit_position
+  def set_exit_position(self,n_position):
+    self.__exit_position = n_position
 
   def running_time(self):
     current_time = self.get_time()
@@ -78,3 +84,11 @@ class Game :
       data = json.load(file)
     self.set_death_path(data['end']['death_path'])
     self.set_ending_path(data['end']['ending_path'])
+
+  def import_exit_position(self,path):
+    with open(path, 'r') as file :
+      data = json.load(file)
+    a,b = data["exit"]
+    height_map = len(data["map"][0])
+    corrected_pos = [b,height_map-a-1]
+    self.set_exit_position(corrected_pos)

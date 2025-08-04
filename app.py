@@ -268,7 +268,13 @@ class MainWindow(QMainWindow):
     self.page2_subsbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page2_subsbutton.pressed.connect(self.activateWallTool)
 
-    page2_legendtext = QLabel("""Tous les murs extérieurs sont immuables.\nLa fin du jeu s'effectue donc obligatoirement par la discussion avec un personnage spécifié.""")
+    self.page2_selectExitbutton = QPushButton("Sélectionner la sortie")
+    self.page2_selectExitbutton.setFont(QFont(self.hunnin, 22))
+    self.page2_selectExitbutton.setStyleSheet(btn_tools_stylesheet)
+    self.page2_selectExitbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.page2_selectExitbutton.pressed.connect(self.activateWallTool)
+
+    page2_legendtext = QLabel("""Vous devez positionner la sortie \ndirectement sur un mur extérieur. (hors coins)""")
     page2_legendtext.setWordWrap(True)
     page2_legendtext.setFont(QFont(self.hunnin, 18))
     page2_legendtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -278,7 +284,8 @@ class MainWindow(QMainWindow):
     page2_layout.addWidget(self.page2_addbutton, stretch=1)
     page2_layout.setSpacing(10)
     page2_layout.addWidget(self.page2_subsbutton, stretch=1)
-    page2_layout.addWidget(page2_legendtext, stretch=2)
+    page2_layout.addWidget(self.page2_selectExitbutton, stretch=1)
+    page2_layout.addWidget(page2_legendtext, stretch=1)
     page2_container = QWidget()
     page2_container.setLayout(page2_layout)
 
@@ -744,7 +751,6 @@ class MainWindow(QMainWindow):
     if self.map_size == -1:
       return
 
-    # on remplace self.grid_map (un QWidget vide) par notre GridWidget
     self.grid_map = GridWidget(self, self.map_size, self.border_color, self.checked_bg_color, self.player_color, self.enemy_color, self.enemy_path)
     self.grid_map.initJsonGrid() 
 
@@ -847,10 +853,13 @@ class MainWindow(QMainWindow):
       self.last_mode = [sender, currentStyleSheet]
       if sender == self.page2_addbutton :
         self.grid_map.setMap_mode(1)
-        self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-      else : 
-        self.grid_map.setMap_mode(2)
-        self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+      elif sender == self.page2_subsbutton : 
+        self.grid_map.setMap_mode(2)  
+      elif sender == self.page2_selectExitbutton :
+        self.grid_map.setMap_mode(6)
+      else :
+        return
+      self.grid_map.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
   def changeEnemySkin(self):
     try :
@@ -1295,6 +1304,8 @@ class MainWindow(QMainWindow):
       QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
     elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
       QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+    elif self.grid_map.pos_exit == [] :
+      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case de sortie du labyrinthe avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
     else :
       go = self.genNPCfiles()
       if go :

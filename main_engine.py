@@ -374,6 +374,7 @@ def run():
   Enemy.dispatch_Enemies(fight_game,"workingDir/data.json")
 
   Game.set_fight(game_run,fight_game)
+  Game.import_exit_position(game_run,"workingDir/data.json")
 
   timer_game = Timer("workingDir/data.json", Color(255,0,0))
 
@@ -388,6 +389,11 @@ def run():
     interact(game_run,player_run,buffer_window)
 
     refresh_buffer(buffer_window)
+
+    if Game.get_exit_position(game_run) == [int(Player.get_position(player_run)[0]),int(Player.get_position(player_run)[1])] :
+      refresh_buffer(buffer_window)
+      endGame(buffer_window,game_run, 1)
+      break
 
     if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
       refresh_buffer(buffer_window)
@@ -404,7 +410,7 @@ def run():
       Fight.update_fight(Game.get_fight(game_run),buffer_window,blue_cyber)
     Buffer.show_data(buffer_window)
     Game.running_time(game_run)
-    time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
+    time.sleep(Game.get_diff_time(game_run)/2) # Faire varier le rafraichissment des animations
 
     if Timer.get_remaining_time(timer_game) < 0 :
       endGame(buffer_window,game_run,0)
