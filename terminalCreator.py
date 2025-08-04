@@ -1,5 +1,5 @@
-from otherTools import checkOS
-import curses, subprocess
+from modules.otherTools import checkOS
+import subprocess
 
 class ExternalTerminal :
   def __init__(self):
@@ -8,7 +8,6 @@ class ExternalTerminal :
   def runGame(self, command=None):
     if self.operating_system == "Windows" :
       if command:
-        # Échapper correctement les guillemets pour PowerShell
         escaped_command = command.replace('"', '""').replace("'", "''")
         subprocess.run([
           "powershell", 
@@ -21,9 +20,8 @@ class ExternalTerminal :
           "-Command", 
           "Start-Process powershell -WindowStyle Maximized"
         ])
-        
+          
     elif self.operating_system == "UNIX" :
-      # ...existing code...
       try:
         if subprocess.run(["which", "gnome-terminal"], capture_output=True).returncode == 0:
           if command:
@@ -63,4 +61,4 @@ class ExternalTerminal :
 
 if __name__ == "__main__" :
   term = ExternalTerminal()
-  term.runGame("python test.py")
+  term.runGame("python main_engine.py")

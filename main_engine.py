@@ -1,6 +1,4 @@
-import math
-import sys
-import time
+import math, sys, os, time
 from modules.game.Wall import Wall
 from modules.game.Game import Game
 from modules.game.Player import Player
@@ -12,8 +10,11 @@ from modules.engine.Buffer import Buffer
 import modules.engine.Tools as Tools
 from modules.game.combat.Fight import Fight
 from modules.game.combat.Enemy import Enemy
-import PyQt6.QtWidgets
-from PyQt6.QtCore import Qt
+from modules.game.Timer import Timer
+from modules.otherTools import checkOS
+
+if checkOS() == "UNIX":
+  import termios, tty
 
 PI = 3.142 # Je fixe pi à une certaine valeur pour éviter des problèmes liés à l'approximation des flottants.
 INCREMENT_RAD = 0.017 # De même, je fixe une valeur arbitraire correspondant à un degré en radian, pour la même raison.
@@ -119,26 +120,26 @@ def draw3DWall(window, game_inp, ray_distance, player_angle, ray_angle, wall_des
   if ray_distance < 0.1 :
     ray_distance = 0.1
 
-  lineHeight = window.getHeight() / ray_distance
-  if lineHeight > window.getHeight() :
-    lineHeight = window.getHeight()
+  lineHeight = Buffer.get_height(window) / ray_distance
+  if lineHeight > Buffer.get_height(window) :
+    lineHeight = Buffer.get_height(window)
 
-  center_h = window.getHeight() // 2 
+  center_h = Buffer.get_height(window) // 2 
   y_start = center_h - (lineHeight //2)
 
   for y_axis in range(round(y_start), round(y_start + lineHeight)) :
-    if 0 <= y_axis < window.getHeight()-1:
+    if 0 <= y_axis < Buffer.get_height(window)-1:
       for i in range(round(Wall.get_start_ind(wall_design)), Wall.get_end_ind(wall_design)) :
-        if 0 <= i < window.getWidth():
+        if 0 <= i < Buffer.get_width(window):
           if i == Wall.get_end_ind(wall_design)-1 :
             Buffer.set_str_buffer(window, " ", Game.get_color2(game_inp), 400, i, y_axis)
           else :
             Buffer.set_str_buffer(window, Wall.get_texture(wall_design), Wall.get_color(wall_design), ray_distance, i, y_axis)
 
 def drawFloor(window, game_inp) :
-  for y_axis in range(window.getHeight()//2, window.getHeight()) :
-    if 0 <= y_axis < window.getHeight() -1 :
-      for x_axis in range(0, window.getWidth()) :
+  for y_axis in range(Buffer.get_height(window)//2, Buffer.get_height(window)) :
+    if 0 <= y_axis < Buffer.get_height(window) -1 :
+      for x_axis in range(0, Buffer.get_width(window)) :
         Buffer.set_str_buffer(window, "-", Game.get_color2(game_inp), 30, x_axis, y_axis)
 
 def get_rays(window, game_inp, player) :
@@ -149,7 +150,7 @@ def get_rays(window, game_inp, player) :
     Pour la valeur par défaut, 60°, l'algorithme trace donc des rayons de collision sur un angle de 30° à gauche de "angle_init", ainsi que sur 30° à droite de "angle_init".
   """
 
-  width = window.getWidth()
+  width = Buffer.get_width(window)
   fov_deg = Player.get_fov(player)
   fov_rad = math.radians(fov_deg)
 
@@ -165,21 +166,57 @@ def get_rays(window, game_inp, player) :
 
     angle_acc -= angle_step
 
-def endGame(emu_terminal, game, death):
-  x_start = emu_terminal.getWidth() // 16
-  y_start = emu_terminal.getHeight() // 30
+def interact(game_inp,player,window):
+  dt = Game.get_diff_time(game_inp)
+  key = Tools.get_key(Game.get_diff_time(game_inp)*50)
 
-  emu_terminal.clearBuffer()
+  if key == 27:  # Quitter avec 'échap'
+    if checkOS() == "UNIX":
+      termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game_inp))
+    sys.exit()
+    exit()
+  elif key == ord('z'):
+    # Simuler l'avancement du personnage :
+    position = Player.get_position(player)
+    n_pos = [position[0] + dt * 5 * math.cos(Player.get_angle(player)),position[1]+ dt * 5 * math.sin(Player.get_angle(player))]
+    Player.set_position(player,n_pos[0],n_pos[1])
+    Buffer.clear_data(window)
+  elif key == ord('s'):
+    # Simuler le reculement du personnage par rapport au sol :
+    position = Player.get_position(player)
+    n_pos = [position[0] - dt * 5 * math.cos(Player.get_angle(player)),position[1] - dt * 5 * math.sin(Player.get_angle(player))]
+    Player.set_position(player,n_pos[0],n_pos[1])
+    Buffer.clear_data(window) 
+  elif key == ord('q'):
+    Player.set_angle(player, player.get_angle() + dt*5)
+    Buffer.clear_data(window)
+  elif key == ord('d'):
+    Player.set_angle(player, player.get_angle() - dt*5)
+    Buffer.clear_data(window)
+
+  if Fight.is_fight_time(Game.get_fight(game_inp),player)[0] :
+    if key == 32 :
+      (Game.get_fight(game_inp)).set_flame_state(1)
+      Enemy.shoot_enemy(Fight.is_fight_time(Game.get_fight(game_inp),player)[1],window,Game.get_fight(game_inp))
+
+def endGame(window, game, death):
+  x_start = Buffer.get_width(window) // 16
+  y_start = Buffer.get_height(window) // 30
+
+  Buffer.clear_data(window)
 
   if death == 0:
     skull = Image.upload_classic_image(Game.get_death_path(game), x_start, y_start, Game.get_color1(game))
     Image.set_color(skull,Color(255,0,255))
-    Image.draw(skull, emu_terminal)
+    Image.draw(skull,window)
   elif death == 1:
     text_end = Image.upload_classic_image(Game.get_ending_path(game), 0, 0, Game.get_color2(game))
-    Image.draw(text_end, emu_terminal)
+    Image.draw(text_end,window)
 
-  emu_terminal.showBuffer()
+  Buffer.show_data(window)
+  time.sleep(10)
+  if checkOS() == "UNIX":
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, Game.get_backup_terminal(game))
   sys.exit()
   exit()
 
@@ -188,55 +225,50 @@ def open_doors(game_inp, lst_blocks):
     Game.get_map(game_inp)[lst_blocks[bloob][1]][lst_blocks[bloob][0]] = 0
 
 def draw_backtalk(window_inp, color):
-  for i in range(window_inp.getWidth()):
-    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(window_inp.getHeight() // 3)*2)
-  for j in range((window_inp.getHeight() // 3)*2+1,window_inp.getHeight()-1):
-    for k in range(window_inp.getWidth()):
+  for i in range(Buffer.get_width(window_inp)):
+    Buffer.set_str_buffer(window_inp,"─",color,0.1,i,(Buffer.get_height(window_inp) // 3)*2)
+  for j in range((Buffer.get_height(window_inp) // 3)*2+1,Buffer.get_height(window_inp)-1):
+    for k in range(Buffer.get_width(window_inp)):
       Buffer.set_str_buffer(window_inp," ",color,0.1,k,j)
 
-def draw_sentence(window_inp, game_inp, player_inp, npc, sentence, color):
-  window_inp.clearBuffer()
+def draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color):
   get_rays(window_inp, game_inp, player_inp)
-  draw_backtalk(window_inp, color)
-  for i in range(len(NPC.get_visuals(npc)[sentence[0] - 1])):
-    Image.set_pos(NPC.get_visuals(npc)[sentence[0] - 1][i], [window_inp.getWidth() // 2, -2])
-    Image.draw(NPC.get_visuals(npc)[sentence[0] - 1][i], window_inp)
-  window_inp.showBuffer()
-  PyQt6.QtWidgets.QApplication.processEvents()
+  draw_backtalk(window_inp, color) 
+  for i in range(len(NPC.get_visuals(npc)[sentence[0]-1])):
+    Image.set_pos(NPC.get_visuals(npc)[sentence[0]-1][i],[Buffer.get_width(window_inp) // 2,-2])
+    Image.draw(NPC.get_visuals(npc)[sentence[0]-1][i],window_inp)
+  Buffer.show_data(window_inp)
 
   padding = 12
   x_index = padding
-  y_line = (window_inp.getHeight() // 4) * 3
-  text = sentence[1]
-
-  for letter in text:
-    if x_index < window_inp.getWidth() - padding:
-      if x_index > ((window_inp.getWidth() // 2) - 6):
-        if letter == ' ':
-          x_index = padding - 1
+  y_line = (Buffer.get_height(window_inp) // 4)*3
+  for letter in sentence[1] :
+    if x_index < Buffer.get_width(window_inp) - padding :
+      if x_index > ((Buffer.get_width(window_inp)//2)-6) :
+        if letter == ' ' :
+          x_index = padding-1
           y_line += 1
-      Buffer.set_str_buffer(window_inp, letter, color, 0, x_index, y_line)
+      Buffer.set_str_buffer(window_inp, letter, color,0, x_index, y_line)
       x_index += 1
-      window_inp.showBuffer()
-      PyQt6.QtWidgets.QApplication.processEvents() 
-      time.sleep(0.01)
-  
-  time.sleep(2)
+      Buffer.show_data(window_inp)
+      time.sleep(Game.get_diff_time(game_inp)*4)
+  time.sleep(1)
+  Buffer.clear_data(window_inp)
 
 def annotations_user(window_inp, color):
-  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, window_inp.getWidth()-45, window_inp.getHeight()-8)
-  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, window_inp.getWidth()-48, window_inp.getHeight()-7)
+  Buffer.set_str_buffer(window_inp, "Utilise Q et D pour changer de réponse", color,0, Buffer.get_width(window_inp)-45, Buffer.get_height(window_inp)-8)
+  Buffer.set_str_buffer(window_inp, "Appuie sur ESPACE pour confirmer ta réponse",color,0, Buffer.get_width(window_inp)-48, Buffer.get_height(window_inp)-7)
 
 def ask_question(window_inp, game_inp, npc, sentence, color):
   padding = 12
   x_shift = 60
   nb_buttons = sentence[2][0]
-  button_lst = [Button(sentence[1][i][0],[padding + i*x_shift, (window_inp.getHeight()//5)*4],Game.get_color2(game_inp), Game.get_color1(game_inp)) for i in range(nb_buttons)]
+  button_lst = [Button(sentence[1][i][0],[padding + i*x_shift, (Buffer.get_height(window_inp)//5)*4],Game.get_color2(game_inp), Game.get_color1(game_inp)) for i in range(nb_buttons)]
 
   draw_backtalk(window_inp, color)
-  Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (window_inp.getHeight()//4)*3)
-  window_inp.showBuffer()
-  PyQt6.QtWidgets.QApplication.processEvents()
+  Buffer.set_str_buffer(window_inp, sentence[0], color, 0, padding, (Buffer.get_height(window_inp)//4)*3)
+  Buffer.show_data(window_inp)
+  time.sleep(4)
 
   choice = 0 
   annotations_user(window_inp, color)
@@ -246,34 +278,32 @@ def ask_question(window_inp, game_inp, npc, sentence, color):
     for idx, btn in enumerate(button_lst):
       Button.draw_text_button(btn, window_inp, idx == choice)
 
-    key = window_inp.getKey()
+    key = Tools.get_key(0.1)
 
-    if key == Qt.Key.Key_D and choice + 1 < nb_buttons:
+    if key == ord('d') and choice + 1 < nb_buttons:
       choice += 1
-    elif key == Qt.Key.Key_Q and choice - 1 >= 0:
+    elif key == ord('q') and choice - 1 >= 0:
       choice -= 1
-    elif key == Qt.Key.Key_Space: 
+    elif key == 32:  # espace
       if sentence[2][1] == 'B':
         open_doors(game_inp, sentence[1][choice][1])
       elif sentence[2][1] == 'C' :
         NPC.set_discuss_choice(npc,choice+1)
       break
 
-    window_inp.showBuffer()
-    PyQt6.QtWidgets.QApplication.processEvents()
-
-  window_inp.clearBuffer()
-  PyQt6.QtWidgets.QApplication.processEvents()
+    Buffer.show_data(window_inp)
+    time.sleep(Game.get_diff_time(game_inp))
 
 def talk_to_NPC(window_inp,player_inp,game_inp,npc,color):
   for sentence in NPC.get_texts(npc) :
     if sentence[0] == 'FUNC':
-      window_inp.clearBuffer()
+      Buffer.clear_data(window_inp)
       eval(sentence[1])
-      window_inp.clearBuffer()
+      Buffer.clear_data(window_inp)
     elif sentence[2][0] != -1 :
       get_rays(window_inp, game_inp, player_inp)
       ask_question(window_inp,game_inp,npc,sentence,color)
+      Buffer.clear_data(window_inp)
     elif (sentence[3] != None and sentence[3] == NPC.get_discuss_choice(npc)) or sentence[3] == None :
       draw_sentence(window_inp,game_inp,player_inp,npc,sentence,color)
   
@@ -287,8 +317,8 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
     distance = math.sqrt((NPC.get_position(npc_g)[0] - Player.get_position(player_inp)[0])**2+(NPC.get_position(npc_g)[1] - Player.get_position(player_inp)[1])**2)
 
     if distance < 6 :
-      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, window_inp.getWidth() // 2, 0)
-      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, window_inp.getWidth() // 2, 1)
+      Buffer.set_str_buffer(window_inp, str(round(distance,3)), talk_color, 0, Buffer.get_width(window_inp) // 2, 0)
+      Buffer.set_str_buffer(window_inp, str(NPC.get_name(npc_g)), talk_color, 0, Buffer.get_width(window_inp) // 2, 1)
 
     if 0.01 < distance < 2.5 :
       if distance > 1 :
@@ -297,7 +327,7 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
         angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
 
         fov_limits = (Player.get_fov(player_inp)//2)*INCREMENT_RAD
-        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * window_inp.getWidth())
+        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * Buffer.get_width(window_inp))
 
         if -fov_limits <= angle_player_npc <= fov_limits :
           for i in range(len(NPC.get_visuals(npc_g)[0])):
@@ -306,3 +336,78 @@ def draw_NPC(window_inp, game_inp, player_inp, talk_color):
       else :
         draw_backtalk(window_inp, talk_color)
         talk_to_NPC(window_inp, player_inp, game_inp, npc_g, talk_color)
+
+def refresh_buffer(buffer_inp) :
+  # Création du buffer :
+  size = os.get_terminal_size()
+  columns = size.columns
+  rows = size.lines
+  Buffer.clear_data(buffer_inp)
+  Buffer.set_height(buffer_inp, rows)
+  Buffer.set_width(buffer_inp, columns)
+
+def run():
+
+  # Démarrage du gestionnaire de couleurs :
+  wall_pink = Color(189, 0, 255)
+  blue_cyber = Color(0,255,159)
+
+  size = os.get_terminal_size()
+  columns = size.columns
+  rows = size.lines
+  buffer_window = Buffer(columns, rows)
+
+  if checkOS() == "UNIX":
+    game_run = Game(0.01, "workingDir/data.json", termios.tcgetattr(sys.stdin))
+    tty.setcbreak(sys.stdin.fileno())
+  else :
+    game_run = Game(0.01, "workingDir/data.json")
+  Game.set_color1(game_run, wall_pink)
+  Game.set_color2(game_run, blue_cyber)
+  Game.upload_all_end(game_run,"workingDir/data.json")
+
+  player_run = Player("workingDir/data.json",80,-(math.pi/2))
+
+  NPC.dispatch_NPCS(game_run,"workingDir/data.json")
+
+  fight_game = Fight(buffer_window)
+  Enemy.dispatch_Enemies(fight_game,"workingDir/data.json")
+
+  Game.set_fight(game_run,fight_game)
+
+  timer_game = Timer("workingDir/data.json", Color(255,0,0))
+
+  mystery_npc = next((npc for npc in Game.get_npcs(game_run) if NPC.get_name(npc) == "MYSTÈRE"), None)
+  if mystery_npc:
+    talk_to_NPC(buffer_window, player_run, game_run, mystery_npc, blue_cyber)
+
+  starting_game_time = time.time()
+  
+  # Boucle de simulation :
+  while True :
+    interact(game_run,player_run,buffer_window)
+
+    refresh_buffer(buffer_window)
+
+    if Game.get_map(game_run)[int(Player.get_position(player_run)[1])][int(Player.get_position(player_run)[0])] :
+      refresh_buffer(buffer_window)
+      endGame(buffer_window,game_run, 0)
+      break
+
+    Timer.show_timer(timer_game,buffer_window)
+    Timer.remove_time(timer_game,starting_game_time-time.time())
+    drawFloor(buffer_window, game_run)
+    get_rays(buffer_window, game_run, player_run)
+    draw_NPC(buffer_window,game_run,player_run,blue_cyber)
+    if Fight.is_fight_time(Game.get_fight(game_run),player_run)[0] :
+      Enemy.draw_Enemy(buffer_window,Game.get_fight(game_run),player_run,blue_cyber)
+      Fight.update_fight(Game.get_fight(game_run),buffer_window,blue_cyber)
+    Buffer.show_data(buffer_window)
+    Game.running_time(game_run)
+    time.sleep(Game.get_diff_time(game_run)) # Faire varier le rafraichissment des animations
+
+    if Timer.get_remaining_time(timer_game) < 0 :
+      endGame(buffer_window,game_run,0)
+
+if __name__ == "__main__":
+  run()

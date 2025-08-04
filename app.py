@@ -7,7 +7,7 @@ from modules.grid import GridWidget
 from modules.newNPC import NewNPC
 from modules.removeNPC import RemoveNPC
 from modules.bloc import Bloc
-from emulatedTerminal import EmulatedTerminal
+from terminalCreator import ExternalTerminal
 from scripts.image_to_ascii import image_to_ascii_by_color
 from modules.NPCtextDialog import NPCtextDialog
 from modules.NPCresponsesDialog import NPCresponsesDialog
@@ -56,9 +56,11 @@ class MainWindow(QMainWindow):
       for npc_couple in json_data["NPCS"] :
         self.addPersTable(npc_couple[0], npc_couple[2])
         self.saved_NPCs[npc_couple[0]] = {}
-        self.saved_NPCs[npc_couple[0]]["position"] = npc_couple[3]
-        self.grid_map.pos_NPCS.append([npc_couple[3],npc_couple[2],self.current_NPC_selected])
+        pos_npc_interpretable = [npc_couple[3][1] - 0.5, npc_couple[3][0] -0.5]
+        self.saved_NPCs[npc_couple[0]]["position"] = pos_npc_interpretable
+        self.grid_map.pos_NPCS.append([pos_npc_interpretable,npc_couple[2],npc_couple[0]])
         self.deserializeBlocs(npc_couple[0], npc_couple[4])
+        self.saved_NPCs[npc_couple[0]]["skins"] = npc_couple[5]
 
   def initializeUI(self):
     self.setWindowTitle("Patate - The 3D ASCII Game Engine")
@@ -973,7 +975,8 @@ class MainWindow(QMainWindow):
   def pos_given(self, position_transmitted) :
     if self.current_NPC_selected not in self.saved_NPCs:
       self.saved_NPCs[self.current_NPC_selected] = {}
-    self.saved_NPCs[self.current_NPC_selected]["position"] = position_transmitted
+    x, y = position_transmitted
+    self.saved_NPCs[self.current_NPC_selected]["position"] = [y+0.5,x+0.5]
     self.grid_map.setMap_mode(0)
     self.grid_map.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
     self.right_layout.setCurrentIndex(1)
@@ -1192,7 +1195,8 @@ class MainWindow(QMainWindow):
                       f"workingDir/NPCS/{npc_name}.txt", # Emplacement du fichier de données
                       [couple[1] for couple in self.NPCs if couple[0] == npc_name][0], # Couleur représentative
                       self.saved_NPCs[npc_name]["position"], # Position
-                      self.serializeBlocs(npc_name) # Sauvegarde des blocs de dialogue
+                      self.serializeBlocs(npc_name), # Sauvegarde des blocs de dialogue
+                      self.saved_NPCs[npc_name]["skins"]
                     ] 
       to_json_npc.append(npc_content)
 
@@ -1294,8 +1298,8 @@ class MainWindow(QMainWindow):
     else :
       go = self.genNPCfiles()
       if go :
-        self.game = EmulatedTerminal(self.game_name)
-        self.game.show()
+        self.game = ExternalTerminal()
+        self.game.runGame("python main_engine.py")
 
   def maintainSpacingLayout(self):
     self.main_layout.setSpacing(int(self.width() * 0.01))

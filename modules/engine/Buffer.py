@@ -1,6 +1,5 @@
+import sys
 from modules.engine.Color import Color
-from modules.game.Game import Game
-import curses
 
 class Buffer : 
   def __init__(self,width,height):
@@ -39,25 +38,57 @@ class Buffer :
 
   def set_str_buffer(self,char,color,depth,x,y):
     if x+len(char) < self.get_width()+1 :
-      if y < self.get_height() :
-        if len(char) > 1 :
-          x_acc = x
-          for i in range(len(char)) :
-            if self.get_pixel(x_acc,y)[2] >= depth :
-              self.set_pixel(x_acc,y,[char[i],color,depth])
-            x_acc += 1
-        else :
-          if self.get_pixel(x,y)[2] >= depth :
-            self.set_pixel(x,y,[char,color,depth])
+      if len(char) > 1 :
+        x_acc = x
+        for i in range(len(char)) :
+          if self.get_pixel(x_acc,y)[2] >= depth :
+            self.set_pixel(x_acc,y,[char[i],color,depth])
+          x_acc += 1
+      else :
+        if self.get_pixel(x,y)[2] >= depth :
+          self.set_pixel(x,y,[char,color,depth])
 
-  def show_data(self, stdscr, game):
-    for y, row in enumerate(self.get_data()):
-      for x, cell in enumerate(row):
-        char = cell[0]
-        color = cell[1]
-        pair_id = Game.get_color(game,Color.get_red(color),Color.get_green(color),Color.get_blue(color))
-        try:
-          stdscr.addstr(y, x, char, curses.color_pair(pair_id))
-        except curses.error:
-          pass
-    stdscr.refresh()
+
+  def rgb_fg(r, g, b):
+      return f"\033[38;2;{r};{g};{b}m"
+
+  def move_to(x, y):
+      return f"\033[{y};{x}H"
+
+  def reset():
+      return "\033[0m"
+
+  def show_data(self):
+      output = []
+      prev_fg = None
+
+      for y, row in enumerate(self.get_data(), start=1):
+          output.append(Buffer.move_to(1, y))
+          for cell in row:
+              char = cell[0]
+              color_fg = [Color.get_red(cell[1]),Color.get_green(cell[1]),Color.get_blue(cell[1])]
+
+              # Moduler la couleur en fonction de la profondeur
+              if cell[2] > 2:
+                depth_factor = (1 - (max(2, min(6, cell[2])) / 8))*1.1
+                color_fg = [
+                int(color_fg[0] * depth_factor),
+                int(color_fg[1] * depth_factor),
+                int(color_fg[2] * depth_factor),
+                ]
+
+              # Changer couleur si nécessaire
+              if color_fg != prev_fg:
+                  if color_fg :
+                      output.append(Buffer.rgb_fg(color_fg[0],color_fg[1],color_fg[2]))
+                  else:
+                      output.append("\033[39m")  # couleur par défaut
+                  prev_fg = color_fg
+
+              output.append("\033[49m")  # fond par défaut
+
+              output.append(char)
+
+      output.append(Buffer.reset())
+      sys.stdout.write("".join(output))
+      sys.stdout.flush()

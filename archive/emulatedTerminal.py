@@ -4,8 +4,6 @@ from PyQt6.QtGui import QFont, QFontMetrics, QKeyEvent
 from PyQt6.QtCore import Qt, QTimer
 from modules.engine.Buffer import Buffer
 from modules.engine.Color import Color
-from main_engine import *
-from modules.game.Timer import Timer
 
 class NoScrollTextEdit(QTextEdit):
   def wheelEvent(self, event):
@@ -137,80 +135,6 @@ class EmulatedTerminal(QWidget):
     self.text_edit.setMinimumWidth(self.terminal_width * fw)
 
     self.buffer = Buffer(self)
-
-  def init_game_logic(self):
-    # Démarrage du gestionnaire de couleurs :
-    wall_pink = Color(189, 0, 255)
-    blue_cyber = Color(0,255,159)
-
-    self.game_run = Game(0.01, "workingDir/data.json")
-    self.game_run.set_color1(wall_pink)
-    self.game_run.set_color2(blue_cyber)
-    self.game_run.upload_all_end("workingDir/data.json")
-
-    self.player_run = Player("workingDir/data.json", 80, -(math.pi/2))
-
-    NPC.dispatch_NPCS(self.game_run, "workingDir/data.json")
-
-    self.fight_game = Fight(self)
-    Enemy.dispatch_Enemies(self.fight_game, "workingDir/data.json")
-
-    self.game_run.set_fight(self.fight_game)
-
-    self.timer_game = Timer("workingDir/data.json", Color(255,0,0))
-
-    self.starting_game_time = time.time()
-    
-    self.game_timer.start(16) 
-
-  def update_game(self):
-    # This method is called periodically by the QTimer
-    dt = self.game_run.get_diff_time()
-    key = self.getKey() # Get the last captured key
-
-    if key == Qt.Key.Key_Escape:  # Quitter avec 'échap'
-      sys.exit()
-    elif key == Qt.Key.Key_Z:
-      position = self.player_run.get_position()
-      n_pos = [position[0] + dt * 5 * math.cos(self.player_run.get_angle()), position[1] + dt * 5 * math.sin(self.player_run.get_angle())]
-      self.player_run.set_position(n_pos[0], n_pos[1])
-    elif key == Qt.Key.Key_S:
-      position = self.player_run.get_position()
-      n_pos = [position[0] - dt * 5 * math.cos(self.player_run.get_angle()), position[1] - dt * 5 * math.sin(self.player_run.get_angle())]
-      self.player_run.set_position(n_pos[0], n_pos[1])
-    elif key == Qt.Key.Key_Q:
-      self.player_run.set_angle(self.player_run.get_angle() + dt*5)
-    elif key == Qt.Key.Key_D:
-      self.player_run.set_angle(self.player_run.get_angle() - dt*5)
-    
-    if self.fight_game.is_fight_time(self.player_run)[0] :
-      if key == Qt.Key.Key_Space :
-        (self.game_run.get_fight()).set_flame_state(1)
-        Enemy.shoot_enemy(self.fight_game.is_fight_time(self.player_run)[1], self, self.game_run.get_fight())
-
-    if self.game_run.get_map()[int(self.player_run.get_position()[1])][int(self.player_run.get_position()[0])] :
-      endGame(self, self.game_run, 0)
-      return
-    
-    self.clearBuffer()
-
-    self.timer_game.show_timer(self)
-    self.timer_game.remove_time(self.starting_game_time-time.time())
-    drawFloor(self, self.game_run)
-    get_rays(self, self.game_run, self.player_run)
-    draw_NPC(self, self.game_run, self.player_run, Color(0,255,159))
-    if self.fight_game.is_fight_time(self.player_run)[0] :
-      Enemy.draw_Enemy(self, self.game_run.get_fight(), self.player_run, Color(0,255,159))
-      self.fight_game.update_fight(self, Color(0,255,159)) 
-    self.showBuffer()
-    self.game_run.running_time()
-
-    if self.timer_game.get_remaining_time() < 0 :
-      endGame(self, self.game_run, 0)
-
-  def closeEvent(self, event):
-    self.game_timer.stop()
-    event.accept()
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
