@@ -1,7 +1,9 @@
 import json, math
+import math, json
 from PyQt6.QtWidgets import QWidget, QMessageBox
 from PyQt6.QtGui import QPainter, QColor, QMouseEvent
 from PyQt6.QtCore import QSize
+from modules.otherTools import translation
 
 class GridWidget(QWidget):
   def __init__(self, main_app, map_size, border_color, wall_color, player_color, enemy_color, enemy_path, parent=None):
@@ -23,6 +25,7 @@ class GridWidget(QWidget):
     self.filename = "workingDir/data.json"
     self.pers_pos_attribution = main_app.pos_given
     self.congestion_limit = 4
+    self.user_language = main_app.user_language  # Récupération de la langue
     self.setMouseTracking(True)
   
   def setMap_mode(self, nmode):
@@ -104,6 +107,13 @@ class GridWidget(QWidget):
       individual_dict["path_visual"] = self.enemy_img
       package.append(individual_dict)
     return package
+  
+  def resetLimits(self, map):
+    for i in range(len(map)) :
+      for j in range(len(map)) :
+        if ((i == 0) or (j == 0) or (i == self.map_size-1) or (j == self.map_size-1)): 
+          map[i][j] = 1
+    return map
 
   def mousePressEvent(self, event):
     pos = event.position()       
@@ -141,9 +151,9 @@ class GridWidget(QWidget):
               if self.checkNearestEnemy([i,j]) > self.congestion_limit :
                 self.pos_enemies.append([i,j])
               else :
-                QMessageBox.warning(self, "Ennemis trop proches", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un de ses congénères.")
+                QMessageBox.warning(self, translation("grid_enemies_too_close_title", self.user_language), translation("grid_enemies_too_close_message", self.user_language))
             else :
-              QMessageBox.warning(self, "Personnage trop proche", "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un personnage.") 
+              QMessageBox.warning(self, translation("grid_character_too_close_title", self.user_language), translation("grid_character_too_close_message", self.user_language)) 
           else :
             self.pos_enemies.remove([i,j])
         elif self.map_mode == 5 and not data["map"][i][j] and [i,j] not in self.pos_enemies and [i,j] != self.pos_player:
@@ -158,12 +168,14 @@ class GridWidget(QWidget):
                 self.pos_NPCS.append([[i,j], attributed_color, npc_select])
                 self.pers_pos_attribution([i, j])
             else :
-              QMessageBox.warning(self, "Personnages trop proches", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un de ses congénères.") 
+              QMessageBox.warning(self, translation("grid_characters_too_close_title", self.user_language), translation("grid_characters_too_close_message", self.user_language)) 
           else :
-            QMessageBox.warning(self, "Ennemi trop proche", "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un ennemi.")
-      elif ((i == 0 ) or (j == 0) or (i == self.map_size-1) or (j == self.map_size-1)) and [i,j] not in [[0,0],[0,self.map_size-1],[self.map_size-1,0],[self.map_size-1,self.map_size-1]] and (self.map_mode == 6) :
+            QMessageBox.warning(self, translation("grid_enemy_too_close_title", self.user_language), translation("grid_enemy_too_close_message", self.user_language))
+      elif ((i == 0) or (j == 0) or (i == self.map_size-1) or (j == self.map_size-1)) and [i,j] not in [[0,0],[0,self.map_size-1],[self.map_size-1,0],[self.map_size-1,self.map_size-1]] and (self.map_mode == 6) :
+        data["map"] = self.resetLimits(data["map"])
         self.pos_exit = [i,j]
         data["exit"] = [i,j]
+        data["map"][i][j] = 0
       with open(self.filename, "w") as f:
         data["Enemy"] = self.packEnemies()
         json.dump(data, f, indent=2, sort_keys=False, ensure_ascii=False)

@@ -1,0 +1,614 @@
+{
+  "title_map": {
+    "en": "The Map",
+    "fr": "La Carte"
+  },
+  "title_working_zone": {
+    "en": "The Dialogue Diagram",
+    "fr": "Le Schéma du Dialogue"
+  },
+  "title_tools": {
+    "en": "The Tools",
+    "fr": "Les Outils"
+  },
+  "player_button": {
+    "en": "Player",
+    "fr": "Joueur"
+  },
+  "walls_button": {
+    "en": "Walls",
+    "fr": "Murs"
+  },
+  "enemies_button": {
+    "en": "Enemies",
+    "fr": "Ennemis"
+  },
+  "npc_button": {
+    "en": "Characters",
+    "fr": "Personnages"
+  },
+  "page1_infotext": {
+    "en": "On the map opposite, click on the tile where your player will appear at the start of the game.",
+    "fr": "Sur la carte ci-contre, cliquez sur la case où votre joueur apparaîtra au lancement du jeu."
+  },
+  "page1_legend": {
+    "en": "Spawn tile",
+    "fr": "Case d'apparition"
+  },
+  "page2_infotext": {
+    "en": "Select the tool:",
+    "fr": "Sélectionnez l'outil :"
+  },
+  "page2_addbutton": {
+    "en": " Add walls",
+    "fr": " Ajouter des murs"
+  },
+  "page2_subsbutton": {
+    "en": " Delete walls",
+    "fr": " Supprimer des murs"
+  },
+  "page2_selectExitbutton": {
+    "en": "Select the exit",
+    "fr": "Sélectionnez la sortie"
+  },
+  "page2_legendtext": {
+    "en": "You must position the outlet \ndirectly on an exterior wall. (excluding corners)",
+    "fr": "Vous devez positionner la sortie \ndirectement sur un mur extérieur. (hors coins)"
+  },
+  "page3_infotext": {
+    "en": "On the map opposite, click on the tiles where you want to position enemies.",
+    "fr": "Sur la carte ci-contre, cliquez sur les cases où vous désirez positionner des ennemis."
+  },
+  "page3_legendtext": {
+    "en": "Enemies",
+    "fr": "Ennemis"
+  },
+  "page3_skin": {
+    "en": "Select enemy appearance",
+    "fr": "Sélectionner l'apparence des ennemis"
+  },
+  "page3_infoskin": {
+    "en": "Warning: Appearance is not defined!",
+    "fr": "Attention : L'apparence n'est pas définie !"
+  },
+  "page4_title": {
+    "en": "Your characters:",
+    "fr": "Vos personnages :"
+  },
+  "page4_table0": {
+    "en": "Name",
+    "fr": "Nom"
+  },
+  "page4_table1": {
+    "en": "Color",
+    "fr": "Couleur"
+  },
+  "page4_table2": {
+    "en": "Attributes",
+    "fr": "Attributs"
+  },
+  "page4_addbutton": {
+    "en": " Add a character",
+    "fr": " Ajouter un personnage"
+  },
+  "page4_subsbutton": {
+    "en": " Delete a character",
+    "fr": " Supprimer un personnage"
+  },
+  "str_concatenation00": {
+    "en": "(limited to ",
+    "fr": "(limité à "
+  },
+  "str_concatenation01": {
+    "en": " characters)",
+    "fr": " personnages"
+  },
+  "config_question": {
+    "en": "What do you want to configure?",
+    "fr": "Que souhaitez-vous configurer ?"
+  },
+  "answer_pos": {
+    "en": "Character location on the map",
+    "fr": "Emplacement du personnage sur la carte"
+  },
+  "answer_dial": {
+    "en": "Dialogs",
+    "fr": "Dialogues"
+  },
+  "answer_skin": {
+    "en": "Appearances",
+    "fr": "Apparences"
+  },
+  "close_button": {
+    "en": "Close",
+    "fr": "Fermer"
+  },
+  "pers_pos_infotext1": {
+    "en": "Please click on the tile where you want to position your character.",
+    "fr": "Veuillez cliquer sur la case où vous souhaitez positionner votre personnage."
+  },
+  "pers_pos_infotext2": {
+    "en": "Warning: It must not be too close to an enemy or another character.",
+    "fr": "Attention, il ne doit pas être trop proche d'un ennemi ou d'un autre personnage."
+  },
+  "pers_pos_close_button": {
+    "en": "Close",
+    "fr": "Fermer"
+  },
+  "start_text": {
+    "en": "START",
+    "fr": "DÉBUT"
+  },
+  "afficher": {
+    "en": "Show",
+    "fr": "Afficher"
+  },
+  "texte_btn": {
+    "en": "text",
+    "fr": "texte"
+  },
+  "skin_text": {
+    "en": "with appearance",
+    "fr": "avec l'apparence"
+  },
+  "poser": {
+    "en": "Ask",
+    "fr": "Poser"
+  },
+  "ask_btn": {
+    "en": "question",
+    "fr": "question"
+  },
+  "a_text": {
+    "en": "with",
+    "fr": "à"
+  },
+  "answers_btn": {
+    "en": "responses",
+    "fr": "réponses"
+  },
+  "flux_text": {
+    "en": "Stream grouping",
+    "fr": "Regroupement des flux"
+  },
+  "executer": {
+    "en": "Run",
+    "fr": "Exécuter"
+  },
+  "python_btn": {
+    "en": "Python script",
+    "fr": "code Python"
+  },
+  "end_text": {
+    "en": "END",
+    "fr": "FIN"
+  },
+  "dialogue_close_button": {
+    "en": "Fermer",
+    "fr": "Close"
+  },
+  "perso_skin_text": {
+    "en": "Add appearances to your character:",
+    "fr": "Ajouter des apparences à votre personnage :"
+  },
+  "perso_skin_1": {
+    "en": "Appearance 1 (mandatory)",
+    "fr": "Apparence 1 (obligatoire)"
+  },
+  "perso_skin_1_info": {
+    "en": "Appearance not defined",
+    "fr": "Apparence non définie"
+  },
+  "perso_skin_2": {
+    "en": "Appearance 2 (optional)",
+    "fr": "Apparence 2 (facultative)"
+  },
+  "perso_skin_2_info": {
+    "en": "Appearance not defined",
+    "fr": "Apparence non définie"
+  },
+  "perso_skin_3": {
+    "en": "Appearance 3 (optional)",
+    "fr": "Apparence 3 (facultative)"
+  },
+  "perso_skin_3_info": {
+    "en": "Appearance not defined",
+    "fr": "Apparence non définie"
+  },
+  "skin_close_button": {
+    "en": "Close",
+    "fr": "Fermer"
+  },
+  "skin_filename": {
+    "en": "Select the image representing an enemy",
+    "fr": "Sélectionner l'image représentant un ennemi"
+  },
+  "page3_infoskin_defined": {
+    "en": "Enemy appearance correctly set",
+    "fr": "Apparence des ennemis correctement définie"
+  },
+  "createNewPersoWarning_title": {
+    "en": "Action not possible",
+    "fr": "Action impossible"
+  },
+  "createNewPersoWarning_content": {
+    "en": "Sorry, you have reached the character limit.\nPlease delete an existing character before continuing.",
+    "fr": "Désolé, vous avez atteint la limite de personnages.\nVeuillez supprimer un personnage existant avant de poursuivre."
+  },
+  "addPersTableWarning_case0": {
+    "en": "Unfortunately, a name is required for your character.\nPlease provide it.",
+    "fr": "Malheureusement, un nom est requis pour votre personnage.\nMerci de le renseigner."
+  },
+  "addPersTableWarning_case1": {
+    "en": "Unfortunately, you are already using this name for another character.\nPlease choose another one.",
+    "fr": "Malheureusement, vous utilisez déjà ce nom pour un autre personnage.\nMerci d'en choisir un autre."
+  },
+  "addPersTableWarning_case2": {
+    "en": "Sorry, you're already using this color for another character.\nPlease use another one.",
+    "fr": "Désolé, vous utilisez déjà cette couleur pour un autre personnage.\nMerci d'en utiliser une autre."
+  },
+  "config_button": {
+    "en": "Configure",
+    "fr": "Configurer"
+  },
+  "deletePersoDialogWaring_content": {
+    "en": "No characters to delete.",
+    "fr": "Aucun personnage à supprimer"
+  },
+  "perso_skin_1_info_defined": {
+    "en": "Appearance defined!",
+    "fr": "Apparence définie !"
+  },
+  "perso_skin_2_info_defined": {
+    "en": "Appearance defined!",
+    "fr": "Apparence définie !"
+  },
+  "perso_skin_3_info_defined": {
+    "en": "Appearance defined!",
+    "fr": "Apparence définie !"
+  },
+  "skinGetterfilename": {
+    "en": "Select the image representing your character",
+    "fr": "Sélectionner l'image représentant votre personnage"
+  },
+  "genNPCfiles_title": {
+    "en": "Character generation failed",
+    "fr": "Génération du personnage échouée"
+  },
+  "genNPCfiles_warning0": {
+    "en": "The position of at least one character is not correctly defined.\nPlease correct this situation before repeating the process.",
+    "fr": "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de réitérer le processus."
+  },
+  "genNPCfiles_warning1": {
+    "en": "At least one of your characters does not have a mandatory appearance set",
+    "fr": "Au moins un de vos personnages n'a pas d'apparence obligatoire définie"
+  },
+  "genNPCfiles_warning2": {
+    "en": "For at least one of your characters, our dialogue generation system could not find the required 'START' block.\nPlease rectify this situation before repeating the process.",
+    "fr": "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de réitérer le processus."
+  },
+  "genNPCfiles_warning3": {
+    "en": "For at least one of your characters, our dialogue generation system could not find the required 'END' block.\nPlease rectify this situation before repeating the process.",
+    "fr": "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de réitérer le processus."
+  },
+  "genNPCfiles_warning4": {
+    "en": "One of your connections between dialogue blocks is incorrect. Please connect your blocks properly and logically.",
+    "fr": "Une de vos connexions entre vos blocs de dialogue n'est pas correcte, merci d'emboîter proprement et logiquement vos blocs."
+  },
+  "genNPCfiles_warningSkins": {
+    "en": "For at least one of your characters, our dialogue generation system could not find the appearance used during the dialogue.\nPlease resolve this issue before attempting the process again.",
+    "fr": "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé l'apparence utilisée durant le dialogue.\nMerci de régulariser cette situation avant de réitérer le processus."
+  },
+  "genNPCfiles_warning5_0": {
+    "en": "The file ",
+    "fr": "Le fichier "
+  },
+  "genNPCfiles_warning5_1": {
+    "en": " was not found.",
+    "fr": " n'a pas été trouvé."
+  },
+  "genNPCfiles_warning6_0": {
+    "en": "The file ",
+    "fr": "Le fichier "
+  },
+  "genNPCfiles_warning6_1": {
+    "en": " is not valid JSON.",
+    "fr": " n'est pas un JSON valide."
+  },
+  "genNPCfiles_warning7": {
+    "en": "An error occurred while editing the JSON file:",
+    "fr": "Une erreur est survenue lors de la modification du fichier JSON: "
+  },
+  "saveAsDialog_title": {
+    "en": "Save as...",
+    "fr": "Enregistrer sous..."
+  },
+  "saveAsDialog_extensions": {
+    "en": "ABengine project files (*.abengine)",
+    "fr": "Fichiers de projet ABengine (*.abengine)"
+  },
+  "quit_act": {
+    "en": "&Close",
+    "fr": "&Fermer"
+  },
+  "exec_act": {
+    "en": "&Start your game",
+    "fr": "&Démarrer votre jeu"
+  },
+  "save_act": {
+    "en": "&Save",
+    "fr": "&Enregistrer"
+  },
+  "save_as_act": {
+    "en": "&Save as",
+    "fr": "&Enregistrer sous"
+  },
+  "parameters_act": {
+    "en": "&Settings",
+    "fr": "&Paramètres"
+  },
+  "file_menu": {
+    "en": "File",
+    "fr": "Fichier"
+  },
+  "edit_menu": {
+    "en": "Edition",
+    "fr": "Edition"
+  },
+  "exec_menu": {
+    "en": "Execution",
+    "fr": "Exécution"
+  },
+  "help_menu": {
+    "en": "Help",
+    "fr": "Aide"
+  },
+  "play_warning_title": {
+    "en": "Unable to run",
+    "fr": "Exécution impossible"
+  },
+  "play_warning0": {
+    "en": "You must set your player's spawn box before you can launch your game.\nGo to the relevant section to fix this issue.",
+    "fr": "Vous devez définir la cause d'apparition de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident."
+  },
+  "play_warning1": {
+    "en": "You must import your enemies' graphical appearance before you can launch your game.\nGo to the corresponding section to fix this issue.",
+    "fr": "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident."
+  },
+  "play_warning2": {
+    "en": "You must set the maze exit square before you can start your game.\nGo to the relevant section to fix this issue.",
+    "fr": "Vous devez définir la case de sortie du labyrinthe avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident."
+  },
+  "app_title": {
+    "en": "Patate - The 3D ASCII Game Engine",
+    "fr": "Patate - Le Moteur de Jeu ASCII 3D"
+  },
+  "menu_file": {
+    "en": "File",
+    "fr": "Fichier"
+  },
+  "menu_edit": {
+    "en": "Edit",
+    "fr": "Edition"
+  },
+  "menu_execution": {
+    "en": "Execution",
+    "fr": "Exécution"
+  },
+  "menu_help": {
+    "en": "Help",
+    "fr": "Aide"
+  },
+  "action_quit": {
+    "en": "&Quit",
+    "fr": "&Quitter"
+  },
+  "action_start_game": {
+    "en": "&Start your game",
+    "fr": "&Démarrer votre jeu"
+  },
+  "action_save": {
+    "en": "&Save",
+    "fr": "&Enregistrer"
+  },
+  "action_save_as": {
+    "en": "&Save as",
+    "fr": "&Enregistrer sous"
+  },
+  "action_parameters": {
+    "en": "&Parameters",
+    "fr": "&Paramètres"
+  },
+  "error_title": {
+    "en": "Error",
+    "fr": "Erreur"
+  },
+  "save_dialog_title": {
+    "en": "Save as...",
+    "fr": "Enregistrer sous..."
+  },
+  "save_dialog_filter": {
+    "en": "ABengine project files (*.abengine)",
+    "fr": "Fichiers de projet ABengine (*.abengine)"
+  },
+  "starting_window_title": {
+    "en": "Patate - The 3D ASCII Game Engine",
+    "fr": "Patate - Le Moteur de Jeu ASCII 3D"
+  },
+  "starting_new_project": {
+    "en": "New Project",
+    "fr": "Nouveau Projet"
+  },
+  "starting_load_project": {
+    "en": "Load Project",
+    "fr": "Charger Projet"
+  },
+  "starting_open_file_title": {
+    "en": "Open a project file",
+    "fr": "Ouvrir un fichier de projet"
+  },
+  "parameters_window_title": {
+    "en": "Project configuration",
+    "fr": "Configuration de votre projet"
+  },
+  "parameters_project_name": {
+    "en": " Project name:",
+    "fr": " Nom du projet :"
+  },
+  "parameters_confirm": {
+    "en": "Confirm",
+    "fr": "Confirmer"
+  },
+  "parameters_error_title": {
+    "en": "Error",
+    "fr": "Erreur"
+  },
+  "parameters_error_empty_name": {
+    "en": "The game name cannot be empty or consist only of spaces.",
+    "fr": "Le nom du jeu ne peut pas être vide ou seulement composé d'espaces."
+  },
+  "parameters_error_file_not_found": {
+    "en": " file was not found.",
+    "fr": " n'a pas été trouvé."
+  },
+  "parameters_error_invalid_json": {
+    "en": " is not a valid JSON file.",
+    "fr": " n'est pas un JSON valide."
+  },
+  "parameters_error_modify_json": {
+    "en": "An error occurred while modifying the JSON file: ",
+    "fr": "Une erreur est survenue lors de la modification du fichier JSON: "
+  },
+  "close_dialog_title": {
+    "en": "Application closing",
+    "fr": "Fermeture de l'application"
+  },
+  "close_dialog_question": {
+    "en": "Do you want to save your project before closing the application?",
+    "fr": "Souhaitez-vous enregistrer votre projet avant de quitter l'application ?"
+  },
+  "close_dialog_yes": {
+    "en": "Yes",
+    "fr": "Oui"
+  },
+  "close_dialog_no": {
+    "en": "No",
+    "fr": "Non"
+  },
+  "close_dialog_cancel": {
+    "en": "Cancel",
+    "fr": "Annuler"
+  },
+  "npc_text_dialog_title": {
+    "en": "Enter the sentence to display...",
+    "fr": "Saisissez la phrase à afficher..."
+  },
+  "npc_text_dialog_confirm": {
+    "en": "Confirm",
+    "fr": "Confirmer"
+  },
+  "npc_text_dialog_error_title": {
+    "en": "Error",
+    "fr": "Erreur"
+  },
+  "npc_text_dialog_error_empty": {
+    "en": "Text cannot be empty or consist only of spaces.",
+    "fr": "Le texte ne peut pas être vide ou seulement composé d'espaces."
+  },
+  "npc_responses_dialog_title": {
+    "en": "Enter the possible responses...",
+    "fr": "Saisissez les réponses possibles..."
+  },
+  "npc_responses_response1": {
+    "en": " Response 1:",
+    "fr": " Réponse 1 :"
+  },
+  "npc_responses_response2": {
+    "en": " Response 2:",
+    "fr": " Réponse 2 :"
+  },
+  "npc_responses_response3": {
+    "en": " Response 3:",
+    "fr": " Réponse 3 :"
+  },
+  "npc_responses_confirm": {
+    "en": "Confirm",
+    "fr": "Confirmer"
+  },
+  "npc_responses_error_title": {
+    "en": "Error",
+    "fr": "Erreur"
+  },
+  "npc_responses_error_empty": {
+    "en": "A response cannot be empty or consist only of spaces.",
+    "fr": "Une réponse ne peut pas être vide ou seulement composée d'espaces."
+  },
+  "grid_enemies_too_close_title": {
+    "en": "Enemies too close",
+    "fr": "Ennemis trop proches"
+  },
+  "grid_enemies_too_close_message": {
+    "en": "Unfortunately, you cannot place an enemy here as it would be too close to one of its peers.",
+    "fr": "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un de ses congénères."
+  },
+  "grid_character_too_close_title": {
+    "en": "Character too close",
+    "fr": "Personnage trop proche"
+  },
+  "grid_character_too_close_message": {
+    "en": "Unfortunately, you cannot place an enemy here as it would be too close to a character.",
+    "fr": "Vous ne pouvez malheureusement pas placer un ennemi ici, car il serait trop proche d'un personnage."
+  },
+  "grid_characters_too_close_title": {
+    "en": "Characters too close",
+    "fr": "Personnages trop proches"
+  },
+  "grid_characters_too_close_message": {
+    "en": "Unfortunately, you cannot place a character here as it would be too close to one of its peers.",
+    "fr": "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un de ses congénères."
+  },
+  "grid_enemy_too_close_title": {
+    "en": "Enemy too close",
+    "fr": "Ennemi trop proche"
+  },
+  "grid_enemy_too_close_message": {
+    "en": "Unfortunately, you cannot place a character here as it would be too close to an enemy.",
+    "fr": "Vous ne pouvez malheureusement pas placer un personnage ici, car il serait trop proche d'un ennemi."
+  },
+  "newproject_window_title": {
+    "en": "New project...",
+    "fr": "Nouveau projet..."
+  },
+  "newproject_name_label": {
+    "en": "Your project name:",
+    "fr": "Nom de votre projet :"
+  },
+  "newproject_size_label": {
+    "en": "Map size:",
+    "fr": "Taille de la carte :"
+  },
+  "newproject_confirm_button": {
+    "en": "Validate",
+    "fr": "Valider"
+  },
+  "newproject_invalid_name_title": {
+    "en": "Invalid project name",
+    "fr": "Nom de projet invalide"
+  },
+  "newproject_invalid_name_message": {
+    "en": "A project name is required to continue the process.\nPlease provide one.",
+    "fr": "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner."
+  },
+  "parameters_language_label": {
+    "en": "Language:",
+    "fr": "Langue :"
+  },
+  "parameters_language_french": {
+    "en": "French",
+    "fr": "Français"
+  },
+  "parameters_language_english": {
+    "en": "English",
+    "fr": "Anglais"
+  }
+}

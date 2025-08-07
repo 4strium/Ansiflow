@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QDialog, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QLabel
 from PyQt6.QtGui import QFont, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt
+from modules.otherTools import translation
 
 class NPCresponsesDialog(QDialog) :
   def __init__(self, bloc, nb_resp):
@@ -8,12 +9,13 @@ class NPCresponsesDialog(QDialog) :
     self.setModal(True)
     self.savingPort = bloc.storage
     self.nb_resp = nb_resp
+    self.user_language = "fr"  # Défaut français
 
     self.initializeUI()
 
   def initializeUI(self):
     self.setFixedSize(800,self.nb_resp*100)
-    self.setWindowTitle("Saisissez les réponses possibles...")
+    self.setWindowTitle(translation("npc_responses_dialog_title", self.user_language))
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/Huninn.ttf")
@@ -30,7 +32,7 @@ class NPCresponsesDialog(QDialog) :
 
     final_layout = QVBoxLayout()
 
-    self.resp1_label = QLabel(" Réponse 1 :")
+    self.resp1_label = QLabel(translation("npc_responses_response1", self.user_language))
     self.resp1_label.setFont(QFont(self.hunnin, 14))
     self.resp1_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
     self.input_text_resp1 = QLineEdit(self)
@@ -45,7 +47,7 @@ class NPCresponsesDialog(QDialog) :
     layout_resp1.addWidget(self.input_text_resp1)
     final_layout.addLayout(layout_resp1)
 
-    self.resp2_label = QLabel(" Réponse 2 :")
+    self.resp2_label = QLabel(translation("npc_responses_response2", self.user_language))
     self.resp2_label.setFont(QFont(self.hunnin, 14))
     self.resp2_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
     self.input_text_resp2 = QLineEdit(self)
@@ -61,7 +63,7 @@ class NPCresponsesDialog(QDialog) :
     final_layout.addLayout(layout_resp2)
 
     if self.nb_resp == 3 :
-      self.resp3_label = QLabel(" Réponse 3 :")
+      self.resp3_label = QLabel(translation("npc_responses_response3", self.user_language))
       self.resp3_label.setFont(QFont(self.hunnin, 14))
       self.resp3_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
       self.input_text_resp3 = QLineEdit(self)
@@ -74,7 +76,7 @@ class NPCresponsesDialog(QDialog) :
       layout_resp3.addWidget(self.input_text_resp3)
       final_layout.addLayout(layout_resp3)
     
-    self.validation = QPushButton("Confirmer")
+    self.validation = QPushButton(translation("npc_responses_confirm", self.user_language))
     self.validation.setFont(QFont(self.hunnin, 14))
     self.validation.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.validation.clicked.connect(self.entryConfirmation)
@@ -90,7 +92,7 @@ class NPCresponsesDialog(QDialog) :
 
   def entryConfirmation(self):
     if self.input_text_resp1.text().strip() == "" or self.input_text_resp2.text().strip() == "":
-      QMessageBox.warning(self, "Erreur", "Une réponse ne peut pas être vide ou seulement composée d'espaces.")
+      QMessageBox.warning(self, translation("npc_responses_error_title", self.user_language), translation("npc_responses_error_empty", self.user_language))
       return
   
     self.savingPort[1] = self.input_text_resp1.text()
@@ -98,7 +100,7 @@ class NPCresponsesDialog(QDialog) :
 
     if self.nb_resp == 3 :
       if self.input_text_resp3.text().strip() == "" :
-        QMessageBox.warning(self, "Erreur", "Une réponse ne peut pas être vide ou seulement composée d'espaces.")
+        QMessageBox.warning(self, translation("npc_responses_error_title", self.user_language), translation("npc_responses_error_empty", self.user_language))
         return
       self.savingPort[3] = self.input_text_resp3.text()
     

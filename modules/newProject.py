@@ -2,13 +2,15 @@ import os, json, shutil
 from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QComboBox
 from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor
 from PyQt6.QtCore import Qt
+from modules.otherTools import translation
 
 class NewProject(QDialog):
-  def __init__(self):
+  def __init__(self, user_language="fr"):
     super().__init__()
     self.setModal(True)
     self.__setup_finished = False
     self.__size_choosen = -1
+    self.user_language = user_language
     self.initializeUI()
 
   def getSetup_finished(self):
@@ -25,7 +27,7 @@ class NewProject(QDialog):
 
   def initializeUI(self):
     self.setFixedSize(450,600)
-    self.setWindowTitle("Nouveau projet...")
+    self.setWindowTitle(translation("newproject_window_title", self.user_language))
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/Huninn.ttf")
@@ -50,7 +52,7 @@ class NewProject(QDialog):
     except FileNotFoundError :
       pass
 
-    name_label = QLabel("Nom de votre projet :", self)
+    name_label = QLabel(translation("newproject_name_label", self.user_language), self)
     name_label.setFont(QFont(self.hunnin, 24))
     name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -64,7 +66,7 @@ class NewProject(QDialog):
     name_layout.addWidget(self.name_linedit)
     name_layout.setSpacing(2)
 
-    size_label = QLabel("Taille de la carte :", self)
+    size_label = QLabel(translation("newproject_size_label", self.user_language), self)
     size_label.setFont(QFont(self.hunnin, 24))
     size_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
@@ -79,7 +81,7 @@ class NewProject(QDialog):
     size_layout.addWidget(self.ddmenu_size)
     size_layout.setSpacing(2)
 
-    confirm_btn = QPushButton("Valider")
+    confirm_btn = QPushButton(translation("newproject_confirm_button", self.user_language))
     confirm_btn.setFont(QFont(self.hunnin, 24))
     confirm_btn.setMinimumHeight(80)
     confirm_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -142,4 +144,4 @@ class NewProject(QDialog):
       self.setSetup_finished(True)
       self.close()
     else :
-      QMessageBox.warning(self, "Nom de projet invalide", "Un nom de projet est requis pour la suite du processus.\nMerci de bien vouloir le renseigner.")
+      QMessageBox.warning(self, translation("newproject_invalid_name_title", self.user_language), translation("newproject_invalid_name_message", self.user_language))

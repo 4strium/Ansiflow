@@ -13,7 +13,7 @@ from modules.NPCtextDialog import NPCtextDialog
 from modules.NPCresponsesDialog import NPCresponsesDialog
 from modules.closeDialog import closeDialog
 from modules.parametersDialog import parametersDialog
-from modules.otherTools import zip_folder, keep_visuals
+from modules.otherTools import *
 
 class MainWindow(QMainWindow):
 
@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
     super().__init__()
 
     self.game_name = ""
+    self.user_language = "fr"  # Par défaut français, sera mis à jour depuis starting.py
     self.data_file= "workingDir/data.json"
     self.file_export_path = None
     self.border_color = "#000000"
@@ -46,6 +47,9 @@ class MainWindow(QMainWindow):
 
   def handleStartupFinished(self):
     if self.sw.getStartup_finished() :
+      # Récupérer la langue sélectionnée depuis starting.py
+      self.user_language = self.sw.user_language
+      
       self.sw.close()
       with open(self.data_file, "r", encoding="utf-8") as f:
         json_data = json.load(f)
@@ -63,7 +67,7 @@ class MainWindow(QMainWindow):
         self.saved_NPCs[npc_couple[0]]["skins"] = npc_couple[5]
 
   def initializeUI(self):
-    self.setWindowTitle("Patate - The 3D ASCII Game Engine")
+    self.setWindowTitle(translation("app_title", self.user_language))
     self.setMinimumSize(1250,650)
     self.showMaximized()
 
@@ -94,7 +98,7 @@ class MainWindow(QMainWindow):
         background-color : #ebebeb;
       }
     """
-    self.title_map = QLabel("La Carte")
+    self.title_map = QLabel(translation("title_map", self.user_language))
     self.title_map.setFont(QFont(self.calSans, 36))
     self.title_map.setAlignment(Qt.AlignmentFlag.AlignHCenter)
     
@@ -105,7 +109,7 @@ class MainWindow(QMainWindow):
     self.map_layout.addWidget(self.title_map)
     self.map_layout.addWidget(self.grid_map, stretch=1)
 
-    title_working_zone = QLabel("Le Schéma du Dialogue")
+    title_working_zone = QLabel(translation("title_working_zone", self.user_language))
     title_working_zone.setFont(QFont(self.calSans, 36))
     title_working_zone.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -113,8 +117,11 @@ class MainWindow(QMainWindow):
     self.bloc_layout = QVBoxLayout()
     self.bloc_layout.addWidget(title_working_zone)
     self.bloc_layout.addWidget(self.bloc_working_zone, stretch=1)
+    
+    # Stocker la référence pour pouvoir la mettre à jour
+    self.title_working_zone = title_working_zone
 
-    self.title_tools = QLabel("Les Outils")
+    self.title_tools = QLabel(translation("title_tools", self.user_language))
     self.title_tools.setFont(QFont(self.calSans, 36))
     self.title_tools.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -132,7 +139,7 @@ class MainWindow(QMainWindow):
         background-color: #c9c9c9;
       }
     """
-    self.player_button = QPushButton("Joueur")
+    self.player_button = QPushButton(translation("player_button", self.user_language))
     self.player_button.setFont(QFont(self.hunnin,22))
     self.player_button.setStyleSheet(stylesheet_player)
     self.player_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -149,12 +156,12 @@ class MainWindow(QMainWindow):
         background-color: #c9c9c9;
       }
     """
-    self.walls_button = QPushButton("Murs")
+    self.walls_button = QPushButton(translation("walls_button", self.user_language))
     self.walls_button.setFont(QFont(self.hunnin,22))
     self.walls_button.setStyleSheet(stylesheet_middle)
     self.walls_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.walls_button.pressed.connect(self.switchToolsTabs)
-    self.enemies_button = QPushButton("Ennemis")
+    self.enemies_button = QPushButton(translation("enemies_button", self.user_language))
     self.enemies_button.setFont(QFont(self.hunnin,22))
     self.enemies_button.setStyleSheet(stylesheet_middle)
     self.enemies_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -174,7 +181,7 @@ class MainWindow(QMainWindow):
         background-color: #c9c9c9;
       }
     """
-    self.npc_button = QPushButton("Personnages")
+    self.npc_button = QPushButton(translation("npc_button", self.user_language))
     self.npc_button.setFont(QFont(self.hunnin,22))
     self.npc_button.setStyleSheet(stylesheet_npc)
     self.npc_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -190,29 +197,29 @@ class MainWindow(QMainWindow):
     self.tabs_selectors.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
     # Page 1 :
-    page1_infotext = QLabel("Sur la carte ci-contre, cliquez sur la case où votre joueur apparaîtra au lancement du jeu.")
-    page1_infotext.setFont(QFont(self.hunnin, 22))
-    page1_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    page1_infotext.setWordWrap(True)
+    self.page1_infotext = QLabel(translation("page1_infotext", self.user_language))
+    self.page1_infotext.setFont(QFont(self.hunnin, 22))
+    self.page1_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page1_infotext.setWordWrap(True)
 
     purple_square = QLabel()
     purple_square.setFixedSize(40, 40)
     purple_square.setStyleSheet(f"""background-color: {self.player_color}; border-radius: 0px;""")
     purple_square.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    page1_legendtext = QLabel("Case d'apparition")
-    page1_legendtext.setFont(QFont(self.hunnin, 22))
-    page1_legendtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page1_legendtext = QLabel(translation("page1_legend", self.user_language))
+    self.page1_legendtext.setFont(QFont(self.hunnin, 22))
+    self.page1_legendtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     page1_legend = QHBoxLayout()
     page1_legend.setSpacing(20)
     page1_legend.addStretch()
     page1_legend.addWidget(purple_square, alignment=Qt.AlignmentFlag.AlignCenter)
-    page1_legend.addWidget(page1_legendtext, alignment=Qt.AlignmentFlag.AlignCenter)
+    page1_legend.addWidget(self.page1_legendtext, alignment=Qt.AlignmentFlag.AlignCenter)
     page1_legend.addStretch()
 
     page1_layout = QVBoxLayout()
-    page1_layout.addWidget(page1_infotext)
+    page1_layout.addWidget(self.page1_infotext)
     page1_layout.addLayout(page1_legend)
     page1_container = QWidget()
     page1_container.setLayout(page1_layout)
@@ -229,9 +236,9 @@ class MainWindow(QMainWindow):
           background-color: #c9c9c9;
         }
     """
-    page2_infotext = QLabel("Sélectionnez l'outil :")
-    page2_infotext.setFont(QFont(self.hunnin, 22))
-    page2_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page2_infotext = QLabel(translation("page2_infotext", self.user_language))
+    self.page2_infotext.setFont(QFont(self.hunnin, 22))
+    self.page2_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     # Créer un QPixmap pour l'icône + vert
     plus_pixmap = QPixmap(24, 24)
@@ -243,7 +250,7 @@ class MainWindow(QMainWindow):
     painter.drawLine(4, 12, 20, 12)
     painter.end()
     plus_icon = QIcon(plus_pixmap)
-    self.page2_addbutton = QPushButton(" Ajouter des murs")
+    self.page2_addbutton = QPushButton(translation("page2_addbutton", self.user_language))
     self.page2_addbutton.setIcon(plus_icon)
     self.page2_addbutton.setIconSize(plus_pixmap.size())
     self.page2_addbutton.setFont(QFont(self.hunnin, 22))
@@ -260,7 +267,7 @@ class MainWindow(QMainWindow):
     painter.drawLine(4, 12, 20, 12)
     painter.end()
     subs_icon = QIcon(subs_pixmap)
-    self.page2_subsbutton = QPushButton(" Supprimer des murs")
+    self.page2_subsbutton = QPushButton(translation("page2_subsbutton", self.user_language))
     self.page2_subsbutton.setIcon(subs_icon)
     self.page2_subsbutton.setIconSize(subs_pixmap.size())
     self.page2_subsbutton.setFont(QFont(self.hunnin, 22))
@@ -268,59 +275,59 @@ class MainWindow(QMainWindow):
     self.page2_subsbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page2_subsbutton.pressed.connect(self.activateWallTool)
 
-    self.page2_selectExitbutton = QPushButton("Sélectionner la sortie")
+    self.page2_selectExitbutton = QPushButton(translation("page2_selectExitbutton", self.user_language))
     self.page2_selectExitbutton.setFont(QFont(self.hunnin, 22))
     self.page2_selectExitbutton.setStyleSheet(btn_tools_stylesheet)
     self.page2_selectExitbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page2_selectExitbutton.pressed.connect(self.activateWallTool)
 
-    page2_legendtext = QLabel("""Vous devez positionner la sortie \ndirectement sur un mur extérieur. (hors coins)""")
-    page2_legendtext.setWordWrap(True)
-    page2_legendtext.setFont(QFont(self.hunnin, 18))
-    page2_legendtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page2_legendtext = QLabel(translation("page2_legendtext", self.user_language))
+    self.page2_legendtext.setWordWrap(True)
+    self.page2_legendtext.setFont(QFont(self.hunnin, 18))
+    self.page2_legendtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     page2_layout = QVBoxLayout()
-    page2_layout.addWidget(page2_infotext, stretch=1)
+    page2_layout.addWidget(self.page2_infotext, stretch=1)
     page2_layout.addWidget(self.page2_addbutton, stretch=1)
     page2_layout.setSpacing(10)
     page2_layout.addWidget(self.page2_subsbutton, stretch=1)
     page2_layout.addWidget(self.page2_selectExitbutton, stretch=1)
-    page2_layout.addWidget(page2_legendtext, stretch=1)
+    page2_layout.addWidget(self.page2_legendtext, stretch=1)
     page2_container = QWidget()
     page2_container.setLayout(page2_layout)
 
     # Page 3 :
-    page3_infotext = QLabel("Sur la carte ci-contre, cliquez sur les cases où vous désirez positionner des ennemis.")
-    page3_infotext.setFont(QFont(self.hunnin, 22))
-    page3_infotext.setWordWrap(True)
-    page3_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page3_infotext = QLabel(translation("page3_infotext", self.user_language))
+    self.page3_infotext.setFont(QFont(self.hunnin, 22))
+    self.page3_infotext.setWordWrap(True)
+    self.page3_infotext.setAlignment(Qt.AlignmentFlag.AlignCenter)
     green_square = QLabel()
     green_square.setFixedSize(40, 40)
     green_square.setStyleSheet("background-color: #00ff5e; border-radius: 0px;")
-    page3_legendtext = QLabel("Ennemis")
-    page3_legendtext.setFont(QFont(self.hunnin, 22))
+    self.page3_legendtext = QLabel(translation("page3_legendtext", self.user_language))
+    self.page3_legendtext.setFont(QFont(self.hunnin, 22))
 
     page3_legend = QHBoxLayout()
     page3_legend.addStretch()
     page3_legend.addWidget(green_square, alignment=Qt.AlignmentFlag.AlignLeft)
-    page3_legend.addWidget(page3_legendtext, alignment=Qt.AlignmentFlag.AlignLeft)
+    page3_legend.addWidget(self.page3_legendtext, alignment=Qt.AlignmentFlag.AlignLeft)
     page3_legend.addStretch()
     page3_legend.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-    page3_skin = QPushButton("Sélectionner l'apparence des ennemis")
+    page3_skin = QPushButton(translation("page3_skin", self.user_language))
     page3_skin.setFont(QFont(self.hunnin, 22))
     page3_skin.setStyleSheet(btn_tools_stylesheet)
     page3_skin.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     page3_skin.pressed.connect(self.changeEnemySkin)
 
-    self.page3_infoskin = QLabel("Attention : L'apparence n'est pas définie !")
+    self.page3_infoskin = QLabel(translation("page3_infoskin", self.user_language))
     self.page3_infoskin.setFont(QFont(self.hunnin, 18))
     self.page3_infoskin.setAlignment(Qt.AlignmentFlag.AlignCenter)
     self.page3_infoskin.setWordWrap(True)
     self.page3_infoskin.setStyleSheet("color : #f81111;")
 
     page3_layout = QVBoxLayout()
-    page3_layout.addWidget(page3_infotext, stretch=1)
+    page3_layout.addWidget(self.page3_infotext, stretch=1)
     page3_layout.addLayout(page3_legend, stretch=1)
     page3_layout.addWidget(page3_skin, stretch=1)
     page3_layout.addWidget(self.page3_infoskin, stretch=1)
@@ -329,12 +336,12 @@ class MainWindow(QMainWindow):
     page3_container.setLayout(page3_layout)
 
     # Page 4 :
-    page4_title = QLabel("Vos personnages :")
-    page4_title.setFont(QFont(self.hunnin, 22))
-    page4_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    self.page4_title = QLabel(translation("page4_title", self.user_language))
+    self.page4_title.setFont(QFont(self.hunnin, 22))
+    self.page4_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
     self.page4_table = QTableWidget()
     self.page4_table.setColumnCount(3)
-    self.page4_table.setHorizontalHeaderLabels(["Nom", "Couleur", "Attributs"])
+    self.page4_table.setHorizontalHeaderLabels([translation("page4_table0", self.user_language), translation("page4_table1", self.user_language), translation("page4_table2", self.user_language)])
     self.page4_table.setRowCount(self.nb_perso)
     
     self.page4_table.setFont(QFont(self.hunnin, 15))
@@ -345,7 +352,7 @@ class MainWindow(QMainWindow):
     self.page4_table.verticalHeader().setVisible(False)
     self.page4_table.verticalHeader().setDefaultSectionSize(50)
   
-    self.page4_addbutton = QPushButton(" Ajouter un personnage")
+    self.page4_addbutton = QPushButton(translation("page4_addbutton", self.user_language))
     self.page4_addbutton.setIcon(plus_icon)
     self.page4_addbutton.setIconSize(plus_pixmap.size())
     self.page4_addbutton.setFont(QFont(self.hunnin, 22))
@@ -353,7 +360,7 @@ class MainWindow(QMainWindow):
     self.page4_addbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page4_addbutton.pressed.connect(self.createNewPerso)
 
-    self.page4_subsbutton = QPushButton(" Supprimer un personnage")
+    self.page4_subsbutton = QPushButton(translation("page4_subsbutton", self.user_language))
     self.page4_subsbutton.setIcon(subs_icon)
     self.page4_subsbutton.setIconSize(subs_pixmap.size())
     self.page4_subsbutton.setFont(QFont(self.hunnin, 22))
@@ -361,12 +368,13 @@ class MainWindow(QMainWindow):
     self.page4_subsbutton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     self.page4_subsbutton.pressed.connect(self.deletePersoDialog)
     
-    self.page4_limit_text = QLabel(f"(limité à {self.pers_limit} personnages)")
+    str_concatenation0 = translation("str_concatenation00", self.user_language) + str(self.pers_limit) + translation("str_concatenation01", self.user_language)
+    self.page4_limit_text = QLabel(str_concatenation0)
     self.page4_limit_text.setFont(QFont(self.hunnin, 14))
     self.page4_limit_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     page4_layout = QVBoxLayout()
-    page4_layout.addWidget(page4_title, stretch=1)
+    page4_layout.addWidget(self.page4_title, stretch=1)
     page4_layout.addWidget(self.page4_table, stretch=4)
     page4_layout.addWidget(self.page4_addbutton, stretch=2)
     page4_layout.addWidget(self.page4_subsbutton, stretch=2)
@@ -387,23 +395,23 @@ class MainWindow(QMainWindow):
     self.tools_layout.addLayout(self.stacked_tools, stretch=8)
 
     # Page 2 - Right Side :
-    config_question = QLabel("Que souhaitez-vous configurer ?")
+    config_question = QLabel(translation("config_question", self.user_language))
     config_question.setFont(QFont(self.hunnin, 22))
     config_question.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    self.answer_pos = QPushButton("Emplacement du personnage sur la carte")
+    self.answer_pos = QPushButton(translation("answer_pos", self.user_language))
     self.answer_pos.setFont(QFont(self.hunnin, 22))
     self.answer_pos.setStyleSheet(btn_tools_stylesheet)
     self.answer_pos.setCursor(Qt.CursorShape.PointingHandCursor)
     self.answer_pos.pressed.connect(self.selectNPCposition)
 
-    self.answer_dial = QPushButton("Dialogues")
+    self.answer_dial = QPushButton(translation("answer_dial", self.user_language))
     self.answer_dial.setFont(QFont(self.hunnin, 22))
     self.answer_dial.setStyleSheet(btn_tools_stylesheet)
     self.answer_dial.setCursor(Qt.CursorShape.PointingHandCursor)
     self.answer_dial.pressed.connect(self.defineConversation)
 
-    self.answer_skin = QPushButton("Apparences")
+    self.answer_skin = QPushButton(translation("answer_skin", self.user_language))
     self.answer_skin.setFont(QFont(self.hunnin, 22))
     self.answer_skin.setStyleSheet(btn_tools_stylesheet)
     self.answer_skin.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -414,7 +422,7 @@ class MainWindow(QMainWindow):
         background-color: #c9c9c9;
       }
     """
-    self.close_button = QPushButton("Fermer")
+    self.close_button = QPushButton(translation("close_button", self.user_language))
     self.close_button.setFont(QFont(self.calSans, 18))
     self.close_button.pressed.connect(self.switchRightSide)
     self.close_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -441,17 +449,17 @@ class MainWindow(QMainWindow):
     config_layout.addLayout(spacing_layout)
 
     # Page 3 - Right Side :
-    pers_pos_infotext1 = QLabel("Veuillez cliquer sur la case où vous souhaitez positionner votre personnage.")
+    pers_pos_infotext1 = QLabel(translation("pers_pos_infotext1", self.user_language))
     pers_pos_infotext1.setFont(QFont(self.hunnin, 22))
     pers_pos_infotext1.setAlignment(Qt.AlignmentFlag.AlignCenter)
     pers_pos_infotext1.setWordWrap(True)
-    pers_pos_infotext2 = QLabel("Attention, il ne doit pas être trop proche d'un ennemi ou d'un autre personnage.")
+    pers_pos_infotext2 = QLabel(translation("pers_pos_infotext2", self.user_language))
     pers_pos_infotext2.setFont(QFont(self.hunnin, 22))
     pers_pos_infotext2.setAlignment(Qt.AlignmentFlag.AlignCenter)
     pers_pos_infotext2.setWordWrap(True)
 
     pers_pos_layout = QVBoxLayout()
-    pers_pos_close_button = QPushButton("Fermer")
+    pers_pos_close_button = QPushButton(translation("pers_pos_close_button", self.user_language))
     pers_pos_close_button.setFont(QFont(self.calSans, 18))
     pers_pos_close_button.pressed.connect(self.switchRightSide)
     pers_pos_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -505,7 +513,7 @@ class MainWindow(QMainWindow):
 
     bloc_font = QFont(self.hunnin, 14)
 
-    start_text = QLabel("DÉBUT")
+    start_text = QLabel(translation("start_text", self.user_language))
     start_text.setFont(bloc_font)
     start_layout = QHBoxLayout()
     start_layout.setContentsMargins(0,0,0,0)
@@ -517,15 +525,15 @@ class MainWindow(QMainWindow):
 
     print_text_layout = QHBoxLayout()
     print_text_layout.setContentsMargins(0,0,0,0)
-    afficher = QLabel("Afficher")
+    afficher = QLabel(translation("afficher", self.user_language))
     afficher.setFont(bloc_font)
-    texte_btn = QPushButton("texte")
+    texte_btn = QPushButton(translation("texte_btn", self.user_language))
     texte_btn.setFont(bloc_font)
     texte_btn.setStyleSheet(bloc_btn_stylesheet)
     texte_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     texte_btn.clicked.connect(self.textOpenBloc)
     texte_btn._clicked_slot = self.textOpenBloc
-    skin_text = QLabel("avec l'apparence")
+    skin_text = QLabel(translation("skin_text", self.user_language))
     skin_text.setFont(bloc_font)
     skin_selector = QComboBox()
     skin_selector.setFont(bloc_font)
@@ -545,15 +553,15 @@ class MainWindow(QMainWindow):
 
     ask_layout = QHBoxLayout()
     ask_layout.setContentsMargins(0,0,0,0)
-    poser = QLabel("Poser")
+    poser = QLabel(translation("poser", self.user_language))
     poser.setFont(bloc_font)
-    ask_btn = QPushButton("question")
+    ask_btn = QPushButton(translation("ask_btn", self.user_language))
     ask_btn.setFont(bloc_font)
     ask_btn.setStyleSheet(bloc_btn_stylesheet)
     ask_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     ask_btn.clicked.connect(self.textOpenBloc)
     ask_btn._clicked_slot = self.textOpenBloc
-    a_text = QLabel("à")
+    a_text = QLabel(translation("a_text", self.user_language))
     a_text.setFont(bloc_font)
     nb_answers_selector = QComboBox()
     nb_answers_selector.setFont(bloc_font)
@@ -562,7 +570,7 @@ class MainWindow(QMainWindow):
     nb_answers_selector.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     nb_answers_selector.currentIndexChanged.connect(self.changeQuantityResponses)
     nb_answers_selector._change_slot = self.changeQuantityResponses
-    answers_btn = QPushButton("réponses")
+    answers_btn = QPushButton(translation("answers_btn", self.user_language))
     answers_btn.setFont(bloc_font)
     answers_btn.setStyleSheet(bloc_btn_stylesheet)
     answers_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -578,7 +586,7 @@ class MainWindow(QMainWindow):
     self.question_bloc = Bloc(self,1,2,ask_container, "#ff00b3", "#FFFFFF", 2)
     self.pers_dialogue_layout.addWidget(self.question_bloc)
     
-    flux_text = QLabel("Regroupement des flux")
+    flux_text = QLabel(translation("flux_text", self.user_language))
     flux_text.setFont(bloc_font)
     flux_layout = QHBoxLayout()
     flux_layout.setContentsMargins(0,0,0,0)
@@ -590,9 +598,9 @@ class MainWindow(QMainWindow):
 
     python_layout = QHBoxLayout()
     python_layout.setContentsMargins(0,0,0,0)
-    executer = QLabel("Exécuter")
+    executer = QLabel(translation("executer", self.user_language))
     executer.setFont(bloc_font)
-    python_btn = QPushButton("code Python")
+    python_btn = QPushButton(translation("python_btn", self.user_language))
     python_btn.setFont(bloc_font)
     python_btn.setStyleSheet(bloc_btn_stylesheet)
     python_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -605,7 +613,7 @@ class MainWindow(QMainWindow):
     self.python_bloc = Bloc(self,1,1, python_bloc_container, "#ff0000", "#FFFFFF", 4)
     self.pers_dialogue_layout.addWidget(self.python_bloc)
 
-    end_text = QLabel("FIN")
+    end_text = QLabel(translation("end_text", self.user_language))
     end_text.setFont(bloc_font)
     end_layout = QHBoxLayout()
     end_layout.setContentsMargins(0,0,0,0)
@@ -616,7 +624,7 @@ class MainWindow(QMainWindow):
     self.pers_dialogue_layout.addWidget(self.end_bloc)
 
     blank_space5 = QWidget()
-    dialogue_close_button = QPushButton("Fermer")
+    dialogue_close_button = QPushButton(translation("dialogue_close_button", self.user_language))
     dialogue_close_button.setFont(QFont(self.calSans, 18))
     dialogue_close_button.pressed.connect(self.switchRightSide)
     dialogue_close_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -633,40 +641,40 @@ class MainWindow(QMainWindow):
     perso_dialogue_container.setLayout(self.pers_dialogue_layout)
 
     # Page 5 - Right Side :
-    perso_skin_text = QLabel("Ajouter des apparences à votre personnage :")
+    perso_skin_text = QLabel(translation("perso_skin_text", self.user_language))
     perso_skin_text.setFont(QFont(self.hunnin, 22))
     perso_skin_text.setWordWrap(True)
     perso_skin_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    perso_skin_1 = QPushButton("Apparence 1 (obligatoire)")
+    perso_skin_1 = QPushButton(translation("perso_skin_1", self.user_language))
     perso_skin_1.setFont(QFont(self.hunnin, 22))
     perso_skin_1.setStyleSheet(btn_tools_stylesheet)
     perso_skin_1.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_1.pressed.connect(self.skinGetter)
 
-    self.perso_skin_1_info = QLabel("Apparence non définie")
+    self.perso_skin_1_info = QLabel(translation("perso_skin_1_info", self.user_language))
     self.perso_skin_1_info.setFont(QFont(self.hunnin, 14))
     self.perso_skin_1_info.setStyleSheet("color: red;")
     self.perso_skin_1_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    perso_skin_2 = QPushButton("Apparence 2 (facultative)")
+    perso_skin_2 = QPushButton(translation("perso_skin_2", self.user_language))
     perso_skin_2.setFont(QFont(self.hunnin, 22))
     perso_skin_2.setStyleSheet(btn_tools_stylesheet)
     perso_skin_2.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_2.pressed.connect(self.skinGetter)
 
-    self.perso_skin_2_info = QLabel("Apparence non définie")
+    self.perso_skin_2_info = QLabel(translation("perso_skin_2_info", self.user_language))
     self.perso_skin_2_info.setFont(QFont(self.hunnin, 14))
     self.perso_skin_2_info.setStyleSheet("color: orange;")
     self.perso_skin_2_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    perso_skin_3 = QPushButton("Apparence 3 (facultative)")
+    perso_skin_3 = QPushButton(translation("perso_skin_3", self.user_language))
     perso_skin_3.setFont(QFont(self.hunnin, 22))
     perso_skin_3.setStyleSheet(btn_tools_stylesheet)
     perso_skin_3.setCursor(Qt.CursorShape.PointingHandCursor)
     perso_skin_3.pressed.connect(self.skinGetter)
     
-    self.perso_skin_3_info = QLabel("Apparence non définie")
+    self.perso_skin_3_info = QLabel(translation("perso_skin_3_info", self.user_language))
     self.perso_skin_3_info.setFont(QFont(self.hunnin, 14))
     self.perso_skin_3_info.setStyleSheet("color: orange;")
     self.perso_skin_3_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -682,7 +690,7 @@ class MainWindow(QMainWindow):
     skins_group.addWidget(self.perso_skin_3_info)
     skins_group.addStretch()
 
-    skin_close_button = QPushButton("Fermer")
+    skin_close_button = QPushButton(translation("skin_close_button", self.user_language))
     skin_close_button.setFont(QFont(self.calSans, 18))
     skin_close_button.pressed.connect(self.switchRightSide)
     skin_close_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -757,7 +765,7 @@ class MainWindow(QMainWindow):
   def switchRightSide(self, mode = None):
     sender = self.sender()
     if sender :
-      if sender.text() == "Configurer" :
+      if sender.text() == translation("config_button", self.user_language) :
         self.current_NPC_selected = sender.objectName()
         self.right_layout.setCurrentIndex(1)
       elif mode == 1 :
@@ -863,12 +871,12 @@ class MainWindow(QMainWindow):
 
   def changeEnemySkin(self):
     try :
-      skin_filename, _ = QFileDialog.getOpenFileName(self,"Sélectionner l'image représentant un ennemi","","Images (*.png *.jpg *.jpeg)")
+      skin_filename, _ = QFileDialog.getOpenFileName(self,translation("skin_filename", self.user_language),"","Images (*.png *.jpg *.jpeg)")
       QApplication.setOverrideCursor(QCursor(Qt.CursorShape.WaitCursor))
       image_to_ascii_by_color(skin_filename, "workingDir/enemy.txt", 70, 10)
       self.enemy_path = "workingDir/enemy.txt"
       self.grid_map.setEnemyImg(self.enemy_path)
-      self.page3_infoskin.setText("Apparence des ennemis correctement définie")
+      self.page3_infoskin.setText(translation("page3_infoskin_defined", self.user_language))
       self.page3_infoskin.setStyleSheet("color : green;")
     except :
       pass
@@ -879,15 +887,15 @@ class MainWindow(QMainWindow):
       self.npc_dialog = NewNPC(self.addPersTable)
       self.npc_dialog.show()
     else :
-      QMessageBox.warning(self, "Action impossible", "Désolé, vous avez atteint la limite de personnages.\nVeuillez supprimer un personnage existant avant de poursuivre.")
+      QMessageBox.warning(self, translation("createNewPersoWarning_title", self.user_language), translation("createNewPersoWarning_content", self.user_language))
 
   def addPersTable(self, name, color):
     if name == "" :
-      QMessageBox.warning(self, "Action impossible", "Malheureusement, un nom est requis pour votre personnage.\nMerci de le renseigner.")
+      QMessageBox.warning(self, translation("createNewPersoWarning_title", self.user_language), translation("addPersTableWarning_case0", self.user_language))
     elif name in [npc[0] for npc in self.NPCs] :
-      QMessageBox.warning(self, "Action impossible", "Malheureusement, vous utilisez déjà ce nom pour un autre personnage.\nMerci d'en choisir un autre.")
+      QMessageBox.warning(self, translation("createNewPersoWarning_title", self.user_language), translation("addPersTableWarning_case1", self.user_language))
     elif color in self.pers_colors :
-      QMessageBox.warning(self, "Action impossible", "Désolé, vous utilisez déjà cette couleur pour un autre personnage.\nMerci d'en utiliser une autre.")
+      QMessageBox.warning(self, translation("createNewPersoWarning_title", self.user_language), translation("addPersTableWarning_case2", self.user_language))
     else :
       if hasattr(self, 'npc_dialog') and self.npc_dialog.isVisible():
         self.npc_dialog.close()
@@ -903,7 +911,7 @@ class MainWindow(QMainWindow):
           background-color: #c9c9c9;
         }
       """
-      config_button = QPushButton("Configurer")
+      config_button = QPushButton(translation("config_button", self.user_language))
       config_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
       config_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
       config_button.pressed.connect(self.switchRightSide)
@@ -923,7 +931,7 @@ class MainWindow(QMainWindow):
 
   def deletePersoDialog(self):
     if self.NPCs == [] :
-      QMessageBox.warning(self, "Action impossible", "Aucun personnage à supprimer.")
+      QMessageBox.warning(self, translation("createNewPersoWarning_title", self.user_language), translation("deletePersoDialogWaring_content", self.user_language))
     else :
       self.deleteNPCdialog = RemoveNPC(self)
       self.deleteNPCdialog.show()
@@ -962,22 +970,22 @@ class MainWindow(QMainWindow):
 
   def defineSkins(self):
     if 1 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
-      self.perso_skin_1_info.setText("Apparence définie !")
+      self.perso_skin_1_info.setText(translation("perso_skin_1_info_defined", self.user_language))
       self.perso_skin_1_info.setStyleSheet("color : green;")
     else :
-      self.perso_skin_1_info.setText("Apparence non définie")
+      self.perso_skin_1_info.setText(translation("perso_skin_1_info", self.user_language))
       self.perso_skin_1_info.setStyleSheet("color : red;")
     if 2 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
-      self.perso_skin_2_info.setText("Apparence définie !")
+      self.perso_skin_2_info.setText(translation("perso_skin_2_info_defined", self.user_language))
       self.perso_skin_2_info.setStyleSheet("color : green;")
     else :
-      self.perso_skin_2_info.setText("Apparence non définie")
+      self.perso_skin_2_info.setText(translation("perso_skin_2_info", self.user_language))
       self.perso_skin_2_info.setStyleSheet("color : orange;")
     if 3 in self.saved_NPCs[self.current_NPC_selected]["skins"] :
-      self.perso_skin_3_info.setText("Apparence définie !")
+      self.perso_skin_3_info.setText(translation("perso_skin_3_info_defined", self.user_language))
       self.perso_skin_3_info.setStyleSheet("color : green;")
     else :
-      self.perso_skin_3_info.setText("Apparence non définie")
+      self.perso_skin_3_info.setText(translation("perso_skin_3_info", self.user_language))
       self.perso_skin_3_info.setStyleSheet("color : orange;")
     self.switchRightSide(3)
   
@@ -992,22 +1000,22 @@ class MainWindow(QMainWindow):
 
   def skinGetter(self):
     sender = self.sender()
-    filename, _ = QFileDialog.getOpenFileName(self,"Sélectionner l'image représentant votre personnage","","Images (*.png *.jpg *.jpeg)")
+    filename, _ = QFileDialog.getOpenFileName(self,translation("skinGetterfilename", self.user_language),"","Images (*.png *.jpg *.jpeg)")
     if filename :
       os.makedirs("workingDir/NPCS/", exist_ok=True)
-      if sender.text() == "Apparence 1 (obligatoire)" :
+      if sender.text() == translation("perso_skin_1", self.user_language) : # Ne pas oublier de remplacer par le traducteur
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 50, 10, 1)
-        self.perso_skin_1_info.setText("Apparence définie !")
+        self.perso_skin_1_info.setText(translation("perso_skin_1_info_defined", self.user_language))
         self.perso_skin_1_info.setStyleSheet("color: green;")
         self.saved_NPCs[self.current_NPC_selected]["skins"].append(1)
-      elif sender.text() == "Apparence 2 (facultative)" :
+      elif sender.text() == translation("perso_skin_2", self.user_language) :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 2)
-        self.perso_skin_2_info.setText("Apparence définie !")
+        self.perso_skin_2_info.setText(translation("perso_skin_2_info_defined", self.user_language))
         self.perso_skin_2_info.setStyleSheet("color: green;")
         self.saved_NPCs[self.current_NPC_selected]["skins"].append(2)
-      elif sender.text() == "Apparence 3 (facultative)" :
+      elif sender.text() == translation("perso_skin_3", self.user_language) :
         image_to_ascii_by_color(filename,f"workingDir/NPCS/{self.current_NPC_selected}.txt", 70, 10, 3)
-        self.perso_skin_3_info.setText("Apparence définie !")
+        self.perso_skin_3_info.setText(translation("perso_skin_3_info_defined", self.user_language))
         self.perso_skin_3_info.setStyleSheet("color: green;")
         self.saved_NPCs[self.current_NPC_selected]["skins"].append(3)
 
@@ -1087,13 +1095,13 @@ class MainWindow(QMainWindow):
     for npc_name in self.saved_NPCs.keys() :
       npc_data = self.saved_NPCs[npc_name]
       if "position" not in npc_data.keys() :
-        QMessageBox.critical(self, "Génération du personnage échouée", "La position d'au moins un personnage n'est pas correctement définie.\nMerci de régulariser cette situation avant de réitérer le processus.")
+        QMessageBox.critical(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning0", self.user_language))
         return False
       npc_posx = npc_data["position"][0]
       npc_posy = npc_data["position"][1]
 
       if 1 not in self.saved_NPCs[npc_name]["skins"] :
-        QMessageBox.critical(self, "Génération du personnage échouée", "Au moins un de vos personnages n'a pas d'apparence obligatoire définie")
+        QMessageBox.critical(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning1", self.user_language))
         return False
 
       start_bloc = None
@@ -1111,10 +1119,10 @@ class MainWindow(QMainWindow):
           elif bloc.id == 5 :
             end_bloc = bloc
         if not start_bloc :
-          QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Départ' requis.\nMerci de régulariser cette situation avant de réitérer le processus.")
+          QMessageBox.critical(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning2", self.user_language))
           return False
         if not end_bloc :
-          QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé le bloc 'Fin' requis.\nMerci de régulariser cette situation avant de réitérer le processus.")
+          QMessageBox.critical(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning3", self.user_language))
           return False
         nb_text = 0
         ask_state = [None,0,2]
@@ -1124,21 +1132,21 @@ class MainWindow(QMainWindow):
             try :
               current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
             except (TypeError, AttributeError) :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
               return False
           elif current_bloc.id == 1 :
             nb_text += 1
             text_written = current_bloc.storage[0]
             skin_choosen = current_bloc.storage[1]
             if skin_choosen not in self.saved_NPCs[npc_name]["skins"] :
-              QMessageBox.critical(self, "Génération du personnage échouée", "Pour au moins un de vos personnages, notre système de génération de dialogue n'a pas trouvé l'apparence utilisée durant le dialogue.\nMerci de régulariser cette situation avant de réitérer le processus.")
+              QMessageBox.critical(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warningSkins", self.user_language))
               return False
             str_content.append(f"__COSTUME__{skin_choosen}\n")
             str_content.append(f"{text_written}\n")
             try : 
               current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
             except (TypeError, AttributeError) :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
               return False
           elif current_bloc.id == 2 :
             nb_text += 1
@@ -1153,7 +1161,7 @@ class MainWindow(QMainWindow):
             try :
               current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
             except (TypeError, AttributeError) :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
               return False
             str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
           elif current_bloc.id == 3 :
@@ -1162,14 +1170,14 @@ class MainWindow(QMainWindow):
               try :
                 current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
               except (TypeError, AttributeError) :
-                QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+                QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
                 return False
             else :
               ask_state[1] += 1
               try :
                 current_bloc = ids_bloc[ask_state[0].used_outputs[ask_state[1]][0]]
               except (TypeError, AttributeError) :
-                QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+                QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
                 return False
               str_content.append(f"__CHOICE__{ask_state[1]+1}\n")
           elif current_bloc.id == 4 :
@@ -1179,7 +1187,7 @@ class MainWindow(QMainWindow):
             try :
               current_bloc = ids_bloc[current_bloc.used_outputs[0][0]]
             except (TypeError, AttributeError) :
-              QMessageBox.warning(self, "Erreur", "Une de vos connexions entre vos blocs de dialogue n'est pas correct, merci d'emboiter proprement et logiquement vos blocs.")
+              QMessageBox.warning(self, translation("genNPCfiles_title", self.user_language), translation("genNPCfiles_warning4", self.user_language))
               return False
         str_content.insert(3,f"__NBTEXTS__{nb_text}\n")
 
@@ -1219,11 +1227,13 @@ class MainWindow(QMainWindow):
         json.dump(json_data, f, ensure_ascii=False, indent=2)
         
     except FileNotFoundError:
-      QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'a pas été trouvé.")
+      genNPCfiles_warning5 = translation("genNPCfiles_warning5_0", self.user_language) + self.data_file + translation("genNPCfiles_warning5_1", self.user_language)
+      QMessageBox.critical(self, translation("error_title", self.user_language), genNPCfiles_warning5)
     except json.JSONDecodeError:
-      QMessageBox.critical(self, "Erreur", f"Le fichier {self.data_file} n'est pas un JSON valide.")
+      genNPCfiles_warning6 = translation("genNPCfiles_warning6_0", self.user_language) + self.data_file + translation("genNPCfiles_warning6_1", self.user_language)
+      QMessageBox.critical(self, translation("error_title", self.user_language), genNPCfiles_warning6)
     except Exception as e:
-      QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la modification du fichier JSON: {str(e)}")
+      QMessageBox.critical(self, translation("error_title", self.user_language), translation("genNPCfiles_warning7", self.user_language) + str(e))
     return True
   
   def serializeBlocs(self, npc_name):
@@ -1248,7 +1258,7 @@ class MainWindow(QMainWindow):
 
   def saveAs(self):
     try :
-      file_export_path, _ = QFileDialog.getSaveFileName(self, "Enregistrer sous...", "", "Fichiers de projet ABengine (*.abengine)")
+      file_export_path, _ = QFileDialog.getSaveFileName(self, translation("save_dialog_title", self.user_language), "", translation("save_dialog_filter", self.user_language))
       self.file_export_path = file_export_path
       if self.NPCs :
         self.genNPCfiles()
@@ -1269,43 +1279,43 @@ class MainWindow(QMainWindow):
     dial.exec()
 
   def createActions(self):
-    self.quit_act = QAction("&Quitter")
+    self.quit_act = QAction(translation("action_quit", self.user_language))
     self.quit_act.setShortcut("Ctrl+Q")
     self.quit_act.triggered.connect(self.close)
 
-    self.exec_act = QAction("&Démarrer votre jeu")
+    self.exec_act = QAction(translation("action_start_game", self.user_language))
     self.exec_act.setShortcut("Ctrl+E")
     self.exec_act.triggered.connect(self.play)
 
-    self.save_act = QAction("&Enregistrer")
+    self.save_act = QAction(translation("action_save", self.user_language))
     self.save_act.setShortcut("Ctrl+S")
     self.save_act.triggered.connect(self.save)
 
-    self.save_as_act = QAction("&Enregistrer sous")
+    self.save_as_act = QAction(translation("action_save_as", self.user_language))
     self.save_as_act.triggered.connect(self.saveAs)
 
-    self.parameters_act = QAction("&Paramètres")
+    self.parameters_act = QAction(translation("action_parameters", self.user_language))
     self.parameters_act.triggered.connect(self.changeParameters)
 
   def createMenu(self):
-    file_menu = self.menuBar().addMenu("Fichier")
+    file_menu = self.menuBar().addMenu(translation("menu_file", self.user_language))
     file_menu.addAction(self.save_act)
     file_menu.addAction(self.save_as_act)
     file_menu.addAction(self.quit_act)
     
-    edit_menu = self.menuBar().addMenu("Edition")
+    edit_menu = self.menuBar().addMenu(translation("menu_edit", self.user_language))
     edit_menu.addAction(self.parameters_act)
-    exec_menu = self.menuBar().addMenu("Exécution")
+    exec_menu = self.menuBar().addMenu(translation("menu_execution", self.user_language))
     exec_menu.addAction(self.exec_act)
-    help_menu = self.menuBar().addMenu("Aide")
+    help_menu = self.menuBar().addMenu(translation("menu_help", self.user_language))
 
   def play(self):
     if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
-      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case d'apparation de votre joueur avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+      QMessageBox.critical(self, translation("play_warning_title", self.user_language), translation("play_warning0", self.user_language))
     elif self.grid_map.pos_enemies != [] and self.enemy_path == None :
-      QMessageBox.critical(self, "Exécution impossible", "Vous devez importer l'apparence graphique de vos ennemis avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+      QMessageBox.critical(self, translation("play_warning_title", self.user_language), translation("play_warning1", self.user_language))
     elif self.grid_map.pos_exit == [] :
-      QMessageBox.critical(self, "Exécution impossible", "Vous devez définir la case de sortie du labyrinthe avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident.")
+      QMessageBox.critical(self, translation("play_warning_title", self.user_language), translation("play_warning2", self.user_language))
     else :
       go = self.genNPCfiles()
       if go :
@@ -1342,6 +1352,99 @@ class MainWindow(QMainWindow):
       event.ignore()
     else:
       event.accept()
+  
+  def updateInterfaceTexts(self):
+    """Met à jour tous les textes de l'interface selon la langue sélectionnée"""
+    # Titre de la fenêtre
+    self.setWindowTitle(translation("app_title", self.user_language))
+    
+    # Titres des sections principales
+    self.title_map.setText(translation("title_map", self.user_language))
+    self.title_working_zone.setText(translation("title_working_zone", self.user_language))
+    self.title_tools.setText(translation("title_tools", self.user_language))
+    
+    # Boutons des onglets d'outils
+    self.player_button.setText(translation("player_button", self.user_language))
+    self.walls_button.setText(translation("walls_button", self.user_language))
+    self.enemies_button.setText(translation("enemies_button", self.user_language))
+    self.npc_button.setText(translation("npc_button", self.user_language))
+    
+    # Page 1 - Informations sur le joueur
+    self.page1_infotext.setText(translation("page1_infotext", self.user_language))
+    self.page1_legendtext.setText(translation("page1_legend", self.user_language))
+    
+    # Page 2 - Outils pour les murs
+    self.page2_infotext.setText(translation("page2_infotext", self.user_language))
+    self.page2_addbutton.setText(translation("page2_addbutton", self.user_language))
+    self.page2_subsbutton.setText(translation("page2_subsbutton", self.user_language))
+    self.page2_selectExitbutton.setText(translation("page2_selectExitbutton", self.user_language))
+    self.page2_legendtext.setText(translation("page2_legendtext", self.user_language))
+    
+    # Page 3 - Informations sur les ennemis
+    self.page3_infotext.setText(translation("page3_infotext", self.user_language))
+    self.page3_legendtext.setText(translation("page3_legendtext", self.user_language))
+    self.page3_infoskin.setText(translation("page3_infoskin", self.user_language))
+    
+    # Page 4 - Gestion des NPCs
+    self.page4_title.setText(translation("page4_title", self.user_language))
+    self.page4_addbutton.setText(translation("page4_addbutton", self.user_language))
+    self.page4_subsbutton.setText(translation("page4_subsbutton", self.user_language))
+    
+    # Mettre à jour les en-têtes du tableau
+    self.page4_table.setHorizontalHeaderLabels([
+      translation("page4_table0", self.user_language), 
+      translation("page4_table1", self.user_language), 
+      translation("page4_table2", self.user_language)
+    ])
+    
+    # Mettre à jour le texte de limite des personnages
+    str_concatenation0 = translation("str_concatenation00", self.user_language) + str(self.pers_limit) + translation("str_concatenation01", self.user_language)
+    self.page4_limit_text.setText(str_concatenation0)
+    
+    # Boutons de configuration NPC
+    self.answer_pos.setText(translation("answer_pos", self.user_language))
+    self.answer_dial.setText(translation("answer_dial", self.user_language))
+    self.answer_skin.setText(translation("answer_skin", self.user_language))
+    
+    # Labels d'information des skins de personnage
+    if hasattr(self, 'perso_skin_1_info'):
+      # Mettre à jour selon l'état actuel des skins
+      if hasattr(self, 'current_NPC_selected') and self.current_NPC_selected and self.current_NPC_selected in self.saved_NPCs:
+        if 1 in self.saved_NPCs[self.current_NPC_selected].get("skins", []):
+          self.perso_skin_1_info.setText(translation("perso_skin_1_info_defined", self.user_language))
+        else:
+          self.perso_skin_1_info.setText(translation("perso_skin_1_info", self.user_language))
+        
+        if 2 in self.saved_NPCs[self.current_NPC_selected].get("skins", []):
+          self.perso_skin_2_info.setText(translation("perso_skin_2_info_defined", self.user_language))
+        else:
+          self.perso_skin_2_info.setText(translation("perso_skin_2_info", self.user_language))
+          
+        if 3 in self.saved_NPCs[self.current_NPC_selected].get("skins", []):
+          self.perso_skin_3_info.setText(translation("perso_skin_3_info_defined", self.user_language))
+        else:
+          self.perso_skin_3_info.setText(translation("perso_skin_3_info", self.user_language))
+      else:
+        self.perso_skin_1_info.setText(translation("perso_skin_1_info", self.user_language))
+        self.perso_skin_2_info.setText(translation("perso_skin_2_info", self.user_language))
+        self.perso_skin_3_info.setText(translation("perso_skin_3_info", self.user_language))
+    
+    # Mettre à jour les boutons "Configurer" dans le tableau des NPCs
+    for row in range(self.page4_table.rowCount()):
+      widget = self.page4_table.cellWidget(row, 2)
+      if widget and hasattr(widget, 'setText'):
+        widget.setText(translation("config_button", self.user_language))
+    
+    # Mettre à jour les actions du menu
+    if hasattr(self, 'quit_act'):
+      self.quit_act.setText(translation("action_quit", self.user_language))
+      self.exec_act.setText(translation("action_start_game", self.user_language))
+      self.save_act.setText(translation("action_save", self.user_language))
+      self.save_as_act.setText(translation("action_save_as", self.user_language))
+      self.parameters_act.setText(translation("action_parameters", self.user_language))
+    
+    # Forcer une mise à jour de l'affichage
+    self.update()
     
 if __name__ == "__main__":
   app = QApplication(sys.argv)

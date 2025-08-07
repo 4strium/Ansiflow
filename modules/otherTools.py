@@ -1,4 +1,4 @@
-import zipfile, os
+import zipfile, os, json
 
 def zip_folder(folder_path, zip_path):
   with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -25,3 +25,9 @@ def checkOS():
     return "Windows"
   else :
     return "Java"
+  
+def translation(key,language):
+  with open("language/language_content.json", "r", encoding="utf-8") as f:
+    json_data = json.load(f)
+  
+  return json_data[key][language]
