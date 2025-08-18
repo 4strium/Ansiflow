@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QDialog, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QLabel
-from PyQt6.QtGui import QFont, QFontDatabase, QCursor
+from PyQt6.QtGui import QFont, QFontDatabase, QCursor, QIcon
 from PyQt6.QtCore import Qt
 from modules.otherTools import translation
 
@@ -16,6 +16,10 @@ class NPCresponsesDialog(QDialog) :
   def initializeUI(self):
     self.setFixedSize(800,self.nb_resp*100)
     self.setWindowTitle(translation("npc_responses_dialog_title", self.user_language))
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/Huninn.ttf")

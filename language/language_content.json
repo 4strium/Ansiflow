@@ -380,8 +380,8 @@
     "fr": "Vous devez définir la case de sortie du labyrinthe avant de pouvoir lancer votre jeu.\nRendez-vous dans la section correspondante pour corriger cet incident."
   },
   "app_title": {
-    "en": "Patate - The 3D ASCII Game Engine",
-    "fr": "Patate - Le Moteur de Jeu ASCII 3D"
+    "en": "Ansiflow - The 3D ASCII Game Engine",
+    "fr": "Ansiflow - Le Moteur de Jeu ASCII 3D"
   },
   "menu_file": {
     "en": "File",
@@ -432,8 +432,8 @@
     "fr": "Fichiers de projet ABengine (*.abengine)"
   },
   "starting_window_title": {
-    "en": "Patate - The 3D ASCII Game Engine",
-    "fr": "Patate - Le Moteur de Jeu ASCII 3D"
+    "en": "Ansiflow - The 3D ASCII Game Engine",
+    "fr": "Ansiflow - Le Moteur de Jeu ASCII 3D"
   },
   "starting_new_project": {
     "en": "New Project",
@@ -610,5 +610,57 @@
   "parameters_language_english": {
     "en": "English",
     "fr": "Anglais"
+  },
+  "commands_dialog_title": {
+    "en": "Controls",
+    "fr": "Commandes"
+  },
+  "commands_dialog_header": {
+    "en": "Game controls:",
+    "fr": "Commandes du jeu :"
+  },
+  "commands_dialog_move": {
+    "en": "Move: Z (forward) / S (backward)",
+    "fr": "Se déplacer : Z (avancer) / S (reculer)"
+  },
+  "commands_dialog_rotate": {
+    "en": "Rotate view: Q (left) / D (right)",
+    "fr": "Tourner la vue : Q (gauche) / D (droite)"
+  },
+  "commands_dialog_shoot": {
+    "en": "Shoot during fights: SPACE",
+    "fr": "Tirer en combat : ESPACE"
+  },
+  "commands_dialog_quit": {
+    "en": "Quit: ESC",
+    "fr": "Quitter : ÉCHAP"
+  },
+  "commands_dialog_ok": {
+    "en": "OK",
+    "fr": "OK"
+  },
+  "action_about": {
+    "en": "&About Ansiflow",
+    "fr": "&À propos d'Ansiflow"
+  },
+  "about_dialog_title": {
+    "en": "About Ansiflow",
+    "fr": "À propos d'Ansiflow"
+  },
+  "about_dialog_description": {
+    "en": "Ansiflow is an experimental 3D ASCII game engine and editor.",
+    "fr": "Ansiflow est un moteur et éditeur de jeu 3D ASCII expérimental."
+  },
+  "about_dialog_version": {
+    "en": "Version",
+    "fr": "Version"
+  },
+  "about_dialog_website": {
+    "en": "Project page:",
+    "fr": "Page du projet :"
+  },
+  "about_dialog_close": {
+    "en": "Close",
+    "fr": "Fermer"
   }
 }

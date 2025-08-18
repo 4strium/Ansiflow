@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QComboBox
-from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor
+from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QCursor, QIcon
 from PyQt6.QtCore import Qt
 
 class NewNPC(QDialog):
@@ -25,6 +25,10 @@ class NewNPC(QDialog):
   def initializeUI(self):
     self.setFixedSize(400,600)
     self.setWindowTitle("Nouveau personnage...")
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/Huninn.ttf")

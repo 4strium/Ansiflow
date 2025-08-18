@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QComboBox
-from PyQt6.QtGui import QFont, QPixmap, QCursor
+from PyQt6.QtGui import QFont, QPixmap, QCursor, QIcon
 from PyQt6.QtCore import Qt
 
 class RemoveNPC(QDialog):
@@ -12,6 +12,10 @@ class RemoveNPC(QDialog):
   def initializeUI(self):
     self.setFixedSize(400,500)
     self.setWindowTitle("Suppression d'un personnage...")
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
     self.setUpWindow()
 
   def setUpWindow(self):

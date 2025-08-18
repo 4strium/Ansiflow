@@ -31,7 +31,11 @@ class StartWindow(QWidget):
     self.setWindowTitle(translation("starting_window_title", self.user_language))
     self.setMinimumSize(800,500)
     self.resize(1200, 700)
-    self.setStyleSheet("background-color: #876acf;")
+    self.setStyleSheet("background-color: white;")
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/CalSans.ttf")
@@ -46,7 +50,7 @@ class StartWindow(QWidget):
     self.show()
 
   def setUpWindow(self):
-    image_splash = "images/splashscreen.jpg"
+    image_splash = "images/ansiflow.png"
 
     try :
       with open(image_splash):
@@ -108,12 +112,12 @@ class StartWindow(QWidget):
     btn_css = """
       QPushButton {
         border-radius: 10%;
-        background-color: #05f1f7;
+        background-color: #13d6df;
         color : white;
       }
       QPushButton:hover {
         background-color: white;
-        color : #05f1f7;
+        color : #13d6df;
       }
     """
 
@@ -142,7 +146,7 @@ class StartWindow(QWidget):
     """Met à jour les styles des boutons de langue selon la sélection"""
     selected_style = """
       QPushButton {
-        border: 4px solid #05f1f7;
+        border: 4px solid #13d6df;
         border-radius: 8px;
         background-color: rgba(5, 241, 247, 0.2);
       }
@@ -158,7 +162,7 @@ class StartWindow(QWidget):
         background-color: transparent;
       }
       QPushButton:hover {
-        border: 2px solid #05f1f7;
+        border: 2px solid #13d6df;
         background-color: rgba(5, 241, 247, 0.1);
       }
     """

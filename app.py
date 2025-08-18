@@ -14,6 +14,7 @@ from modules.NPCresponsesDialog import NPCresponsesDialog
 from modules.closeDialog import closeDialog
 from modules.parametersDialog import parametersDialog
 from modules.otherTools import *
+from modules.aboutDialog import AboutDialog
 
 class MainWindow(QMainWindow):
 
@@ -22,6 +23,8 @@ class MainWindow(QMainWindow):
 
     self.game_name = ""
     self.user_language = "fr"  # Par défaut français, sera mis à jour depuis starting.py
+  # Version de l'application (mise à jour centralisée ici)
+    self.app_version = "0.1"
     self.data_file= "workingDir/data.json"
     self.file_export_path = None
     self.border_color = "#000000"
@@ -70,6 +73,10 @@ class MainWindow(QMainWindow):
     self.setWindowTitle(translation("app_title", self.user_language))
     self.setMinimumSize(1250,650)
     self.showMaximized()
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
 
     # Load the custom fonts
     font_id_calsans = QFontDatabase.addApplicationFont("fonts/CalSans.ttf")
@@ -1296,18 +1303,30 @@ class MainWindow(QMainWindow):
 
     self.parameters_act = QAction(translation("action_parameters", self.user_language))
     self.parameters_act.triggered.connect(self.changeParameters)
+    self.about_act = QAction(translation("action_about", self.user_language))
+    self.about_act.triggered.connect(self.showAboutDialog)
 
   def createMenu(self):
-    file_menu = self.menuBar().addMenu(translation("menu_file", self.user_language))
-    file_menu.addAction(self.save_act)
-    file_menu.addAction(self.save_as_act)
-    file_menu.addAction(self.quit_act)
-    
-    edit_menu = self.menuBar().addMenu(translation("menu_edit", self.user_language))
-    edit_menu.addAction(self.parameters_act)
-    exec_menu = self.menuBar().addMenu(translation("menu_execution", self.user_language))
-    exec_menu.addAction(self.exec_act)
-    help_menu = self.menuBar().addMenu(translation("menu_help", self.user_language))
+    # Create menus once and keep references for dynamic language updates
+    self.file_menu = self.menuBar().addMenu(translation("menu_file", self.user_language))
+    self.file_menu.addAction(self.save_act)
+    self.file_menu.addAction(self.save_as_act)
+    self.file_menu.addAction(self.quit_act)
+    self.file_menu.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+    self.edit_menu = self.menuBar().addMenu(translation("menu_edit", self.user_language))
+    self.edit_menu.addAction(self.parameters_act)
+    self.edit_menu.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.exec_menu = self.menuBar().addMenu(translation("menu_execution", self.user_language))
+    self.exec_menu.addAction(self.exec_act)
+    self.exec_menu.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.help_menu = self.menuBar().addMenu(translation("menu_help", self.user_language))
+    self.help_menu.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+    self.help_menu.addAction(self.about_act)
+
+  def showAboutDialog(self):
+    dial = AboutDialog(self)
+    dial.exec()
 
   def play(self):
     if self.grid_map.pos_player in [[], [-1.5,-1.5]] :
@@ -1319,8 +1338,17 @@ class MainWindow(QMainWindow):
     else :
       go = self.genNPCfiles()
       if go :
-        self.game = ExternalTerminal()
-        self.game.runGame("python main_engine.py")
+        # Afficher la fenêtre des commandes avant de lancer le jeu
+        try:
+          from modules.commandsDialog import CommandsDialog
+          dial = CommandsDialog(self)
+          if dial.exec() == QDialog.DialogCode.Accepted:
+            self.game = ExternalTerminal()
+            self.game.runGame("python main_engine.py")
+        except Exception as e:
+          # En cas de problème avec la fenêtre, lancer tout de même le jeu
+            self.game = ExternalTerminal()
+            self.game.runGame("python main_engine.py")
 
   def maintainSpacingLayout(self):
     self.main_layout.setSpacing(int(self.width() * 0.01))
@@ -1442,6 +1470,17 @@ class MainWindow(QMainWindow):
       self.save_act.setText(translation("action_save", self.user_language))
       self.save_as_act.setText(translation("action_save_as", self.user_language))
       self.parameters_act.setText(translation("action_parameters", self.user_language))
+      if hasattr(self, 'about_act'):
+        self.about_act.setText(translation("action_about", self.user_language))
+    # Update menu titles if they exist
+    if hasattr(self, 'file_menu'):
+      self.file_menu.setTitle(translation("menu_file", self.user_language))
+    if hasattr(self, 'edit_menu'):
+      self.edit_menu.setTitle(translation("menu_edit", self.user_language))
+    if hasattr(self, 'exec_menu'):
+      self.exec_menu.setTitle(translation("menu_execution", self.user_language))
+    if hasattr(self, 'help_menu'):
+      self.help_menu.setTitle(translation("menu_help", self.user_language))
     
     # Forcer une mise à jour de l'affichage
     self.update()

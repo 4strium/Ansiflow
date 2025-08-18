@@ -1,6 +1,6 @@
 import json
 from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout, QHBoxLayout, QWidget, QComboBox
-from PyQt6.QtGui import QFont, QFontDatabase, QCursor
+from PyQt6.QtGui import QFont, QFontDatabase, QCursor, QIcon
 from PyQt6.QtCore import Qt
 from modules.otherTools import translation
 
@@ -16,6 +16,10 @@ class parametersDialog(QDialog) :
   def initializeUI(self):
     self.setFixedSize(400,350)
     self.setWindowTitle(translation("parameters_window_title", self.user_language))
+    try:
+      self.setWindowIcon(QIcon("images/ansiflow-icon.png"))
+    except Exception:
+      pass
 
     # Load the custom font
     font_id = QFontDatabase.addApplicationFont("fonts/Huninn.ttf")
