@@ -195,7 +195,7 @@ class StartWindow(QWidget):
       self.finished.emit()  
 
   def openPreviousProject(self):
-    project_compressed, _ = QFileDialog.getOpenFileName(self,translation("starting_open_file_title", self.user_language),"","*.abengine")
+    project_compressed, _ = QFileDialog.getOpenFileName(self,translation("starting_open_file_title", self.user_language),"","*.ansiflow")
     if project_compressed :
 
       os.makedirs("workingDir", exist_ok=True)

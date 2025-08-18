@@ -1,12 +1,12 @@
 <div align="center">
 	<img src="images/ansiflow.png" alt="Ansiflow" height="160"/>
-  
-	<h1>Ansiflow – 3D ASCII Game Engine & Editor</h1>
-	<p>
-		Create, configure and play small 3D maze / dungeon experiences fully rendered in ANSI / ASCII characters.<br>
-		Cross‑platform, open source (GPLv3) and already localized in English & French.
-	</p>
 </div>
+
+<h1 align="center">Ansiflow – 3D ASCII Game Engine & Editor</h1>
+
+Create, configure and play small 3D maze / dungeon experiences fully rendered in ASCII characters.
+  
+Cross‑platform, open source (GPLv3) and already localized in English & French.
 
 ---
 
@@ -14,7 +14,7 @@
 
 - **Live editor (PyQt6 GUI)** – map grid, wall tools, enemy placement, NPC configuration.
 - **3D ASCII runtime** – launches in an external terminal (ray‑cast style rendering using characters & colors).
-- **Project packaging** – all editable data stored under `workingDir/` and exportable to a single `*.abengine` archive (zip format).
+- **Project packaging** – all editable data stored under `workingDir/` and exportable to a single `*.ansiflow` archive (zip format).
 - **NPC dialogue graph** – block system (start, text, question with branching, regroup / end choice, Python call, end) serialized into NPC data files.
 - **Enemy & NPC skins** – generate ASCII art from images (automatic conversion via color sampling).
 - **Multilingual** – English / French toggle at startup and changeable later in Parameters (UI text loaded from `language/language_content.json`).
@@ -29,7 +29,7 @@ app.py                  # Main editor window (MainWindow)
 main_engine.py          # Runtime ASCII 3D engine (executed in external terminal)
 modules/                # Dialogs, tools, widgets (PyQt6)
 	starting.py           # Start / project chooser & language selection
-	newProject.py         # Create a new project (.abengine data skeleton)
+   newProject.py         # Create a new project (.ansiflow data skeleton)
 	parametersDialog.py   # Rename project + change language at runtime
 	commandsDialog.py     # Pre-run controls help
 	closeDialog.py        # Save-before-exit dialog
@@ -78,25 +78,16 @@ pip install PyQt6 Pillow
    ```
    python app.py
    ```
-4. Choose language, create a new project OR load an exported `*.abengine` file.
+4. Choose language, create a new project OR load an exported `*.ansiflow` file.
 5. Configure map, player spawn, enemies, exit tile, NPCs (dialogue blocks + skins).
 6. Press Ctrl+E or use Menu → Execution → Start your game.
 7. Review controls dialog, then the external ASCII 3D view launches.
 
-### Controls (Default)
-
-| Action                  | Key   |
-| ----------------------- | ----- |
-| Move forward / backward | Z / S |
-| Rotate left / right     | Q / D |
-| Shoot in combat         | Space |
-| Quit runtime            | Esc   |
-
 ## 💾 Project Files & Export
 
 - Working state lives in `workingDir/` (JSON data + generated NPC text + temporary assets).
-- Export: Menu → File → Save (or Save as…) creates / overwrites a `*.abengine` archive.
-- Import: From the start window “Load Project” (`*.abengine` is simply an uncompressed zip you can inspect if needed).
+- Export: Menu → File → Save (or Save as…) creates / overwrites a `*.ansiflow` archive.
+- Import: From the start window “Load Project” (`*.ansiflow` is simply an uncompressed zip you can inspect if needed).
 
 ## 🧩 NPC Dialogue System (Overview)
 
@@ -133,14 +124,6 @@ Enemy and NPC skins are derived from user‑selected images. The converter downs
 | Window text not updating after language change | Reopen dialogs; core window updates via `updateInterfaceTexts()`.                             |
 | Image conversion slow                          | Use smaller images; avoid very large PNG/JPG files.                                           |
 | Terminal colors look dull                      | Use a truecolor (24‑bit) capable terminal (Windows Terminal, iTerm2, modern Linux terminals). |
-
-## 🛤 Roadmap (Indicative)
-
-- Enhanced combat & enemy AI
-- Additional block types (conditions, variables)
-- Extended key rebinding
-- More export / packaging options
-- Additional languages
 
 ## 🤝 Contributing
 

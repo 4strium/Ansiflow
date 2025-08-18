@@ -324,8 +324,8 @@
     "fr": "Enregistrer sous..."
   },
   "saveAsDialog_extensions": {
-    "en": "ABengine project files (*.abengine)",
-    "fr": "Fichiers de projet ABengine (*.abengine)"
+    "en": "Ansiflow project files (*.ansiflow)",
+    "fr": "Fichiers de projet Ansiflow (*.ansiflow)"
   },
   "quit_act": {
     "en": "&Close",
@@ -428,8 +428,8 @@
     "fr": "Enregistrer sous..."
   },
   "save_dialog_filter": {
-    "en": "ABengine project files (*.abengine)",
-    "fr": "Fichiers de projet ABengine (*.abengine)"
+    "en": "Ansiflow project files (*.ansiflow)",
+    "fr": "Fichiers de projet Ansiflow (*.ansiflow)"
   },
   "starting_window_title": {
     "en": "Ansiflow - The 3D ASCII Game Engine",
