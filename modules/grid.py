@@ -1,5 +1,4 @@
 import json, math
-import math, json
 from PyQt6.QtWidgets import QWidget, QMessageBox
 from PyQt6.QtGui import QPainter, QColor, QMouseEvent
 from PyQt6.QtCore import QSize

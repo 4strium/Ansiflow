@@ -9,8 +9,10 @@
 </p>
 
 Create, configure and play small 3D maze / dungeon experiences fully rendered in ASCII characters.
-  
+
 Cross‑platform, open source (GPLv3) and already localized in English & French.
+
+Windows users: a signed installer (AnsiflowSetup.exe) is published under Releases (Windows only). macOS & Linux should follow the source install steps below.
 
 ---
 
@@ -31,15 +33,30 @@ Cross‑platform, open source (GPLv3) and already localized in English & French.
 | OS        | Windows / macOS / Linux (X11 / Wayland)                     |
 | Terminal  | Must support ANSI escape codes & 24‑bit color for best look |
 
-Python dependencies (install manually if you do not already have them):
+Python dependencies (macOS / Linux / Windows source build):
 
 ```
-pip install PyQt6 Pillow
+pip install -r requirements.txt
 ```
 
-> Pillow is required for image → ASCII conversion. No database or network dependencies.
+Or minimal manual install:
+
+```
+pip install PyQt6 Pillow numpy scikit-learn
+```
+
+Pillow is required for image → ASCII conversion. NumPy & scikit-learn (KMeans) are used for color clustering / matrix ops in the ASCII image pipeline. No database or network dependencies.
 
 ## 🚀 Quick Start
+
+### Option A – Windows Installer (Windows only)
+
+1. Go to Releases on GitHub and download `AnsiflowSetup.exe` for the latest version.
+2. Run the installer (it bundles the packaged Python runtime & assets).
+3. Launch Ansiflow from the Start Menu or desktop shortcut.
+4. (You can still export/import `.ansiflow` project archives exactly like the source version.)
+
+### Option B – Source install (all platforms)
 
 1. Clone the repository:
    ```
@@ -53,22 +70,23 @@ pip install PyQt6 Pillow
    .venv\\Scripts\\Activate.ps1
    # macOS / Linux
    source .venv/bin/activate
-   pip install PyQt6 Pillow
+   pip install PyQt6 Pillow numpy scikit-learn
    ```
-3. Launch the editor:
+3. (Optional) Install optional extras listed above.
+4. Launch the editor:
    ```
    python app.py
    ```
-4. Choose language, create a new project OR load an exported `*.ansiflow` file.
-5. Configure map, player spawn, enemies, exit tile, NPCs (dialogue blocks + skins).
-6. Press Ctrl+E or use Menu → Execution → Start your game.
-7. Review controls dialog, then the external ASCII 3D view launches.
+5. Choose language, create a new project OR load an exported `*.ansiflow` file.
+6. Configure map, player spawn, enemies, exit tile, NPCs (dialogue blocks + skins).
+7. Press Ctrl+E or use Menu → Execution → Start your game.
+8. Review controls dialog, then the external ASCII 3D view launches.
 
 ## 💾 Project Files & Export
 
 - Working state lives in `workingDir/` (JSON data + generated NPC text + temporary assets).
 - Export: Menu → File → Save (or Save as…) creates / overwrites a `*.ansiflow` archive.
-- Import: From the start window “Load Project” (`*.ansiflow` is simply an uncompressed zip you can inspect if needed).
+- Import: From the start window “Load Project” (`*.ansiflow` is a plain ZIP container – you can rename to `.zip` and inspect for debugging).
 
 ## 🛡️ Enemies System
 
@@ -148,8 +166,14 @@ Released under the **GNU GPLv3** (see `LICENSE`). You may copy, modify and distr
 ## 🙌 Credits
 
 Project author: 4strium.
+Windows installer packaging: NSIS (Modern UI 2) – script `installer.nsi`.
 
-Libraries: PyQt6, Pillow.
+Core libraries:
+
+- PyQt6 – GUI toolkit.
+- Pillow – image loading & adjustments (saturation, brightness, sharpness).
+- NumPy – pixel array manipulation, vector math.
+- scikit-learn (KMeans) – color clustering for multi‑layer ASCII generation.
 
 Logo & assets: Stored under `images/` (see repository history for origins where applicable).
 

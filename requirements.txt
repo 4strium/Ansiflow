@@ -1,0 +1,7 @@
+# Core runtime dependencies for running Ansiflow from source (macOS / Linux / Windows without installer)
+# Versions kept flexible; pin if you need full reproducibility.
+PyQt6>=6.7.0
+Pillow>=10.0.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+
