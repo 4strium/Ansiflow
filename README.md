@@ -4,7 +4,7 @@
 
 <h1 align="center">Ansiflow – 3D ASCII Game Engine & Editor</h1>
 
-<p>
+<p align="center">
   <img src="https://github.com/4strium/Ansiflow/blob/main/images/pres1.gif?raw=true"  width="80%" alt="basic demonstration">
 </p>
 
@@ -75,7 +75,7 @@ pip install PyQt6 Pillow
 
 ## 🛡️ Enemies System
 
-<p>
+<p align="center">
   <img src="https://github.com/4strium/Ansiflow/blob/main/images/pres2.gif?raw=true"  width="80%" alt="enemies demonstration">
 </p>
 
