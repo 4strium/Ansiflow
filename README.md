@@ -72,21 +72,19 @@ Pillow is required for image → ASCII conversion. NumPy & scikit-learn (KMeans)
    source .venv/bin/activate
    pip install PyQt6 Pillow numpy scikit-learn
    ```
-3. (Optional) Install optional extras listed above.
-4. Launch the editor:
+3. Launch the editor:
    ```
    python app.py
    ```
-5. Choose language, create a new project OR load an exported `*.ansiflow` file.
-6. Configure map, player spawn, enemies, exit tile, NPCs (dialogue blocks + skins).
-7. Press Ctrl+E or use Menu → Execution → Start your game.
-8. Review controls dialog, then the external ASCII 3D view launches.
+4. Choose language, create a new project OR load an exported `*.ansiflow` file.
+5. Configure map, player spawn, enemies, exit tile, NPCs (dialogue blocks + skins).
+6. Press Ctrl+E or use Menu → Execution → Start your game.
+7. Review controls dialog, then the external ASCII 3D view launches.
 
 ## 💾 Project Files & Export
 
 - Working state lives in `workingDir/` (JSON data + generated NPC text + temporary assets).
 - Export: Menu → File → Save (or Save as…) creates / overwrites a `*.ansiflow` archive.
-- Import: From the start window “Load Project” (`*.ansiflow` is a plain ZIP container – you can rename to `.zip` and inspect for debugging).
 
 ## 🛡️ Enemies System
 
