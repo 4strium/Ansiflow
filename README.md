@@ -22,9 +22,6 @@ Cross‑platform, open source (GPLv3) and already localized in English & French.
 - **NPC dialogue graph** – block system (start, text, question with branching, regroup / end choice, Python call, end) serialized into NPC data files.
 - **Enemy & NPC skins** – generate ASCII art from images (automatic conversion via color sampling).
 - **Multilingual** – English / French toggle at startup and changeable later in Parameters (UI text loaded from `language/language_content.json`).
-- **Keyboard controls dialog** – shown before starting the game for quick reference.
-- **Graceful close workflow** – prompt to save on exit.
-- **Consistent branding & icons** – unified window icon (`images/ansiflow-icon.png`).
 
 ## 🔧 Requirements
 
