@@ -4,8 +4,8 @@
 
 <h1 align="center">Ansiflow – 3D ASCII Game Engine & Editor</h1>
 
-<p>
-  <img src="https://raw.githubusercontent.com/4strium/Fothelia/refs/heads/main/images/pres1.gif"  width="80%" alt="basic demonstration">
+<p align="center">
+  <img src="https://github.com/4strium/Ansiflow/blob/main/images/pres1.gif?raw=true"  width="80%" alt="basic demonstration">
 </p>
 
 Create, configure and play small 3D maze / dungeon experiences fully rendered in ASCII characters.
@@ -72,8 +72,8 @@ pip install PyQt6 Pillow
 
 ## 🛡️ Enemies System
 
-<p>
-  <img src="https://raw.githubusercontent.com/4strium/Fothelia/refs/heads/main/images/pres2.gif"  width="80%" alt="enemies demonstration">
+<p align="center">
+  <img src="https://github.com/4strium/Ansiflow/blob/main/images/pres2.gif?raw=true"  width="80%" alt="enemies demonstration">
 </p>
 
 You can place enemies at various positions on the map provided they are spaced sufficiently apart, and assign them any appearance by importing an image directly from your device for ASCII conversion.
