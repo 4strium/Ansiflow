@@ -27,9 +27,11 @@ class Enemy(Character.Character):
   
   
   def shoot_enemy(self, window_inp, fight_game):
-    if (Buffer.get_pixel(window_inp.buffer,(window_inp.getWidth()//2)+2,(window_inp.getHeight()//2)-2)[0] not in [' ', '█']) or (Buffer.get_pixel(window_inp.buffer,(window_inp.getWidth()//2)+3,(window_inp.getHeight()//2)-2)[0] not in [' ', '█']) :
-      self.set_pv(self.get_pv()-10)
-      if self.get_pv() <= 0 :
+    center_x = window_inp.get_width() // 2
+    center_y = window_inp.get_height() // 2
+    if (window_inp.get_pixel(center_x + 2, center_y - 2)[0] not in [' ', '█']) or (window_inp.get_pixel(center_x + 3, center_y - 2)[0] not in [' ', '█']):
+      self.set_pv(self.get_pv() - 10)
+      if self.get_pv() <= 0:
         fight_game.get_enemy_list().remove(self)
         fight_game.set_flame_state(0)
 
@@ -82,10 +84,11 @@ class Enemy(Character.Character):
         angle_player_npc = math.atan2(vector_origin[0]*vector_NPC[1] - vector_origin[1]*vector_NPC[0],vector_origin[0]*vector_NPC[0] + vector_origin[1]*vector_NPC[1])
 
         fov_limits = (player_inp.get_fov()//2)*INCREMENT_RAD
-        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * window_inp.getWidth())
+        x_fix = int(((fov_limits - angle_player_npc) / (2 * fov_limits)) * window_inp.get_width())
 
         if -fov_limits <= angle_player_npc <= fov_limits :
           for i in range(len(enemy_t.get_visuals()[0])):
             Image.set_pos(enemy_t.get_visuals()[0][i],[x_fix,2])
             Image.draw(enemy_t.get_visuals()[0][i],window_inp, distance)
-        Buffer.set_str_buffer(window_inp, str(enemy_t.get_pv())+" PV", UI_color,0,window_inp.getWidth()//2, 0)
+      # Écrire les PV via le buffer interne
+      Buffer.set_str_buffer(window_inp, str(enemy_t.get_pv())+" PV", UI_color,0,window_inp.get_width()//2, 0)

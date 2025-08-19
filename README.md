@@ -4,6 +4,10 @@
 
 <h1 align="center">Ansiflow – 3D ASCII Game Engine & Editor</h1>
 
+<p>
+  <img src="https://raw.githubusercontent.com/4strium/Fothelia/refs/heads/main/images/pres1.gif"  width="80%" alt="basic demonstration">
+</p>
+
 Create, configure and play small 3D maze / dungeon experiences fully rendered in ASCII characters.
   
 Cross‑platform, open source (GPLv3) and already localized in English & French.
@@ -21,26 +25,6 @@ Cross‑platform, open source (GPLv3) and already localized in English & French.
 - **Keyboard controls dialog** – shown before starting the game for quick reference.
 - **Graceful close workflow** – prompt to save on exit.
 - **Consistent branding & icons** – unified window icon (`images/ansiflow-icon.png`).
-
-## 🗂 Repository Layout (Highlights)
-
-```
-app.py                  # Main editor window (MainWindow)
-main_engine.py          # Runtime ASCII 3D engine (executed in external terminal)
-modules/                # Dialogs, tools, widgets (PyQt6)
-	starting.py           # Start / project chooser & language selection
-   newProject.py         # Create a new project (.ansiflow data skeleton)
-	parametersDialog.py   # Rename project + change language at runtime
-	commandsDialog.py     # Pre-run controls help
-	closeDialog.py        # Save-before-exit dialog
-	aboutDialog.py        # About window (logo, version, link)
-	... (NPC & block system dialogs)
-engine/                 # Lower-level rendering / buffer utilities
-scripts/image_to_ascii.py # Image ⇒ ASCII conversion helpers
-language/language_content.json # Translation strings
-workingDir/             # Current editable project data (generated)
-images/, text/, fonts/  # Assets (icons, flags, ASCII art, fonts)
-```
 
 ## 🔧 Requirements
 
@@ -89,6 +73,14 @@ pip install PyQt6 Pillow
 - Export: Menu → File → Save (or Save as…) creates / overwrites a `*.ansiflow` archive.
 - Import: From the start window “Load Project” (`*.ansiflow` is simply an uncompressed zip you can inspect if needed).
 
+## 🛡️ Enemies System
+
+<p>
+  <img src="https://raw.githubusercontent.com/4strium/Fothelia/refs/heads/main/images/pres2.gif"  width="80%" alt="enemies demonstration">
+</p>
+
+You can place enemies at various positions on the map provided they are spaced sufficiently apart, and assign them any appearance by importing an image directly from your device for ASCII conversion.
+
 ## 🧩 NPC Dialogue System (Overview)
 
 Each NPC dialogue is built from draggable blocks:
@@ -124,6 +116,26 @@ Enemy and NPC skins are derived from user‑selected images. The converter downs
 | Window text not updating after language change | Reopen dialogs; core window updates via `updateInterfaceTexts()`.                             |
 | Image conversion slow                          | Use smaller images; avoid very large PNG/JPG files.                                           |
 | Terminal colors look dull                      | Use a truecolor (24‑bit) capable terminal (Windows Terminal, iTerm2, modern Linux terminals). |
+
+## 🗂 Repository Layout (Highlights)
+
+```
+app.py                  # Main editor window (MainWindow)
+main_engine.py          # Runtime ASCII 3D engine (executed in external terminal)
+modules/                # Dialogs, tools, widgets (PyQt6)
+	starting.py           # Start / project chooser & language selection
+   newProject.py         # Create a new project (.ansiflow data skeleton)
+	parametersDialog.py   # Rename project + change language at runtime
+	commandsDialog.py     # Pre-run controls help
+	closeDialog.py        # Save-before-exit dialog
+	aboutDialog.py        # About window (logo, version, link)
+	... (NPC & block system dialogs)
+engine/                 # Lower-level rendering / buffer utilities
+scripts/image_to_ascii.py # Image ⇒ ASCII conversion helpers
+language/language_content.json # Translation strings
+workingDir/             # Current editable project data (generated)
+images/, text/, fonts/  # Assets (icons, flags, ASCII art, fonts)
+```
 
 ## 🤝 Contributing
 

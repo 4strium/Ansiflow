@@ -42,15 +42,16 @@ class Fight :
     return[False,None]
 
   def update_fight(self, terminal_inp, UI_color):
-    Image.set_pos(self.__target_image,[(terminal_inp.getWidth()//2)-7,(terminal_inp.getHeight()//2)-7])
+    Image.set_pos(self.__target_image,[(terminal_inp.get_width()//2)-7,(terminal_inp.get_height()//2)-7])
     Image.draw(self.get_target_image(),terminal_inp)
     for color in self.get_weapon_image() :
-      Image.set_pos(color,[terminal_inp.getWidth()-60,terminal_inp.getHeight()-25])
+      Image.set_pos(color,[terminal_inp.get_width()-60,terminal_inp.get_height()-25])
       Image.draw(color,terminal_inp)
     if self.get_flame_state() > 0 :
       for color2 in self.get_flame_image() :
-        Image.set_pos(color2,[terminal_inp.getWidth()-74,terminal_inp.getHeight()-33])
+        Image.set_pos(color2,[terminal_inp.get_width()-74,terminal_inp.get_height()-33])
         Image.draw(color2,terminal_inp)
       current_state = self.get_flame_state()
       self.set_flame_state(current_state - 1)
-    Buffer.set_str_buffer(terminal_inp,"Appuie sur ESPACE pour lui tirer dessus !",UI_color,0, (terminal_inp.getWidth()//3)+14,terminal_inp.getHeight()-8)
+    
+    Buffer.set_str_buffer(terminal_inp,"Appuie sur ESPACE pour lui tirer dessus !",UI_color,0, (terminal_inp.get_width()//3)+14,terminal_inp.get_height()-8)
