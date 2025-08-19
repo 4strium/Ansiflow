@@ -105,6 +105,12 @@ Each NPC dialogue is built from draggable blocks:
 - Python Call (invoke a function name placeholder in future extensions)
 - End (terminal block)
 
+It offers an intuitive, straightforward experience for all users: craft your most beautiful, intriguing, and moving stories step by step.
+
+<p align="center">
+  <img src="https://github.com/4strium/Ansiflow/blob/main/images/pres3.gif?raw=true"  width="80%" alt="dialog bloc system demonstration">
+</p>
+
 Dialogue graphs are serialized when you export or launch the game. Validation ensures all required paths (start/end, skins, positions) are set before play.
 
 ## 🌐 Localization
